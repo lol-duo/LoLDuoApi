@@ -1,11 +1,8 @@
 package com.lolduo.duo.service;
 
 
-import com.lolduo.duo.dto.league_v4.LeagueItemDTO;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
 import com.lolduo.duo.dto.match_v5.MatchDto;
-import com.lolduo.duo.dto.match_v5.ParticipantDto;
-import com.lolduo.duo.dto.summoner_v4.MatchIdDTO;
 import com.lolduo.duo.dto.summoner_v4.SummonerDTO;
 import com.lolduo.duo.entity.MatchIdEntity;
 import com.lolduo.duo.entity.SoloEntity;
@@ -23,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,7 +30,7 @@ public class RiotService {
     private final MatchIdRepository matchIdRepository;
     private final SoloRepository soloRepository;
     private final TierRepository tierRepository;
-    private String key = "RGAPI-d2339d99-679e-4226-9659-d3f39b416577";
+    private String key = "RGAPI-27f3d93f-53b3-47bd-9c58-cdc168ee3a28";
 
     public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository) {
         this.userIdRepository = userIdRepository;
@@ -61,6 +56,8 @@ public class RiotService {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            log.info("서머너 아이디" + leagueItemDTO.getSummonerId());
+            log.info("이름" + leagueItemDTO.getSummerName());
             userIdRepository.save(new UserIdEntity(restTemplate.exchange(url_summoner + leagueItemDTO.getSummonerId(), HttpMethod.GET, requestEntity, SummonerDTO.class).getBody().getPuuid(), leagueItemDTO.getSummonerId(), tierRepository.findById(1L).orElse(null)));
         });
 
@@ -87,7 +84,7 @@ public class RiotService {
         });
     }
 
-    public void getMatchId() {
+    public void getMatchId(String startTime, String endTime) {
         String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/";
         List<UserIdEntity> userIdEntity = userIdRepository.findAll();
         RestTemplate restTemplate = new RestTemplate();
@@ -96,7 +93,12 @@ public class RiotService {
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         userIdEntity.forEach(userIdEntity1 -> {
-            ResponseEntity<List> response = restTemplate.exchange(url + userIdEntity1.getPuuid() + "/ids?type=ranked&start=0&count=100", HttpMethod.GET, requestEntity, List.class);
+            ResponseEntity<List> response = restTemplate.exchange(url + userIdEntity1.getPuuid() + "/ids?startTime=" + startTime+ "&endTime=" + endTime + "&type=ranked&start=0&count=100", HttpMethod.GET, requestEntity, List.class);
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             response.getBody().forEach(s -> {
                 try{
                     matchIdRepository.save(new MatchIdEntity(null, s.toString()));
