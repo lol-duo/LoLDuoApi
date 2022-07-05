@@ -6,11 +6,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class MatchDto {
-    private MetadataDto metadataDto;
-    private InfoDto infoDto;
+    private MetadataDto metadata;
+    private InfoDto info;
 
     public MatchDto(MetadataDto metadataDto, InfoDto infoDto) {
-        this.metadataDto = metadataDto;
-        this.infoDto = infoDto;
+        this.metadata = metadataDto;
+        this.info = infoDto;
     }
 }

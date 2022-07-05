@@ -4,10 +4,7 @@ package com.lolduo.duo.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @NoArgsConstructor
 @Entity
@@ -19,8 +16,13 @@ public class UserIdEntity {
     @Column
     private String summonerId;
 
-    public UserIdEntity(String puuid, String summonerId) {
+    @ManyToOne
+    @JoinColumn(name = "tier")
+    private TierEntity tier;
+
+    public UserIdEntity(String puuid, String summonerId, TierEntity tier) {
         this.puuid = puuid;
         this.summonerId = summonerId;
+        this.tier = tier;
     }
 }
