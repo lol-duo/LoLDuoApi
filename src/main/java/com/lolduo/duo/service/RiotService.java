@@ -30,7 +30,7 @@ public class RiotService {
     private final MatchIdRepository matchIdRepository;
     private final SoloRepository soloRepository;
     private final TierRepository tierRepository;
-    private String key = "RGAPI-27f3d93f-53b3-47bd-9c58-cdc168ee3a28";
+    private String key = "RGAPI-d2339d99-679e-4226-9659-d3f39b416577";
 
     public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository) {
         this.userIdRepository = userIdRepository;
