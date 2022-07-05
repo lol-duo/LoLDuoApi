@@ -8,7 +8,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Getter
-@Table(name = "match_a")
+@Table(name = "match_id")
 public class MatchIdEntity {
 
     @Id
