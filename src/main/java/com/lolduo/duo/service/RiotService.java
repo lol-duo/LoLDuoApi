@@ -30,7 +30,6 @@ public class RiotService {
     private final MatchIdRepository matchIdRepository;
     private final SoloRepository soloRepository;
     private final TierRepository tierRepository;
-    private String key = "RGAPI-27f3d93f-53b3-47bd-9c58-cdc168ee3a28";
 
     public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository) {
         this.userIdRepository = userIdRepository;
@@ -39,7 +38,7 @@ public class RiotService {
         this.tierRepository = tierRepository;
     }
 
-    public void getChallengerList(){
+    public void getChallengerList(String key, String startTime, String endTime){
         String url_challengerId = "https://kr.api.riotgames.com/lol/league/v4/challengerleagues/by-queue/RANKED_SOLO_5x5";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -84,7 +83,7 @@ public class RiotService {
         });
     }
 
-    public void getMatchId(String startTime, String endTime) {
+    public void getMatchId(String key, String startTime, String endTime) {
         String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/";
         List<UserIdEntity> userIdEntity = userIdRepository.findAll();
         RestTemplate restTemplate = new RestTemplate();
@@ -101,7 +100,7 @@ public class RiotService {
             }
             response.getBody().forEach(s -> {
                 try{
-                    matchIdRepository.save(new MatchIdEntity(null, s.toString()));
+                    matchIdRepository.save(new MatchIdEntity(null, s.toString(),startTime));
                 }
                 catch (DataIntegrityViolationException e){
                 }
@@ -116,7 +115,7 @@ public class RiotService {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Riot-Token", key);
+       // headers.set("X-Riot-Token", key);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         matchIdEntityList.forEach(matchIdEntity -> {

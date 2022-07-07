@@ -13,13 +13,13 @@ public class RiotApi {
     private RiotService riotService;
 
     @GetMapping("/challenger")
-    public void getChallengerlist(){
-        riotService.getChallengerList();
+    public void getChallengerlist(@RequestParam(value = "k")String key, @RequestParam(value = "s")String startTime, @RequestParam(value = "e") String endTime){
+        riotService.getChallengerList(key, startTime, endTime);
     }
 
     @GetMapping("/getMatch")
-    public void getMatchId(@RequestParam(value = "s")String startTime, @RequestParam(value = "e") String endTime) {
-        riotService.getMatchId(startTime, endTime);
+    public void getMatchId(@RequestParam(value = "k")String key, @RequestParam(value = "s")String startTime, @RequestParam(value = "e") String endTime) {
+        riotService.getMatchId(key, startTime, endTime);
     }
 
     @GetMapping("/getSolo")
