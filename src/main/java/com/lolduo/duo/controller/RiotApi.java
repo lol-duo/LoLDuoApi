@@ -1,11 +1,12 @@
 package com.lolduo.duo.controller;
 
 
+import com.lolduo.duo.dto.setting.perk.PerkDto;
 import com.lolduo.duo.service.RiotService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class RiotApi {
@@ -26,4 +27,10 @@ public class RiotApi {
     public void makeDB(){
         riotService.getSolo();
     }
+
+    @PostMapping("/setPerk")
+    public void setPerk(@RequestBody List<PerkDto> perkDtoList){
+        riotService.setPerk(perkDtoList);
+    }
+
 }
