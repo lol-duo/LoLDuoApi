@@ -144,6 +144,7 @@ public class RiotService {
         });
         setAllPerk();
     }
+
     public void setAllPerk(){
         perkAllRepository.deleteAll();
         List<PerkEntity> perkEntityList = perkRepository.findAllByType(1L);
