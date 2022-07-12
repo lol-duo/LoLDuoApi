@@ -1,8 +1,13 @@
 package com.lolduo.duo.service;
 
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lolduo.duo.dto.item.DataDto;
+import com.lolduo.duo.dto.item.ItemDto;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
 import com.lolduo.duo.dto.match_v5.MatchDto;
+import com.lolduo.duo.dto.match_v5.ObjectivesDto;
 import com.lolduo.duo.dto.setting.perk.PerkDto;
 import com.lolduo.duo.dto.setting.perk.PerkRune;
 import com.lolduo.duo.dto.summoner_v4.SummonerDTO;
@@ -17,9 +22,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+
+import static org.springframework.data.repository.init.ResourceReader.Type.JSON;
 
 @Service
 @Slf4j
@@ -31,14 +37,22 @@ public class RiotService {
     private final TierRepository tierRepository;
     private final PerkRepository perkRepository;
     private final PerkAllRepository perkAllRepository;
+    private final ItemRepository itemRepository;
+    private final ChampionRepository championRepository;
+    private final SpellRepository spellRepository;
+    private final SpellCombinationRepository spellCombinationRepository;
 
-    public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository, PerkRepository perkRepository, PerkAllRepository perkAllRepository) {
+    public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository, PerkRepository perkRepository, PerkAllRepository perkAllRepository, ItemRepository itemRepository, ChampionRepository championRepository, SpellRepository spellRepository, SpellCombinationRepository spellCombinationRepository) {
         this.userIdRepository = userIdRepository;
         this.matchIdRepository = matchIdRepository;
         this.soloRepository = soloRepository;
         this.tierRepository = tierRepository;
         this.perkRepository = perkRepository;
         this.perkAllRepository = perkAllRepository;
+        this.itemRepository = itemRepository;
+        this.championRepository = championRepository;
+        this.spellRepository = spellRepository;
+        this.spellCombinationRepository = spellCombinationRepository;
     }
 
     public void getChallengerList(String key, String startTime, String endTime){
@@ -196,5 +210,38 @@ public class RiotService {
                 });
             });
         });
+    }
+    public void setItem(ItemDto item){
+        itemRepository.deleteAll();
+        //추후에 map iter 로 변경하여서 n번
+        Set<String> s = item.getData().keySet();
+        for(String str : s){
+            itemRepository.save(new ItemEntity(Long.parseLong(str), item.getData().get(str).getName(),str + ".png"));
+        }
+    }
+
+    public void setChampion(ItemDto item){
+        championRepository.deleteAll();
+        Set<String> s = item.getData().keySet();
+        for(String str : s){
+            championRepository.save(new ChampionEntity(Long.parseLong(item.getData().get(str).getKey()), item.getData().get(str).getName(),str + ".png"));
+        }
+    }
+    public void setSpell(ItemDto item){
+        spellRepository.deleteAll();
+        Set<String> s = item.getData().keySet();
+        for(String str : s){
+            if(Integer.parseInt(item.getData().get(str).getKey()) > 21) continue;
+            spellRepository.save(new SpellEntity(Long.parseLong(item.getData().get(str).getKey()), item.getData().get(str).getName(),str + ".png"));
+        }
+        makeSpell();
+    }
+    public void makeSpell(){
+        List<SpellEntity> spellEntityList = spellRepository.findAll();
+        for(int i = 0; i < spellEntityList.size() - 1; i++){
+            for(int j = i + 1; j < spellEntityList.size(); j++){
+                spellCombinationRepository.save(new SpellCombinationEntity(null, spellEntityList.get(i), spellEntityList.get(j)));
+            }
+        }
     }
 }
