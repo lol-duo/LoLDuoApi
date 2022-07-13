@@ -222,6 +222,11 @@ public class RiotService {
                 listList.get(i).add(0L);
                 listList.get(i).add(0L);
             }
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             solo(matchIdEntity, key, listList, puMap, spMap);
             try {
                 Thread.sleep(1500);
