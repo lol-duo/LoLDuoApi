@@ -245,7 +245,7 @@ public class RiotService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Riot-Token", key);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        ResponseEntity<MatchDto> response_match = restTemplate.exchange(url_matchId, HttpMethod.GET, requestEntity, MatchDto.class);
+        ResponseEntity<MatchDto> response_match = restTemplate.exchange(url_matchId + matchIdEntity.getMatchId(), HttpMethod.GET, requestEntity, MatchDto.class);
 
         response_match.getBody().getInfo().getParticipants().forEach(participantDto -> {
             PerkStyleDto pStyle = participantDto.getPerks().getStyles().get(0);
