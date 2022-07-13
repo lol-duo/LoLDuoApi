@@ -42,5 +42,9 @@ public class RiotApi {
     public void setSpell(@RequestBody ItemDto item){
         riotService.setSpell(item);
     }
+    @GetMapping("/setSolo")
+    public void setSolo(@RequestParam(value = "k")String key, @RequestParam(value = "s")String startTime){
+        riotService.makeMatchInfo(key,startTime);
+    }
 
 }
