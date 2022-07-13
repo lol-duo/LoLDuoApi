@@ -224,6 +224,11 @@ public class RiotService {
                     }
                 });
             });
+            for(int i =0 ; i< 11; i++){
+                listList.get(i).add(0L);
+                listList.get(i).add(0L);
+                listList.get(i).add(0L);
+            }
             solo(matchIdEntity, key, listList, puMap, spMap);
             try {
                 Thread.sleep(1500);
