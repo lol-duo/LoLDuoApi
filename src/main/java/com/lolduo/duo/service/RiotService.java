@@ -1,13 +1,9 @@
 package com.lolduo.duo.service;
 
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lolduo.duo.dto.item.DataDto;
 import com.lolduo.duo.dto.item.ItemDto;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
 import com.lolduo.duo.dto.match_v5.MatchDto;
-import com.lolduo.duo.dto.match_v5.ObjectivesDto;
 import com.lolduo.duo.dto.match_v5.PerkStyleDto;
 import com.lolduo.duo.dto.setting.perk.PerkDto;
 import com.lolduo.duo.dto.setting.perk.PerkRune;
@@ -24,10 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.util.*;
-
-import static org.springframework.data.repository.init.ResourceReader.Type.JSON;
 
 @Service
 @Slf4j
