@@ -209,7 +209,10 @@ public class RiotService {
 
         matchIdEntityList.forEach(matchIdEntity -> {
             ResponseEntity<MatchTimeLineDto> time_match = restTemplate.exchange(url_matchId + matchIdEntity.getMatchId() + "/timeline", HttpMethod.GET, requestEntity, MatchTimeLineDto.class);
-            List<List<Long>> listList = new ArrayList<List<Long>>(11);
+            List<List<Long>> listList = new ArrayList<List<Long>>();
+            for(int i =0 ; i< 11; i++){
+                listList.add(new ArrayList<>());
+            }
             Map<String, Long> puMap = new HashMap<>();
             time_match.getBody().getInfo().getParticipants().forEach(participantDto -> {
                 puMap.put(participantDto.getPuuid(), participantDto.getParticipantId());
