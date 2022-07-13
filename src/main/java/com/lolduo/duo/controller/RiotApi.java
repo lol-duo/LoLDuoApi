@@ -25,11 +25,6 @@ public class RiotApi {
         riotService.getMatchId(key, startTime, endTime);
     }
 
-    @GetMapping("/getSolo")
-    public void makeDB(){
-        riotService.getSolo();
-    }
-
     @PostMapping("/setPerk")
     public void setPerk(@RequestBody List<PerkDto> perkDtoList){
         riotService.setPerk(perkDtoList);

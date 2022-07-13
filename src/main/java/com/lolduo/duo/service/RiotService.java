@@ -8,9 +8,11 @@ import com.lolduo.duo.dto.item.ItemDto;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
 import com.lolduo.duo.dto.match_v5.MatchDto;
 import com.lolduo.duo.dto.match_v5.ObjectivesDto;
+import com.lolduo.duo.dto.match_v5.PerkStyleDto;
 import com.lolduo.duo.dto.setting.perk.PerkDto;
 import com.lolduo.duo.dto.setting.perk.PerkRune;
 import com.lolduo.duo.dto.summoner_v4.SummonerDTO;
+import com.lolduo.duo.dto.timeline.MatchTimeLineDto;
 import com.lolduo.duo.entity.*;
 import com.lolduo.duo.repository.*;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +43,11 @@ public class RiotService {
     private final ChampionRepository championRepository;
     private final SpellRepository spellRepository;
     private final SpellCombinationRepository spellCombinationRepository;
+    private final ItemFullRepository itemFullRepository;
 
-    public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository, PerkRepository perkRepository, PerkAllRepository perkAllRepository, ItemRepository itemRepository, ChampionRepository championRepository, SpellRepository spellRepository, SpellCombinationRepository spellCombinationRepository) {
+    private final DuoRepository duoRepository;
+
+    public RiotService(UserIdRepository userIdRepository, MatchIdRepository matchIdRepository, SoloRepository soloRepository, TierRepository tierRepository, PerkRepository perkRepository, PerkAllRepository perkAllRepository, ItemRepository itemRepository, ChampionRepository championRepository, SpellRepository spellRepository, SpellCombinationRepository spellCombinationRepository, ItemFullRepository itemFullRepository, DuoRepository duoRepository) {
         this.userIdRepository = userIdRepository;
         this.matchIdRepository = matchIdRepository;
         this.soloRepository = soloRepository;
@@ -53,6 +58,8 @@ public class RiotService {
         this.championRepository = championRepository;
         this.spellRepository = spellRepository;
         this.spellCombinationRepository = spellCombinationRepository;
+        this.itemFullRepository = itemFullRepository;
+        this.duoRepository = duoRepository;
     }
 
     public void getChallengerList(String key, String startTime, String endTime){
@@ -98,6 +105,8 @@ public class RiotService {
             }
             userIdRepository.save(new UserIdEntity(restTemplate.exchange(url_summoner + leagueItemDTO.getSummonerId(), HttpMethod.GET, requestEntity, SummonerDTO.class).getBody().getPuuid(), leagueItemDTO.getSummonerId(), tierRepository.findById(3L).orElse(null)));
         });
+
+        getMatchId(key,startTime,endTime);
     }
 
     public void getMatchId(String key, String startTime, String endTime) {
@@ -125,25 +134,6 @@ public class RiotService {
         });
     }
 
-    public void getSolo(){
-        String url = "https://asia.api.riotgames.com/lol/match/v5/matches/";
-
-        List<MatchIdEntity> matchIdEntityList = matchIdRepository.findAll();
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-       // headers.set("X-Riot-Token", key);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-        matchIdEntityList.forEach(matchIdEntity -> {
-            log.info(url+matchIdEntity.getMatchId());
-            ResponseEntity<MatchDto> response = restTemplate.exchange(url + matchIdEntity.getMatchId(), HttpMethod.GET, requestEntity, MatchDto.class);
-            response.getBody().getInfo().getParticipants().forEach(participantDto -> {
-                soloRepository.save(new SoloEntity(null, participantDto.getChampionId(),participantDto.getWin()));
-            });
-        });
-    }
-
     public void setPerk(List<PerkDto> perkDtoList){
         perkRepository.deleteAll();
         perkDtoList.forEach(perkDto -> {
@@ -156,60 +146,6 @@ public class RiotService {
             }
             perkRepository.save(new PerkEntity(perkDto.getId(), perkDto.getName(), perkDto.getIcon(), 1L, null));
         });
-        setAllPerk();
-    }
-
-    public void setAllPerk(){
-        perkAllRepository.deleteAll();
-        List<PerkEntity> perkEntityList = perkRepository.findAllByType(1L);
-        perkEntityList.forEach(perkEntity -> {
-            perkRepository.findAllByParentAndType(perkEntity.getId(), 2L).forEach(perkEntity1 -> {
-                perkRepository.findAllByParentAndType(perkEntity.getId(), 3L).forEach(perkEntity2 -> {
-                    perkRepository.findAllByParentAndType(perkEntity.getId(), 4L).forEach(perkEntity3 -> {
-                        perkRepository.findAllByParentAndType(perkEntity.getId(), 5L).forEach(perkEntity4 -> {
-                            perkRepository.findAllByIdNotAndType(perkEntity.getId(), 1L).forEach(perkEntity5 -> {
-                                List<Long> defenseList = Arrays.asList(5001L,5002L,5003L);
-                                List<Long> felxList = Arrays.asList(5008L,5002L,5003L);
-                                List<Long> offenseList = Arrays.asList(5008L,5005L,5007L);
-                                perkRepository.findAllByParentAndType(perkEntity5.getId(), 3L).forEach(perkEntity6 -> {
-                                    perkRepository.findAllByParentAndType(perkEntity5.getId(), 4L).forEach(perkEntity7 -> {
-                                        for(int i = 0; i < defenseList.size(); i++){
-                                            for(int j = 0; j < felxList.size(); j++){
-                                                for(int k = 0; k < offenseList.size(); k++){
-                                                    perkAllRepository.save(new PerkAllEntity(null,perkEntity,perkEntity1,perkEntity2,perkEntity3,perkEntity4,perkEntity5,perkEntity6,perkEntity7,defenseList.get(i),felxList.get(j),offenseList.get(k)));
-                                                }
-                                            }
-                                        }
-                                    });
-                                });
-                                perkRepository.findAllByParentAndType(perkEntity5.getId(), 4L).forEach(perkEntity6 -> {
-                                    perkRepository.findAllByParentAndType(perkEntity5.getId(), 5L).forEach(perkEntity7 -> {
-                                        for(int i = 0; i < defenseList.size(); i++){
-                                            for(int j = 0; j < felxList.size(); j++){
-                                                for(int k = 0; k < offenseList.size(); k++){
-                                                    perkAllRepository.save(new PerkAllEntity(null,perkEntity,perkEntity1,perkEntity2,perkEntity3,perkEntity4,perkEntity5,perkEntity6,perkEntity7,defenseList.get(i),felxList.get(j),offenseList.get(k)));
-                                                }
-                                            }
-                                        }
-                                    });
-                                });
-                                perkRepository.findAllByParentAndType(perkEntity5.getId(), 3L).forEach(perkEntity6 -> {
-                                    perkRepository.findAllByParentAndType(perkEntity5.getId(), 5L).forEach(perkEntity7 -> {
-                                        for(int i = 0; i < defenseList.size(); i++){
-                                            for(int j = 0; j < felxList.size(); j++){
-                                                for(int k = 0; k < offenseList.size(); k++){
-                                                    perkAllRepository.save(new PerkAllEntity(null,perkEntity,perkEntity1,perkEntity2,perkEntity3,perkEntity4,perkEntity5,perkEntity6,perkEntity7,defenseList.get(i),felxList.get(j),offenseList.get(k)));
-                                                }
-                                            }
-                                        }
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
     }
     public void setItem(ItemDto item){
         itemRepository.deleteAll();
@@ -218,6 +154,7 @@ public class RiotService {
         for(String str : s){
             itemRepository.save(new ItemEntity(Long.parseLong(str), item.getData().get(str).getName(),str + ".png"));
         }
+        makeFullItem(item);
     }
 
     public void setChampion(ItemDto item){
@@ -244,4 +181,80 @@ public class RiotService {
             }
         }
     }
+
+    public void makeFullItem(ItemDto item){
+        itemFullRepository.deleteAll();
+        Set<String> s = item.getData().keySet();
+        for(String str : s){
+            if(item.getData().get(str).getInto() == null && item.getData().get(str).getGold().getTotal() > 1000L){
+                itemFullRepository.save(new ItemFullEntity(Long.parseLong(str)));
+            }
+        }
+    }
+
+    public void makeMatchInfo(String key, String start){
+        List<MatchIdEntity> matchIdEntityList = matchIdRepository.findAllByStartTime(start);
+        List<SpellEntity> spellEntityList = spellRepository.findAll();
+        Map<Long, SpellEntity> spMap = new HashMap<>();
+        spellEntityList.forEach(spellEntity -> {
+            spMap.put(spellEntity.getId(), spellEntity);
+        });
+
+        String url_matchId = "https://asia.api.riotgames.com/lol/match/v5/matches/";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Riot-Token", key);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        matchIdEntityList.forEach(matchIdEntity -> {
+            ResponseEntity<MatchTimeLineDto> time_match = restTemplate.exchange(url_matchId + matchIdEntity.getMatchId() + "/timeline", HttpMethod.GET, requestEntity, MatchTimeLineDto.class);
+            List<List<Long>> listList = new ArrayList<List<Long>>(11);
+            Map<String, Long> puMap = new HashMap<>();
+            time_match.getBody().getInfo().getParticipants().forEach(participantDto -> {
+                puMap.put(participantDto.getPuuid(), participantDto.getParticipantId());
+            });
+            time_match.getBody().getInfo().getFrames().forEach(frameDto -> {
+                frameDto.getEvents().forEach(eventDto -> {
+                    if(eventDto.getType().equals("ITEM_PURCHASED") && itemFullRepository.findById(eventDto.getItemId()).orElse(null) != null){
+                        listList.get(eventDto.getParticipantId().intValue()).add(eventDto.getItemId());
+                    }
+                });
+            });
+            solo(matchIdEntity, key, listList, puMap, spMap);
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+    public void solo(MatchIdEntity matchIdEntity, String key, List<List<Long>> listList, Map<String, Long> puMap, Map<Long, SpellEntity> spMap){
+        List<PerkEntity> perkEntityList = perkRepository.findAll();
+        Map<Long, PerkEntity> pMap = new HashMap<>();
+        perkEntityList.forEach(perkEntity -> {
+            pMap.put(perkEntity.getId(),perkEntity);
+        });
+
+        String url_matchId = "https://asia.api.riotgames.com/lol/match/v5/matches/";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Riot-Token", key);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+        ResponseEntity<MatchDto> response_match = restTemplate.exchange(url_matchId, HttpMethod.GET, requestEntity, MatchDto.class);
+
+        response_match.getBody().getInfo().getParticipants().forEach(participantDto -> {
+            PerkStyleDto pStyle = participantDto.getPerks().getStyles().get(0);
+            PerkStyleDto sStyle = participantDto.getPerks().getStyles().get(1);
+            PerkAllEntity nowPerk = perkAllRepository.findByAll(pMap.get(pStyle.getStyle()), pMap.get(pStyle.getSelections().get(0).getPerk()),pMap.get(pStyle.getSelections().get(1).getPerk()),pMap.get(pStyle.getSelections().get(2).getPerk()),pMap.get(pStyle.getSelections().get(3).getPerk()),pMap.get(sStyle.getStyle()),pMap.get(sStyle.getSelections().get(0).getPerk()),pMap.get(sStyle.getSelections().get(1).getPerk()), participantDto.getPerks().getStatPerks().getDefense(),participantDto.getPerks().getStatPerks().getFlex(),participantDto.getPerks().getStatPerks().getOffense());
+            if(nowPerk == null)
+                nowPerk = perkAllRepository.save(new PerkAllEntity(null, pMap.get(pStyle.getStyle()), pMap.get(pStyle.getSelections().get(0).getPerk()),pMap.get(pStyle.getSelections().get(1).getPerk()),pMap.get(pStyle.getSelections().get(2).getPerk()),pMap.get(pStyle.getSelections().get(3).getPerk()),pMap.get(sStyle.getStyle()),pMap.get(sStyle.getSelections().get(0).getPerk()),pMap.get(sStyle.getSelections().get(1).getPerk()), participantDto.getPerks().getStatPerks().getDefense(),participantDto.getPerks().getStatPerks().getFlex(),participantDto.getPerks().getStatPerks().getOffense()));
+            Long parid = puMap.get(participantDto.getPuuid());
+            soloRepository.save(new SoloEntity(null, participantDto.getChampionId(), participantDto.getWin(), participantDto.getIndividualPosition(),nowPerk.getId(), listList.get(parid.intValue()).get(0), listList.get(parid.intValue()).get(1),listList.get(parid.intValue()).get(2),spellCombinationRepository.findbycom(spMap.get(participantDto.getSummoner1Id().longValue()),spMap.get(participantDto.getSummoner2Id().longValue()))));
+        });
+
+    }
+
+
 }

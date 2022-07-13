@@ -9,8 +9,4 @@ import java.util.Map;
 @Getter
 public class ItemDto {
     private Map<String, DataDto> data;
-
-    public ItemDto(Map<String, DataDto> data) {
-        this.data = data;
-    }
 }

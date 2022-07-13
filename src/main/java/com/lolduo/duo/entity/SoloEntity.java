@@ -20,9 +20,29 @@ public class SoloEntity {
     @Column
     private Boolean win;
 
-    public SoloEntity(Long id, Long chId, Boolean win) {
+    @Column
+    private String position;
+
+    @Column
+    private Long perkAll;
+    @Column
+    private Long item1;
+    @Column
+    private Long item2;
+    @Column
+    private Long item3;
+    @Column
+    private Long spellAll;
+
+    public SoloEntity(Long id, Long chId, Boolean win, String position, Long perkAll, Long item1, Long item2, Long item3, Long spellAll) {
         this.id = id;
         this.chId = chId;
         this.win = win;
+        this.position = position;
+        this.perkAll = perkAll;
+        this.item1 = item1;
+        this.item2 = item2;
+        this.item3 = item3;
+        this.spellAll = spellAll;
     }
 }
