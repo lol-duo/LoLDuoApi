@@ -7,8 +7,6 @@ on:
   pull_request:
     branches: [ "master" ]
 
-
-
 env:
   S3_BUCKET_NAME: lolduo-build
   
@@ -34,6 +32,12 @@ jobs:
         
       - name: Copy Jar
         run: cp ./build/libs/*.jar ./deploy
+        
+      - name: Copy appspec.yml
+        run: cp appspec.yml ./deploy
+
+      - name: Copy script
+        run: cp ./scripts/*.sh ./deploy
 
       - name: Make zip file
         run: zip -r ./lolduo.zip ./deploy
@@ -47,4 +51,11 @@ jobs:
           aws-region: ap-northeast-2
          
       - name: upload to s3
-        run: aws s3 cp --region ap-northeast-2 ./lolduo.zip s3://$S3_BUCKET_NAME/
+        run: aws s3 cp —-region ap-northeast-2 ./lolduo.zip s3://$S3_BUCKET_NAME/
+         
+      - name: Deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws deploy create-deployment --application-name lolduo-application --deployment-group-name lolduo-group --file-exists-behavior OVERWRITE --s3-location bucket=lolduo-build,bundleType=zip,key=lolduo.zip —-region ap-northeast-2
