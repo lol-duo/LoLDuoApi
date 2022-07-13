@@ -233,6 +233,7 @@ public class RiotService {
         });
     }
     public void solo(MatchIdEntity matchIdEntity, String key, List<List<Long>> listList, Map<String, Long> puMap, Map<Long, SpellEntity> spMap){
+        log.info(listList.toString());
         List<PerkEntity> perkEntityList = perkRepository.findAll();
         Map<Long, PerkEntity> pMap = new HashMap<>();
         perkEntityList.forEach(perkEntity -> {
