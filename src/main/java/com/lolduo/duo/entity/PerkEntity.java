@@ -1,6 +1,5 @@
 package com.lolduo.duo.entity;
 
-import lombok.Cleanup;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,16 +19,10 @@ public class PerkEntity {
     private String name;
     @Column
     private String imgUrl;
-    @Column
-    private Long type;
-    @Column
-    private Long parent;
 
-    public PerkEntity(Long id, String name, String imgUrl, Long type, Long parent) {
+    public PerkEntity(Long id, String name, String imgUrl) {
         this.id = id;
         this.name = name;
         this.imgUrl = imgUrl;
-        this.type = type;
-        this.parent = parent;
     }
 }

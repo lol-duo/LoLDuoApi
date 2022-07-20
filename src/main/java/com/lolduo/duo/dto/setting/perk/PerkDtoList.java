@@ -5,6 +5,6 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class PerkRuneList {
-    private List<PerkRune> runes;
+public class PerkDtoList {
+    List<PerkDto> perkDtoList;
 }
