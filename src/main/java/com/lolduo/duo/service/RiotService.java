@@ -4,6 +4,7 @@ package com.lolduo.duo.service;
 import com.lolduo.duo.dto.champion.ChampionDto;
 import com.lolduo.duo.dto.item.ItemDto;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
+import com.lolduo.duo.dto.setting.perk.PerkDto;
 import com.lolduo.duo.entity.match_v5.MatchDto;
 import com.lolduo.duo.dto.setting.perk.PerkDtoList;
 import com.lolduo.duo.dto.setting.perk.PerkRune;
@@ -54,12 +55,12 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("");
+        setKey("RGAPI-dc9606e2-ff7f-4ebf-96ba-8e824c9daffa");
         setVersion("12.13.1");
         setItem();
-        setPerk();
         setChampion();
         setSpell();
+        setPerk();
         All();
     }
 
@@ -68,16 +69,23 @@ public class RiotService implements ApplicationRunner{
         Long endTime = System.currentTimeMillis();
         Long startTime = endTime - 86400;
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
+        log.info("start!!");
 
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        AllLeaguePuuid.put("master",getPuuIdList("master"));
+        log.info("challenger done");
+        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        log.info("grandmaster done");
+        //AllLeaguePuuid.put("master",getPuuIdList("master"));
+        log.info("master done");
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
-
+        log.info("challenger done");
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        log.info("grandmaster done");
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
+        log.info("master done");
+        getMatchInfo(matchIdList);
     }
     private void setItem(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/item.json";
@@ -91,6 +99,7 @@ public class RiotService implements ApplicationRunner{
         //추후에 map iter 로 변경하여서 n번
         Set<String> itemIdList = item.getBody().getData().keySet();
         for(String itemId : itemIdList){
+            log.info(itemId + "    " + item.getBody().getData().get(itemId).getName());
             itemRepository.save(new ItemEntity(Long.parseLong(itemId), item.getBody().getData().get(itemId).getName(),itemId + ".png"));
         }
         makeFullItem(item.getBody());
@@ -115,8 +124,8 @@ public class RiotService implements ApplicationRunner{
             final int PlayerNum = 10;
             ResponseEntity<MatchTimeLineDto> time_match = restTemplate.exchange(url + matchId + "/timeline", HttpMethod.GET, requestEntity, MatchTimeLineDto.class);
             List<List<Long>> playerItemList = new ArrayList<List<Long>>();
-
-            for(int i =0 ; i< PlayerNum; i++){
+            log.info("matchId in");
+            for(int i =0 ; i<= PlayerNum; i++){
                 playerItemList.add(new ArrayList<>());
             }
 
@@ -124,7 +133,7 @@ public class RiotService implements ApplicationRunner{
             time_match.getBody().getInfo().getParticipants().forEach(participantDto -> {
                 puuIdMap.put(participantDto.getPuuid(), participantDto.getParticipantId());
             });
-
+            log.info("puuId :" +  puuIdMap.toString());
             time_match.getBody().getInfo().getFrames().forEach(frameDto -> {
                 frameDto.getEvents().forEach(eventDto -> {
                     if(eventDto.getType().equals("ITEM_PURCHASED") && itemFullRepository.findById(eventDto.getItemId()).orElse(null) != null){
@@ -132,7 +141,7 @@ public class RiotService implements ApplicationRunner{
                     }
                 });
             });
-            for(int i =0 ; i< 11; i++){
+            for(int i =0 ; i<= PlayerNum; i++){
                 playerItemList.get(i).add(0L);
                 playerItemList.get(i).add(0L);
                 playerItemList.get(i).add(0L);
@@ -142,6 +151,7 @@ public class RiotService implements ApplicationRunner{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            log.info("solo go");
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
             setSolo(response_match.getBody(),playerItemList,puuIdMap);
             try {
@@ -153,6 +163,7 @@ public class RiotService implements ApplicationRunner{
         });
     }
     private void setSolo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap){
+        log.info("solo start");
         matchDto.getInfo().getParticipants().forEach(participant -> {
             Boolean win = participant.getWin();
             String position = participant.getIndividualPosition();
@@ -172,6 +183,7 @@ public class RiotService implements ApplicationRunner{
                 perkList.add(perkStyle.getStyle());
             });
             Collections.sort(perkList);
+            log.info("solo save" + champion);
             soloRepository.save(new SoloEntity(win,position,itemList,spellList,champion,perkList));
         });
     }
@@ -226,9 +238,9 @@ public class RiotService implements ApplicationRunner{
         headers.set("X-Riot-Token", key);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<PerkDtoList> perkDtoList = restTemplate.exchange(url, HttpMethod.GET, requestEntity, PerkDtoList.class);
-
-        perkDtoList.getBody().getPerkDtoList().forEach(perkDto -> {
+        ResponseEntity<PerkDto[]> response_perkDtoList = restTemplate.exchange(url, HttpMethod.GET, requestEntity, PerkDto[].class);
+        List<PerkDto> perkDtoList = Arrays.asList(response_perkDtoList.getBody());
+        perkDtoList.forEach(perkDto -> {
             for(int i = 0; i < perkDto.getSlots().size(); i++){
                 List<PerkRune> perkRuneList = perkDto.getSlots().get(i).getRunes();
                 for(int j = 0; j < perkRuneList.size(); j++){
