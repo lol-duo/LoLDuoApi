@@ -8,7 +8,6 @@ spring:
     path match:
       matching-strategy: ant_path_matcher
   jpa:
-    show-sql: false
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
