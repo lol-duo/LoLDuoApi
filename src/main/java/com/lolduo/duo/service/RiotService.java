@@ -57,39 +57,28 @@ public class RiotService implements ApplicationRunner{
     public void run(ApplicationArguments args) throws Exception{
         setKey("RGAPI-9d5f8dc6-7149-4d60-969f-b88fc7effc25");
         setVersion("12.13.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
         //All();
     }
 
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
         Long endTime = System.currentTimeMillis() / 1000;
-        log.info(""+endTime);
         Long startTime = endTime - 86400;
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
-        log.info("start!!");
 
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        log.info("challenger done");
-        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        log.info("grandmaster done");
-        //AllLeaguePuuid.put("master",getPuuIdList("master"));
-        log.info("master done");
-        log.info(AllLeaguePuuid.toString());
+        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        log.info("challenger done");
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        log.info("grandmaster done");
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
-        log.info("master done");
-        log.info(matchIdList.toString());
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
         getMatchInfo(matchIdList);
-        log.info("done");
     }
     private void setItem(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/item.json";
