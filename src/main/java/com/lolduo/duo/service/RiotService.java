@@ -55,18 +55,19 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-dc9606e2-ff7f-4ebf-96ba-8e824c9daffa");
+        setKey("RGAPI-9d5f8dc6-7149-4d60-969f-b88fc7effc25");
         setVersion("12.13.1");
         setItem();
         setChampion();
         setSpell();
         setPerk();
-        All();
+        //All();
     }
 
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
-        Long endTime = System.currentTimeMillis();
+        Long endTime = System.currentTimeMillis() / 1000;
+        log.info(""+endTime);
         Long startTime = endTime - 86400;
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
         log.info("start!!");
@@ -77,6 +78,7 @@ public class RiotService implements ApplicationRunner{
         log.info("grandmaster done");
         //AllLeaguePuuid.put("master",getPuuIdList("master"));
         log.info("master done");
+        log.info(AllLeaguePuuid.toString());
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
@@ -85,7 +87,9 @@ public class RiotService implements ApplicationRunner{
         log.info("grandmaster done");
         //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
         log.info("master done");
+        log.info(matchIdList.toString());
         getMatchInfo(matchIdList);
+        log.info("done");
     }
     private void setItem(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/item.json";
@@ -119,7 +123,7 @@ public class RiotService implements ApplicationRunner{
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Riot-Token", key);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
+        log.info(""+ matchIdList.size());
         matchIdList.forEach(matchId -> {
             final int PlayerNum = 10;
             ResponseEntity<MatchTimeLineDto> time_match = restTemplate.exchange(url + matchId + "/timeline", HttpMethod.GET, requestEntity, MatchTimeLineDto.class);
