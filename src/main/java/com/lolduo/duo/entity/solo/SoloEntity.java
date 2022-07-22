@@ -35,9 +35,7 @@ public class SoloEntity {
     @Type(type = "json")
     @Column(name = "spell_list", columnDefinition = "json")
     private TreeSet<Long> spellList;
-
-    @Type(type = "json")
-    @Column(name = "champion", columnDefinition = "json")
+    @Column(name = "champion")
     private Long champion;
 
     @Type(type = "json")
