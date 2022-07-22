@@ -74,7 +74,6 @@ public class RiotService implements ApplicationRunner{
         AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
         AllLeaguePuuid.put("master",getPuuIdList("master"));
 
-
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
