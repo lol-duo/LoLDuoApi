@@ -92,7 +92,6 @@ public class RiotService implements ApplicationRunner{
         //추후에 map iter 로 변경하여서 n번
         Set<String> itemIdList = item.getBody().getData().keySet();
         for(String itemId : itemIdList){
-            log.info(itemId + "    " + item.getBody().getData().get(itemId).getName());
             itemRepository.save(new ItemEntity(Long.parseLong(itemId), item.getBody().getData().get(itemId).getName(),itemId + ".png"));
         }
         makeFullItem(item.getBody());
@@ -112,12 +111,10 @@ public class RiotService implements ApplicationRunner{
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Riot-Token", key);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-        log.info(""+ matchIdList.size());
         matchIdList.forEach(matchId -> {
             final int PlayerNum = 10;
             ResponseEntity<MatchTimeLineDto> time_match = restTemplate.exchange(url + matchId + "/timeline", HttpMethod.GET, requestEntity, MatchTimeLineDto.class);
             List<List<Long>> playerItemList = new ArrayList<List<Long>>();
-            log.info("matchId in");
             for(int i =0 ; i<= PlayerNum; i++){
                 playerItemList.add(new ArrayList<>());
             }
@@ -126,7 +123,6 @@ public class RiotService implements ApplicationRunner{
             time_match.getBody().getInfo().getParticipants().forEach(participantDto -> {
                 puuIdMap.put(participantDto.getPuuid(), participantDto.getParticipantId());
             });
-            log.info("puuId :" +  puuIdMap.toString());
             time_match.getBody().getInfo().getFrames().forEach(frameDto -> {
                 frameDto.getEvents().forEach(eventDto -> {
                     if(eventDto.getType().equals("ITEM_PURCHASED") && itemFullRepository.findById(eventDto.getItemId()).orElse(null) != null){
@@ -144,7 +140,6 @@ public class RiotService implements ApplicationRunner{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            log.info("solo go");
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
             setSolo(response_match.getBody(),playerItemList,puuIdMap);
             try {
@@ -156,7 +151,6 @@ public class RiotService implements ApplicationRunner{
         });
     }
     private void setSolo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap){
-        log.info("solo start");
         matchDto.getInfo().getParticipants().forEach(participant -> {
             Boolean win = participant.getWin();
             String position = participant.getIndividualPosition();
@@ -176,7 +170,6 @@ public class RiotService implements ApplicationRunner{
                 perkList.add(perkStyle.getStyle());
             });
             Collections.sort(perkList);
-            log.info("solo save" + champion);
             soloRepository.save(new SoloEntity(win,position,itemList,spellList,champion,perkList));
         });
     }
