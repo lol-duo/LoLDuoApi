@@ -57,10 +57,10 @@ public class RiotService implements ApplicationRunner{
     public void run(ApplicationArguments args) throws Exception{
         setKey("RGAPI-9d5f8dc6-7149-4d60-969f-b88fc7effc25");
         setVersion("12.13.1");
-        //setItem();
-        //setChampion();
-        //setSpell();
-        //setPerk();
+        setItem();
+        setChampion();
+        setSpell();
+        setPerk();
         //All();
     }
 
