@@ -5,17 +5,18 @@ import com.lolduo.duo.dto.champion.ChampionDto;
 import com.lolduo.duo.dto.item.ItemDto;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
 import com.lolduo.duo.dto.setting.perk.PerkDto;
-import com.lolduo.duo.entity.match_v5.MatchDto;
-import com.lolduo.duo.dto.setting.perk.PerkDtoList;
 import com.lolduo.duo.dto.setting.perk.PerkRune;
 import com.lolduo.duo.dto.spell.SpellDto;
 import com.lolduo.duo.dto.summoner_v4.SummonerDTO;
 import com.lolduo.duo.dto.timeline.MatchTimeLineDto;
 import com.lolduo.duo.entity.ChampionEntity;
+import com.lolduo.duo.entity.DuoEntity;
 import com.lolduo.duo.entity.PerkEntity;
 import com.lolduo.duo.entity.SpellEntity;
 import com.lolduo.duo.entity.item.ItemEntity;
 import com.lolduo.duo.entity.item.ItemFullEntity;
+import com.lolduo.duo.entity.match_v5.MatchDto;
+import com.lolduo.duo.entity.match_v5.Participant;
 import com.lolduo.duo.entity.solo.SoloEntity;
 import com.lolduo.duo.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class RiotService implements ApplicationRunner{
     private final ChampionRepository championRepository;
     private final SpellRepository spellRepository;
     private final SoloRepository soloRepository;
+    private final DuoRepository duoRepository;
 
     public void setKey(String key) {
         this.key = key;
@@ -55,13 +57,13 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-9d5f8dc6-7149-4d60-969f-b88fc7effc25");
+        setKey("RGAPI-42a54901-4025-420f-978a-621101c7a7d2");
         setVersion("12.13.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
-        //All();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
+        All();
     }
 
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
@@ -79,7 +81,9 @@ public class RiotService implements ApplicationRunner{
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
         getMatchInfo(matchIdList);
+        log.info(startTime + ": done");
     }
+
     private void setItem(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/item.json";
 
@@ -140,8 +144,11 @@ public class RiotService implements ApplicationRunner{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
             setSolo(response_match.getBody(),playerItemList,puuIdMap);
+            setDuo(response_match.getBody(),playerItemList,puuIdMap);
+
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
@@ -149,6 +156,80 @@ public class RiotService implements ApplicationRunner{
             }
 
         });
+    }
+    private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String,Long> puuIdMap){
+        List<Participant> winList = new ArrayList<>();
+        List<Participant> loseList = new ArrayList<>();
+        matchDto.getInfo().getParticipants().forEach(participant -> {
+            Boolean win = participant.getWin();
+            if(win) winList.add(participant);
+            else loseList.add(participant);
+        });
+        List<List<Participant>> list = new ArrayList<>();
+        list.add(winList);
+        list.add(loseList);
+        //후에 함수화하여 list로 반환하기 필요할듯.
+        list.forEach(listParticipant -> {
+            for(int i = 0; i < listParticipant.size() - 1; i++){
+                for(int j = i+1; j < listParticipant.size(); j++){
+                    Map<Long, String> position = new HashMap<>();
+                    Map<Long, List<Long>> itemList = new HashMap<>();
+                    Map<Long, TreeSet<Long>> spellList = new HashMap<>();
+                    Map<Long,List<Long>> perkList = new HashMap<>();
+                    TreeSet<Long> champion = new TreeSet<>();
+                    //champion
+                    champion.add(listParticipant.get(i).getChampionId());
+                    champion.add(listParticipant.get(j).getChampionId());
+                    //position
+                    position.put(listParticipant.get(i).getChampionId(),listParticipant.get(i).getIndividualPosition());
+                    position.put(listParticipant.get(j).getChampionId(),listParticipant.get(j).getIndividualPosition());
+                    //itemList
+                    itemList.put(listParticipant.get(i).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(i).getPuuid()).intValue()));
+                    itemList.put(listParticipant.get(j).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(j).getPuuid()).intValue()));
+                    //spellList
+                    TreeSet<Long> firstSpellList = new TreeSet<>();
+                    TreeSet<Long> secondSpellList = new TreeSet<>();
+                    firstSpellList.add(listParticipant.get(i).getSummoner1Id());
+                    firstSpellList.add(listParticipant.get(i).getSummoner2Id());
+                    secondSpellList.add(listParticipant.get(j).getSummoner1Id());
+                    secondSpellList.add(listParticipant.get(j).getSummoner2Id());
+
+                    spellList.put(listParticipant.get(i).getChampionId(), firstSpellList);
+                    spellList.put(listParticipant.get(j).getChampionId(), secondSpellList);
+                    //perkList
+                    List<Long> firstPerkList = new ArrayList<>();
+                    List<Long> secondPerkList = new ArrayList<>();
+
+                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getDefense());
+                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getOffense());
+                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getFlex());
+                    listParticipant.get(i).getPerks().getStyles().forEach(perkStyle -> {
+                        perkStyle.getSelections().forEach(perkStyleSelection -> {
+                            firstPerkList.add(perkStyleSelection.getPerk());
+                        });
+                        firstPerkList.add(perkStyle.getStyle());
+                    });
+                    Collections.sort(firstPerkList);
+
+                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getDefense());
+                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getOffense());
+                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getFlex());
+                    listParticipant.get(j).getPerks().getStyles().forEach(perkStyle -> {
+                        perkStyle.getSelections().forEach(perkStyleSelection -> {
+                            secondPerkList.add(perkStyleSelection.getPerk());
+                        });
+                        secondPerkList.add(perkStyle.getStyle());
+                    });
+                    Collections.sort(secondPerkList);
+
+                    perkList.put(listParticipant.get(i).getParticipantId(), firstPerkList);
+                    perkList.put(listParticipant.get(j).getParticipantId(), secondPerkList);
+
+                    duoRepository.save(new DuoEntity(listParticipant.get(i).getWin(),position,itemList,spellList,champion,perkList));
+                }
+            }
+        });
+
     }
     private void setSolo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap){
         matchDto.getInfo().getParticipants().forEach(participant -> {
@@ -235,6 +316,7 @@ public class RiotService implements ApplicationRunner{
             }
             perkRepository.save(new PerkEntity(perkDto.getId(), perkDto.getName(), perkDto.getIcon()));
         });
+
     }
     private void setChampion(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/champion.json";
