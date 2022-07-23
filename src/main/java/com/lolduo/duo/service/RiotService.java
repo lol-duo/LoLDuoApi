@@ -9,10 +9,7 @@ import com.lolduo.duo.dto.setting.perk.PerkRune;
 import com.lolduo.duo.dto.spell.SpellDto;
 import com.lolduo.duo.dto.summoner_v4.SummonerDTO;
 import com.lolduo.duo.dto.timeline.MatchTimeLineDto;
-import com.lolduo.duo.entity.ChampionEntity;
-import com.lolduo.duo.entity.DuoEntity;
-import com.lolduo.duo.entity.PerkEntity;
-import com.lolduo.duo.entity.SpellEntity;
+import com.lolduo.duo.entity.*;
 import com.lolduo.duo.entity.item.ItemEntity;
 import com.lolduo.duo.entity.item.ItemFullEntity;
 import com.lolduo.duo.entity.match_v5.MatchDto;
@@ -48,6 +45,7 @@ public class RiotService implements ApplicationRunner{
     private final SpellRepository spellRepository;
     private final SoloRepository soloRepository;
     private final DuoRepository duoRepository;
+    private final TrioRepository trioRepository;
 
     public void setKey(String key) {
         this.key = key;
@@ -147,8 +145,8 @@ public class RiotService implements ApplicationRunner{
 
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
             setSolo(response_match.getBody(),playerItemList,puuIdMap);
-            setDuo(response_match.getBody(),playerItemList,puuIdMap);
-
+            //setDuo(response_match.getBody(),playerItemList,puuIdMap);
+            setTrio(response_match.getBody(),playerItemList,puuIdMap);
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
@@ -157,6 +155,7 @@ public class RiotService implements ApplicationRunner{
 
         });
     }
+    /*
     private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String,Long> puuIdMap){
         List<Participant> winList = new ArrayList<>();
         List<Participant> loseList = new ArrayList<>();
@@ -231,6 +230,7 @@ public class RiotService implements ApplicationRunner{
         });
 
     }
+     */
     private void setSolo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap){
         matchDto.getInfo().getParticipants().forEach(participant -> {
             Boolean win = participant.getWin();
@@ -253,6 +253,82 @@ public class RiotService implements ApplicationRunner{
             Collections.sort(perkList);
             soloRepository.save(new SoloEntity(win,position,itemList,spellList,champion,perkList));
         });
+    }
+
+    private void setTrio(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
+        Map<String,Boolean> visitedWin =new HashMap<>();
+        Map<String,Boolean> visitedLose =new HashMap<>();
+        matchDto.getInfo().getParticipants().forEach(participant -> {
+            if(participant.getWin()==true) visitedWin.put(participant.getPuuid(),false);
+            else visitedLose.put(participant.getPuuid(),false);
+        });
+        //2인 정보
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,2);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,2);
+        //3인 정보
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,3);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,3);
+        //5인 정보
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,5);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,5);
+    }
+    private void combination(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap,List<Participant> participantList,Map<String,Boolean> visited,Boolean win,int number){
+        if(participantList.size()==number){
+            saveTrio(participantList,playerItemList,puuIdMap,win,number);
+            return;
+        }
+        matchDto.getInfo().getParticipants().forEach(participant -> {
+            if (visited.containsKey(participant.getPuuid())==true && visited.get(participant.getPuuid())==false) {
+                visited.put(participant.getPuuid(),true);
+                participantList.add(participant);
+                visited.put(participant.getPuuid(),false);
+            }
+        });
+    }
+    private void saveTrio(List<Participant> participantList, List<List<Long>> playerItemList, Map<String, Long> puuIdMap, Boolean win,int number){
+        Map<Long,String> positionMap = new HashMap<>();
+        Map<Long,List<Long>> itemListMap = new HashMap<>();
+        Map<Long,TreeSet<Long>> spellListMap = new HashMap<>();
+        TreeSet<Long> championList = new TreeSet<>();
+        Map<Long,List<Long>> perkListMap = new HashMap<>();
+
+        // 중복 start
+        participantList.forEach(participant -> {
+            String position = participant.getIndividualPosition();
+            List<Long> itemList = playerItemList.get(puuIdMap.get(participant.getPuuid()).intValue());
+            TreeSet<Long> spellList = new TreeSet<>();
+            spellList.add(participant.getSummoner1Id());
+            spellList.add(participant.getSummoner2Id());
+            Long champion = participant.getChampionId();
+            List<Long> perkList = new ArrayList<>();
+            perkList.add(participant.getPerks().getStatPerks().getDefense());
+            perkList.add(participant.getPerks().getStatPerks().getOffense());
+            perkList.add(participant.getPerks().getStatPerks().getFlex());
+            participant.getPerks().getStyles().forEach(perkStyle -> {
+                perkStyle.getSelections().forEach(perkStyleSelection -> {
+                    perkList.add(perkStyleSelection.getPerk());
+                });
+                perkList.add(perkStyle.getStyle());
+            });
+            Collections.sort(perkList);
+            positionMap.put(champion,position);
+            itemListMap.put(champion,itemList);
+            spellListMap.put(champion,spellList);
+            championList.add(champion);
+            perkListMap.put(champion,perkList);
+        });
+        // 중복 end
+        if(number==2){
+            duoRepository.save(new DuoEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap) );
+        }
+        else if(number==3){
+            trioRepository.save(new TrioEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
+        }
+        else if(number==5){
+            //trioRepository.save(new TrioEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
+            //team 저장 추가 예정.
+        }
+
     }
     private List<String> getPuuIdList(String league){
         String url = "https://kr.api.riotgames.com/lol/league/v4/"+league+"leagues/by-queue/RANKED_SOLO_5x5";
