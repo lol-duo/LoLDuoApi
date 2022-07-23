@@ -63,7 +63,7 @@ public class RiotService implements ApplicationRunner{
         //setChampion();
         //setSpell();
         //setPerk();
-        All();
+        //All();
     }
 
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
