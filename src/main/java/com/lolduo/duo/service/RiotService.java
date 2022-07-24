@@ -47,6 +47,8 @@ public class RiotService implements ApplicationRunner{
     private final DuoRepository duoRepository;
     private final TrioRepository trioRepository;
 
+    private final TeamRepository teamRepository;
+
     public void setKey(String key) {
         this.key = key;
     }
@@ -55,13 +57,14 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-92131ab8-5ef7-4afe-a002-ce0a7a2b5ea3");
+        setKey("RGAPI-0abe228d-550e-41b5-802b-824e4f20a477");
         setVersion("12.13.1");
-        //setItem();
-        //setChampion();
-        //setSpell();
-        //setPerk();
-        //All();
+        setItem();
+        setChampion();
+        setSpell();
+        setPerk();
+
+        All();  //주석 처리해야
     }
 
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
@@ -71,13 +74,17 @@ public class RiotService implements ApplicationRunner{
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        AllLeaguePuuid.put("master",getPuuIdList("master"));
+
+        //주석처리 풀 것
+        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        //AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
+
+        //주석처리 풀것
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
         getMatchInfo(matchIdList);
         log.info(startTime + ": done");
     }
@@ -145,8 +152,9 @@ public class RiotService implements ApplicationRunner{
 
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
             setSolo(response_match.getBody(),playerItemList,puuIdMap);
-            //setDuo(response_match.getBody(),playerItemList,puuIdMap);
+            setDuo(response_match.getBody(),playerItemList,puuIdMap);
             setTrio(response_match.getBody(),playerItemList,puuIdMap);
+            setTeam(response_match.getBody(),playerItemList,puuIdMap);
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
@@ -254,8 +262,7 @@ public class RiotService implements ApplicationRunner{
             soloRepository.save(new SoloEntity(win,position,itemList,spellList,champion,perkList));
         });
     }
-
-    private void setTrio(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
+    private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
         Map<String,Boolean> visitedWin =new HashMap<>();
         Map<String,Boolean> visitedLose =new HashMap<>();
         matchDto.getInfo().getParticipants().forEach(participant -> {
@@ -265,16 +272,33 @@ public class RiotService implements ApplicationRunner{
         //2인 정보
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,2);
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,2);
+    }
+    private void setTrio(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
+        Map<String,Boolean> visitedWin =new HashMap<>();
+        Map<String,Boolean> visitedLose =new HashMap<>();
+        matchDto.getInfo().getParticipants().forEach(participant -> {
+            if(participant.getWin()==true) visitedWin.put(participant.getPuuid(),false);
+            else visitedLose.put(participant.getPuuid(),false);
+        });
         //3인 정보
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,3);
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,3);
+
+    }
+    private void setTeam(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
+        List<Participant>  winParticipantList = new ArrayList<>();
+        List<Participant> loseParticipantList = new ArrayList<>();
+        matchDto.getInfo().getParticipants().forEach(participant -> {
+            if(participant.getWin()==true) winParticipantList.add(participant);
+            else loseParticipantList.add(participant);
+        });
         //5인 정보
-        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,5);
-        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,5);
+        saveMatchInfo(winParticipantList,playerItemList,puuIdMap,true,5);
+        saveMatchInfo(loseParticipantList,playerItemList,puuIdMap,false,5);
     }
     private void combination(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap,List<Participant> participantList,Map<String,Boolean> visited,Boolean win,int number){
         if(participantList.size()==number){
-            saveTrio(participantList,playerItemList,puuIdMap,win,number);
+            saveMatchInfo(participantList,playerItemList,puuIdMap,win,number);
             return;
         }
         matchDto.getInfo().getParticipants().forEach(participant -> {
@@ -285,7 +309,7 @@ public class RiotService implements ApplicationRunner{
             }
         });
     }
-    private void saveTrio(List<Participant> participantList, List<List<Long>> playerItemList, Map<String, Long> puuIdMap, Boolean win,int number){
+    private void saveMatchInfo(List<Participant> participantList, List<List<Long>> playerItemList, Map<String, Long> puuIdMap, Boolean win,int number){
         Map<Long,String> positionMap = new HashMap<>();
         Map<Long,List<Long>> itemListMap = new HashMap<>();
         Map<Long,TreeSet<Long>> spellListMap = new HashMap<>();
@@ -325,8 +349,7 @@ public class RiotService implements ApplicationRunner{
             trioRepository.save(new TrioEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
         }
         else if(number==5){
-            //trioRepository.save(new TrioEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
-            //team 저장 추가 예정.
+            teamRepository.save(new TeamEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
         }
 
     }
