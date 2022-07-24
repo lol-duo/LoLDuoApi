@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
-    url: jdbc:mariadb://localhost/lolduo?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    password: alpha..
+    url: jdbc:mariadb://lol-duo-mariadb.cswfqjzaqdu0.ap-northeast-2.rds.amazonaws.com:3306/lolduo
+    password: fhfebdh1
   mvc:
     path match:
       matching-strategy: ant_path_matcher

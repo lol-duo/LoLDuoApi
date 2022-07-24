@@ -57,14 +57,14 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-0abe228d-550e-41b5-802b-824e4f20a477");
+        setKey("RGAPI-286c8d2b-d4eb-45a5-a34e-a81d2d4dbfca");
         setVersion("12.13.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
 
-        All();  //주석 처리해야
+        //All();
     }
 
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
@@ -74,19 +74,15 @@ public class RiotService implements ApplicationRunner{
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-
-        //주석처리 풀 것
-        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        //AllLeaguePuuid.put("master",getPuuIdList("master"));
+        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
 
-        //주석처리 풀것
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
         getMatchInfo(matchIdList);
-        log.info(startTime + ": done");
     }
 
     private void setItem(){
@@ -163,82 +159,7 @@ public class RiotService implements ApplicationRunner{
 
         });
     }
-    /*
-    private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String,Long> puuIdMap){
-        List<Participant> winList = new ArrayList<>();
-        List<Participant> loseList = new ArrayList<>();
-        matchDto.getInfo().getParticipants().forEach(participant -> {
-            Boolean win = participant.getWin();
-            if(win) winList.add(participant);
-            else loseList.add(participant);
-        });
-        List<List<Participant>> list = new ArrayList<>();
-        list.add(winList);
-        list.add(loseList);
-        //후에 함수화하여 list로 반환하기 필요할듯.
-        list.forEach(listParticipant -> {
-            for(int i = 0; i < listParticipant.size() - 1; i++){
-                for(int j = i+1; j < listParticipant.size(); j++){
-                    Map<Long, String> position = new HashMap<>();
-                    Map<Long, List<Long>> itemList = new HashMap<>();
-                    Map<Long, TreeSet<Long>> spellList = new HashMap<>();
-                    Map<Long,List<Long>> perkList = new HashMap<>();
-                    TreeSet<Long> champion = new TreeSet<>();
-                    //champion
-                    champion.add(listParticipant.get(i).getChampionId());
-                    champion.add(listParticipant.get(j).getChampionId());
-                    //position
-                    position.put(listParticipant.get(i).getChampionId(),listParticipant.get(i).getIndividualPosition());
-                    position.put(listParticipant.get(j).getChampionId(),listParticipant.get(j).getIndividualPosition());
-                    //itemList
-                    itemList.put(listParticipant.get(i).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(i).getPuuid()).intValue()));
-                    itemList.put(listParticipant.get(j).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(j).getPuuid()).intValue()));
-                    //spellList
-                    TreeSet<Long> firstSpellList = new TreeSet<>();
-                    TreeSet<Long> secondSpellList = new TreeSet<>();
-                    firstSpellList.add(listParticipant.get(i).getSummoner1Id());
-                    firstSpellList.add(listParticipant.get(i).getSummoner2Id());
-                    secondSpellList.add(listParticipant.get(j).getSummoner1Id());
-                    secondSpellList.add(listParticipant.get(j).getSummoner2Id());
 
-                    spellList.put(listParticipant.get(i).getChampionId(), firstSpellList);
-                    spellList.put(listParticipant.get(j).getChampionId(), secondSpellList);
-                    //perkList
-                    List<Long> firstPerkList = new ArrayList<>();
-                    List<Long> secondPerkList = new ArrayList<>();
-
-                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getDefense());
-                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getOffense());
-                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getFlex());
-                    listParticipant.get(i).getPerks().getStyles().forEach(perkStyle -> {
-                        perkStyle.getSelections().forEach(perkStyleSelection -> {
-                            firstPerkList.add(perkStyleSelection.getPerk());
-                        });
-                        firstPerkList.add(perkStyle.getStyle());
-                    });
-                    Collections.sort(firstPerkList);
-
-                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getDefense());
-                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getOffense());
-                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getFlex());
-                    listParticipant.get(j).getPerks().getStyles().forEach(perkStyle -> {
-                        perkStyle.getSelections().forEach(perkStyleSelection -> {
-                            secondPerkList.add(perkStyleSelection.getPerk());
-                        });
-                        secondPerkList.add(perkStyle.getStyle());
-                    });
-                    Collections.sort(secondPerkList);
-
-                    perkList.put(listParticipant.get(i).getParticipantId(), firstPerkList);
-                    perkList.put(listParticipant.get(j).getParticipantId(), secondPerkList);
-
-                    duoRepository.save(new DuoEntity(listParticipant.get(i).getWin(),position,itemList,spellList,champion,perkList));
-                }
-            }
-        });
-
-    }
-     */
     private void setSolo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap){
         matchDto.getInfo().getParticipants().forEach(participant -> {
             Boolean win = participant.getWin();
@@ -270,8 +191,8 @@ public class RiotService implements ApplicationRunner{
             else visitedLose.put(participant.getPuuid(),false);
         });
         //2인 정보
-        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,2);
-        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,2);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,2,0);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,2,0);
     }
     private void setTrio(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
         Map<String,Boolean> visitedWin =new HashMap<>();
@@ -281,8 +202,8 @@ public class RiotService implements ApplicationRunner{
             else visitedLose.put(participant.getPuuid(),false);
         });
         //3인 정보
-        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,3);
-        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,3);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,3,0);
+        combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,3,0);
 
     }
     private void setTeam(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
@@ -296,18 +217,21 @@ public class RiotService implements ApplicationRunner{
         saveMatchInfo(winParticipantList,playerItemList,puuIdMap,true,5);
         saveMatchInfo(loseParticipantList,playerItemList,puuIdMap,false,5);
     }
-    private void combination(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap,List<Participant> participantList,Map<String,Boolean> visited,Boolean win,int number){
+    private void combination(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap,List<Participant> participantList,Map<String,Boolean> visited,Boolean win,int number,int start){
         if(participantList.size()==number){
             saveMatchInfo(participantList,playerItemList,puuIdMap,win,number);
             return;
         }
-        matchDto.getInfo().getParticipants().forEach(participant -> {
+        for(int i = start; i< matchDto.getInfo().getParticipants().size(); i++){
+            Participant participant = matchDto.getInfo().getParticipants().get(i);
             if (visited.containsKey(participant.getPuuid())==true && visited.get(participant.getPuuid())==false) {
-                visited.put(participant.getPuuid(),true);
                 participantList.add(participant);
+                visited.put(participant.getPuuid(),true);
+                combination(matchDto,playerItemList,puuIdMap,participantList,visited,win,number,i+1);
+                participantList.remove(participant);
                 visited.put(participant.getPuuid(),false);
             }
-        });
+        }
     }
     private void saveMatchInfo(List<Participant> participantList, List<List<Long>> playerItemList, Map<String, Long> puuIdMap, Boolean win,int number){
         Map<Long,String> positionMap = new HashMap<>();
@@ -448,4 +372,80 @@ public class RiotService implements ApplicationRunner{
             spellRepository.save(new SpellEntity(Long.parseLong(spellList.getBody().getData().get(spellId).getKey()), spellList.getBody().getData().get(spellId).getName(),spellId + ".png"));
         }
     }
+        /*
+    private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String,Long> puuIdMap){
+        List<Participant> winList = new ArrayList<>();
+        List<Participant> loseList = new ArrayList<>();
+        matchDto.getInfo().getParticipants().forEach(participant -> {
+            Boolean win = participant.getWin();
+            if(win) winList.add(participant);
+            else loseList.add(participant);
+        });
+        List<List<Participant>> list = new ArrayList<>();
+        list.add(winList);
+        list.add(loseList);
+        //후에 함수화하여 list로 반환하기 필요할듯.
+        list.forEach(listParticipant -> {
+            for(int i = 0; i < listParticipant.size() - 1; i++){
+                for(int j = i+1; j < listParticipant.size(); j++){
+                    Map<Long, String> position = new HashMap<>();
+                    Map<Long, List<Long>> itemList = new HashMap<>();
+                    Map<Long, TreeSet<Long>> spellList = new HashMap<>();
+                    Map<Long,List<Long>> perkList = new HashMap<>();
+                    TreeSet<Long> champion = new TreeSet<>();
+                    //champion
+                    champion.add(listParticipant.get(i).getChampionId());
+                    champion.add(listParticipant.get(j).getChampionId());
+                    //position
+                    position.put(listParticipant.get(i).getChampionId(),listParticipant.get(i).getIndividualPosition());
+                    position.put(listParticipant.get(j).getChampionId(),listParticipant.get(j).getIndividualPosition());
+                    //itemList
+                    itemList.put(listParticipant.get(i).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(i).getPuuid()).intValue()));
+                    itemList.put(listParticipant.get(j).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(j).getPuuid()).intValue()));
+                    //spellList
+                    TreeSet<Long> firstSpellList = new TreeSet<>();
+                    TreeSet<Long> secondSpellList = new TreeSet<>();
+                    firstSpellList.add(listParticipant.get(i).getSummoner1Id());
+                    firstSpellList.add(listParticipant.get(i).getSummoner2Id());
+                    secondSpellList.add(listParticipant.get(j).getSummoner1Id());
+                    secondSpellList.add(listParticipant.get(j).getSummoner2Id());
+
+                    spellList.put(listParticipant.get(i).getChampionId(), firstSpellList);
+                    spellList.put(listParticipant.get(j).getChampionId(), secondSpellList);
+                    //perkList
+                    List<Long> firstPerkList = new ArrayList<>();
+                    List<Long> secondPerkList = new ArrayList<>();
+
+                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getDefense());
+                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getOffense());
+                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getFlex());
+                    listParticipant.get(i).getPerks().getStyles().forEach(perkStyle -> {
+                        perkStyle.getSelections().forEach(perkStyleSelection -> {
+                            firstPerkList.add(perkStyleSelection.getPerk());
+                        });
+                        firstPerkList.add(perkStyle.getStyle());
+                    });
+                    Collections.sort(firstPerkList);
+
+                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getDefense());
+                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getOffense());
+                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getFlex());
+                    listParticipant.get(j).getPerks().getStyles().forEach(perkStyle -> {
+                        perkStyle.getSelections().forEach(perkStyleSelection -> {
+                            secondPerkList.add(perkStyleSelection.getPerk());
+                        });
+                        secondPerkList.add(perkStyle.getStyle());
+                    });
+                    Collections.sort(secondPerkList);
+
+                    perkList.put(listParticipant.get(i).getParticipantId(), firstPerkList);
+                    perkList.put(listParticipant.get(j).getParticipantId(), secondPerkList);
+
+                    duoRepository.save(new DuoEntity(listParticipant.get(i).getWin(),position,itemList,spellList,champion,perkList));
+                }
+            }
+        });
+
+    }
+     */
 }
