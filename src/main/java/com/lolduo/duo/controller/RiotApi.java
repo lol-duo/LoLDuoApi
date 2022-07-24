@@ -5,6 +5,8 @@ import com.lolduo.duo.dto.KeyDto;
 import com.lolduo.duo.dto.VersionDto;
 import com.lolduo.duo.service.RiotService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
