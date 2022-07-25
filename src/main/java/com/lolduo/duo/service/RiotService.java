@@ -10,12 +10,19 @@ import com.lolduo.duo.dto.spell.SpellDto;
 import com.lolduo.duo.dto.summoner_v4.SummonerDTO;
 import com.lolduo.duo.dto.timeline.MatchTimeLineDto;
 import com.lolduo.duo.entity.*;
+import com.lolduo.duo.entity.gameInfo.DuoEntity;
+import com.lolduo.duo.entity.gameInfo.QuintetEntity;
+import com.lolduo.duo.entity.gameInfo.TrioEntity;
 import com.lolduo.duo.entity.item.ItemEntity;
 import com.lolduo.duo.entity.item.ItemFullEntity;
 import com.lolduo.duo.entity.match_v5.MatchDto;
 import com.lolduo.duo.entity.match_v5.Participant;
-import com.lolduo.duo.entity.solo.SoloEntity;
+import com.lolduo.duo.entity.gameInfo.SoloEntity;
 import com.lolduo.duo.repository.*;
+import com.lolduo.duo.repository.gameInfo.DuoRepository;
+import com.lolduo.duo.repository.gameInfo.QuintetRepository;
+import com.lolduo.duo.repository.gameInfo.SoloRepository;
+import com.lolduo.duo.repository.gameInfo.TrioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -46,8 +53,7 @@ public class RiotService implements ApplicationRunner{
     private final SoloRepository soloRepository;
     private final DuoRepository duoRepository;
     private final TrioRepository trioRepository;
-
-    private final TeamRepository teamRepository;
+    private final QuintetRepository quintetRepository;
 
     public void setKey(String key) {
         this.key = key;
@@ -85,22 +91,6 @@ public class RiotService implements ApplicationRunner{
         getMatchInfo(matchIdList);
     }
 
-    private void setItem(){
-        String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/item.json";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Riot-Token", key);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-        ResponseEntity<ItemDto> item = restTemplate.exchange(url, HttpMethod.GET, requestEntity, ItemDto.class);
-        //추후에 map iter 로 변경하여서 n번
-        Set<String> itemIdList = item.getBody().getData().keySet();
-        for(String itemId : itemIdList){
-            itemRepository.save(new ItemEntity(Long.parseLong(itemId), item.getBody().getData().get(itemId).getName(),itemId + ".png"));
-        }
-        makeFullItem(item.getBody());
-    }
     private void makeFullItem(ItemDto item){
         Set<String> itemIdList = item.getData().keySet();
         for(String itemId : itemIdList){
@@ -150,7 +140,7 @@ public class RiotService implements ApplicationRunner{
             setSolo(response_match.getBody(),playerItemList,puuIdMap);
             setDuo(response_match.getBody(),playerItemList,puuIdMap);
             setTrio(response_match.getBody(),playerItemList,puuIdMap);
-            setTeam(response_match.getBody(),playerItemList,puuIdMap);
+            setQuintet(response_match.getBody(),playerItemList,puuIdMap);
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
@@ -168,7 +158,7 @@ public class RiotService implements ApplicationRunner{
             TreeSet<Long> spellList = new TreeSet<>();
             spellList.add(participant.getSummoner1Id());
             spellList.add(participant.getSummoner2Id());
-            Long champion = participant.getChampionId();
+            Long championId = participant.getChampionId();
             List<Long> perkList = new ArrayList<>();
             perkList.add(participant.getPerks().getStatPerks().getDefense());
             perkList.add(participant.getPerks().getStatPerks().getOffense());
@@ -180,17 +170,21 @@ public class RiotService implements ApplicationRunner{
                 perkList.add(perkStyle.getStyle());
             });
             Collections.sort(perkList);
-            soloRepository.save(new SoloEntity(win,position,itemList,spellList,champion,perkList));
+            soloRepository.save(new SoloEntity(win,position,itemList,spellList,championId,perkList));
         });
     }
     private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
         Map<String,Boolean> visitedWin =new HashMap<>();
         Map<String,Boolean> visitedLose =new HashMap<>();
         matchDto.getInfo().getParticipants().forEach(participant -> {
-            if(participant.getWin()==true) visitedWin.put(participant.getPuuid(),false);
-            else visitedLose.put(participant.getPuuid(),false);
+            if(participant.getWin()==true) {
+                visitedWin.put(participant.getPuuid(),false);
+            }
+            else {
+                visitedLose.put(participant.getPuuid(),false);
+            }
         });
-        //2인 정보
+        //2인 정보 save
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,2,0);
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,2,0);
     }
@@ -198,22 +192,30 @@ public class RiotService implements ApplicationRunner{
         Map<String,Boolean> visitedWin =new HashMap<>();
         Map<String,Boolean> visitedLose =new HashMap<>();
         matchDto.getInfo().getParticipants().forEach(participant -> {
-            if(participant.getWin()==true) visitedWin.put(participant.getPuuid(),false);
-            else visitedLose.put(participant.getPuuid(),false);
+            if(participant.getWin()==true) {
+                visitedWin.put(participant.getPuuid(), false);
+            }
+            else{
+                visitedLose.put(participant.getPuuid(),false);
+            }
         });
-        //3인 정보
+        //3인 정보 save
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedWin,true,3,0);
         combination(matchDto,playerItemList,puuIdMap,new ArrayList<>(),visitedLose,false,3,0);
 
     }
-    private void setTeam(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
+    private void setQuintet(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap) {
         List<Participant>  winParticipantList = new ArrayList<>();
         List<Participant> loseParticipantList = new ArrayList<>();
         matchDto.getInfo().getParticipants().forEach(participant -> {
-            if(participant.getWin()==true) winParticipantList.add(participant);
-            else loseParticipantList.add(participant);
+            if(participant.getWin()==true) {
+                winParticipantList.add(participant);
+            }
+            else {
+                loseParticipantList.add(participant);
+            }
         });
-        //5인 정보
+        //5인 정보 save
         saveMatchInfo(winParticipantList,playerItemList,puuIdMap,true,5);
         saveMatchInfo(loseParticipantList,playerItemList,puuIdMap,false,5);
     }
@@ -240,14 +242,14 @@ public class RiotService implements ApplicationRunner{
         TreeSet<Long> championList = new TreeSet<>();
         Map<Long,List<Long>> perkListMap = new HashMap<>();
 
-        // 중복 start
+        // 260line까지 sestSolo와 중복되는 부분, 추후에 가능하면 AOP 적용
         participantList.forEach(participant -> {
             String position = participant.getIndividualPosition();
             List<Long> itemList = playerItemList.get(puuIdMap.get(participant.getPuuid()).intValue());
             TreeSet<Long> spellList = new TreeSet<>();
             spellList.add(participant.getSummoner1Id());
             spellList.add(participant.getSummoner2Id());
-            Long champion = participant.getChampionId();
+            Long championId = participant.getChampionId();
             List<Long> perkList = new ArrayList<>();
             perkList.add(participant.getPerks().getStatPerks().getDefense());
             perkList.add(participant.getPerks().getStatPerks().getOffense());
@@ -259,13 +261,12 @@ public class RiotService implements ApplicationRunner{
                 perkList.add(perkStyle.getStyle());
             });
             Collections.sort(perkList);
-            positionMap.put(champion,position);
-            itemListMap.put(champion,itemList);
-            spellListMap.put(champion,spellList);
-            championList.add(champion);
-            perkListMap.put(champion,perkList);
+            positionMap.put(championId,position);
+            itemListMap.put(championId,itemList);
+            spellListMap.put(championId,spellList);
+            championList.add(championId);
+            perkListMap.put(championId,perkList);
         });
-        // 중복 end
         if(number==2){
             duoRepository.save(new DuoEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap) );
         }
@@ -273,7 +274,7 @@ public class RiotService implements ApplicationRunner{
             trioRepository.save(new TrioEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
         }
         else if(number==5){
-            teamRepository.save(new TeamEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
+            quintetRepository.save(new QuintetEntity(win,positionMap,itemListMap,spellListMap,championList,perkListMap));
         }
 
     }
@@ -301,8 +302,8 @@ public class RiotService implements ApplicationRunner{
 
     private Set<String> getMatchId(Long startTime, Long endTime, List<String> puuidList) {
         String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/";
-        Set<String> matchList = new HashSet<>();
 
+        Set<String> matchList = new HashSet<>();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Riot-Token", key);
@@ -320,26 +321,22 @@ public class RiotService implements ApplicationRunner{
         return matchList;
     }
 
-    private void setPerk(){
-        String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/runesReforged.json";
+    //  패치 별 아이템, 챔피언 ,스펠, 룬 정보 정보들 DB에 세팅해주는 부분들
+    private void setItem(){
+        String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/item.json";
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Riot-Token", key);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<PerkDto[]> response_perkDtoList = restTemplate.exchange(url, HttpMethod.GET, requestEntity, PerkDto[].class);
-        List<PerkDto> perkDtoList = Arrays.asList(response_perkDtoList.getBody());
-        perkDtoList.forEach(perkDto -> {
-            for(int i = 0; i < perkDto.getSlots().size(); i++){
-                List<PerkRune> perkRuneList = perkDto.getSlots().get(i).getRunes();
-                for(int j = 0; j < perkRuneList.size(); j++){
-                    perkRepository.save(new PerkEntity(perkRuneList.get(j).getId(),perkRuneList.get(j).getName(), perkRuneList.get(j).getIcon()));
-                }
-            }
-            perkRepository.save(new PerkEntity(perkDto.getId(), perkDto.getName(), perkDto.getIcon()));
-        });
-
+        ResponseEntity<ItemDto> item = restTemplate.exchange(url, HttpMethod.GET, requestEntity, ItemDto.class);
+        //추후에 map iter 로 변경하여서 n번
+        Set<String> itemIdList = item.getBody().getData().keySet();
+        for(String itemId : itemIdList){
+            itemRepository.save(new ItemEntity(Long.parseLong(itemId), item.getBody().getData().get(itemId).getName(),itemId + ".png"));
+        }
+        makeFullItem(item.getBody());
     }
     private void setChampion(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/champion.json";
@@ -368,84 +365,31 @@ public class RiotService implements ApplicationRunner{
 
         Set<String> spellIdList = spellList.getBody().getData().keySet();
         for(String spellId : spellIdList){
-            if(Integer.parseInt(spellList.getBody().getData().get(spellId).getKey()) > 21) continue;
+            if(Integer.parseInt(spellList.getBody().getData().get(spellId).getKey()) > 21) {
+                continue;
+            }
             spellRepository.save(new SpellEntity(Long.parseLong(spellList.getBody().getData().get(spellId).getKey()), spellList.getBody().getData().get(spellId).getName(),spellId + ".png"));
         }
     }
-        /*
-    private void setDuo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String,Long> puuIdMap){
-        List<Participant> winList = new ArrayList<>();
-        List<Participant> loseList = new ArrayList<>();
-        matchDto.getInfo().getParticipants().forEach(participant -> {
-            Boolean win = participant.getWin();
-            if(win) winList.add(participant);
-            else loseList.add(participant);
-        });
-        List<List<Participant>> list = new ArrayList<>();
-        list.add(winList);
-        list.add(loseList);
-        //후에 함수화하여 list로 반환하기 필요할듯.
-        list.forEach(listParticipant -> {
-            for(int i = 0; i < listParticipant.size() - 1; i++){
-                for(int j = i+1; j < listParticipant.size(); j++){
-                    Map<Long, String> position = new HashMap<>();
-                    Map<Long, List<Long>> itemList = new HashMap<>();
-                    Map<Long, TreeSet<Long>> spellList = new HashMap<>();
-                    Map<Long,List<Long>> perkList = new HashMap<>();
-                    TreeSet<Long> champion = new TreeSet<>();
-                    //champion
-                    champion.add(listParticipant.get(i).getChampionId());
-                    champion.add(listParticipant.get(j).getChampionId());
-                    //position
-                    position.put(listParticipant.get(i).getChampionId(),listParticipant.get(i).getIndividualPosition());
-                    position.put(listParticipant.get(j).getChampionId(),listParticipant.get(j).getIndividualPosition());
-                    //itemList
-                    itemList.put(listParticipant.get(i).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(i).getPuuid()).intValue()));
-                    itemList.put(listParticipant.get(j).getChampionId(), playerItemList.get(puuIdMap.get(listParticipant.get(j).getPuuid()).intValue()));
-                    //spellList
-                    TreeSet<Long> firstSpellList = new TreeSet<>();
-                    TreeSet<Long> secondSpellList = new TreeSet<>();
-                    firstSpellList.add(listParticipant.get(i).getSummoner1Id());
-                    firstSpellList.add(listParticipant.get(i).getSummoner2Id());
-                    secondSpellList.add(listParticipant.get(j).getSummoner1Id());
-                    secondSpellList.add(listParticipant.get(j).getSummoner2Id());
+    private void setPerk(){
+        String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/runesReforged.json";
 
-                    spellList.put(listParticipant.get(i).getChampionId(), firstSpellList);
-                    spellList.put(listParticipant.get(j).getChampionId(), secondSpellList);
-                    //perkList
-                    List<Long> firstPerkList = new ArrayList<>();
-                    List<Long> secondPerkList = new ArrayList<>();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-Riot-Token", key);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getDefense());
-                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getOffense());
-                    firstPerkList.add(listParticipant.get(i).getPerks().getStatPerks().getFlex());
-                    listParticipant.get(i).getPerks().getStyles().forEach(perkStyle -> {
-                        perkStyle.getSelections().forEach(perkStyleSelection -> {
-                            firstPerkList.add(perkStyleSelection.getPerk());
-                        });
-                        firstPerkList.add(perkStyle.getStyle());
-                    });
-                    Collections.sort(firstPerkList);
-
-                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getDefense());
-                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getOffense());
-                    secondPerkList.add(listParticipant.get(j).getPerks().getStatPerks().getFlex());
-                    listParticipant.get(j).getPerks().getStyles().forEach(perkStyle -> {
-                        perkStyle.getSelections().forEach(perkStyleSelection -> {
-                            secondPerkList.add(perkStyleSelection.getPerk());
-                        });
-                        secondPerkList.add(perkStyle.getStyle());
-                    });
-                    Collections.sort(secondPerkList);
-
-                    perkList.put(listParticipant.get(i).getParticipantId(), firstPerkList);
-                    perkList.put(listParticipant.get(j).getParticipantId(), secondPerkList);
-
-                    duoRepository.save(new DuoEntity(listParticipant.get(i).getWin(),position,itemList,spellList,champion,perkList));
+        ResponseEntity<PerkDto[]> response_perkDtoList = restTemplate.exchange(url, HttpMethod.GET, requestEntity, PerkDto[].class);
+        List<PerkDto> perkDtoList = Arrays.asList(response_perkDtoList.getBody());
+        perkDtoList.forEach(perkDto -> {
+            for(int i = 0; i < perkDto.getSlots().size(); i++){
+                List<PerkRune> perkRuneList = perkDto.getSlots().get(i).getRunes();
+                for(int j = 0; j < perkRuneList.size(); j++){
+                    perkRepository.save(new PerkEntity(perkRuneList.get(j).getId(),perkRuneList.get(j).getName(), perkRuneList.get(j).getIcon()));
                 }
             }
+            perkRepository.save(new PerkEntity(perkDto.getId(), perkDto.getName(), perkDto.getIcon()));
         });
 
     }
-     */
 }
