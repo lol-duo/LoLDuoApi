@@ -1,4 +1,4 @@
-package com.lolduo.duo.swagger;
+package com.lolduo.duo.dto.config;
 
 import java.util.ArrayList;
 import java.util.List;
