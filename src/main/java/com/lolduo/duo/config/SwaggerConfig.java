@@ -1,4 +1,4 @@
-package com.lolduo.duo.dto.config;
+package com.lolduo.duo.config;
 
 import java.util.ArrayList;
 import java.util.List;
