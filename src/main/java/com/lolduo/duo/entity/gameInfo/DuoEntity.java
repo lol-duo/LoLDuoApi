@@ -22,6 +22,9 @@ public class DuoEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "tier")
+    private String tier;
+
     @Column(name = "win")
     private Boolean win;
 
@@ -44,7 +47,8 @@ public class DuoEntity {
     @Column(name = "perk_list", columnDefinition = "json")
     private Map<Long,List<Long>> perkList;
 
-    public DuoEntity(Boolean win, Map<Long, String> position, Map<Long, List<Long>> itemList, Map<Long, TreeSet<Long>> spellList, TreeSet<Long> champion, Map<Long, List<Long>> perkList) {
+    public DuoEntity(String tier, Boolean win, Map<Long, String> position, Map<Long, List<Long>> itemList, Map<Long, TreeSet<Long>> spellList, TreeSet<Long> champion, Map<Long, List<Long>> perkList) {
+        this.tier = tier;
         this.win = win;
         this.position = position;
         this.itemList = itemList;

@@ -22,8 +22,12 @@ public class TrioEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "tier")
+    private String tier;
+
     @Column(name = "win")
     private Boolean win;
+
 
     @Type(type = "json")
     @Column(name = "position")
@@ -45,7 +49,8 @@ public class TrioEntity {
     @Column(name = "perk_list", columnDefinition = "json")
     private Map<Long,List<Long>> perkListMap;
 
-    public TrioEntity( Boolean win, Map<Long, String> positionMap, Map<Long, List<Long>> itemListMap, Map<Long, TreeSet<Long>> spellListMap, TreeSet<Long> championList, Map<Long, List<Long>> perkListMap) {
+    public TrioEntity(String tier, Boolean win, Map<Long, String> positionMap, Map<Long, List<Long>> itemListMap, Map<Long, TreeSet<Long>> spellListMap, TreeSet<Long> championList, Map<Long, List<Long>> perkListMap) {
+        this.tier = tier;
         this.win = win;
         this.positionMap = positionMap;
         this.itemListMap = itemListMap;

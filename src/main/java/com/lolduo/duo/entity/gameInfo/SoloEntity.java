@@ -22,6 +22,9 @@ public class SoloEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "tier")
+    private String tier;
+
     @Column(name = "win")
     private Boolean win;
 
@@ -42,7 +45,8 @@ public class SoloEntity {
     @Column(name = "perk_list", columnDefinition = "json")
     private List<Long> perkList;
 
-    public SoloEntity( Boolean win, String position, List<Long> itemList, TreeSet<Long> spellList, Long champion, List<Long> perkList) {
+    public SoloEntity(String tier, Boolean win, String position, List<Long> itemList, TreeSet<Long> spellList, Long champion, List<Long> perkList) {
+        this.tier = tier;
         this.win = win;
         this.position = position;
         this.itemList = itemList;
