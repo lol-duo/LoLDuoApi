@@ -22,6 +22,9 @@ public class QuintetEntity {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "tier")
+    private String tier;
+
     @Column(name = "win")
     private Boolean win;
 
@@ -45,7 +48,8 @@ public class QuintetEntity {
     @Column(name = "perk_list", columnDefinition = "json")
     private Map<Long,List<Long>> perkListMap;
 
-    public QuintetEntity(Boolean win, Map<Long, String> positionMap, Map<Long, List<Long>> itemListMap, Map<Long, TreeSet<Long>> spellListMap, TreeSet<Long> championList, Map<Long, List<Long>> perkListMap) {
+    public QuintetEntity(String tier, Boolean win, Map<Long, String> positionMap, Map<Long, List<Long>> itemListMap, Map<Long, TreeSet<Long>> spellListMap, TreeSet<Long> championList, Map<Long, List<Long>> perkListMap) {
+        this.tier = tier;
         this.win = win;
         this.positionMap = positionMap;
         this.itemListMap = itemListMap;
