@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Getter
 @Table(name = "champion")
-public class ChampionEntity {
+public class ChampionEntity implements Comparable<ChampionEntity> {
     @Id
     private Long id;
     @Column
@@ -23,5 +23,14 @@ public class ChampionEntity {
         this.id = id;
         this.name = name;
         this.imgUrl = imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+    @Override
+    public int compareTo(ChampionEntity championEntity) {
+        return this.name.compareTo(championEntity.name);
     }
 }

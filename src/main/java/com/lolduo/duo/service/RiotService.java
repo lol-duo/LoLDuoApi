@@ -65,16 +65,39 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-ec20366a-acfb-430f-ae0f-fa6d673dcebf");
-        setVersion("12.13.1");
-        //setItem();
-        //setChampion();
-        //setSpell();
-        //setPerk();
+        setKey("RGAPI-7f70530a-e516-4b64-8637-4cbff3593b77");
+        setVersion("12.14.1");
+        setItem();
+        setChampion();
+        setSpell();
+        setPerk();
+        All();
 
-        //All();
+        //test();
     }
-
+    public void test(){
+        String[] st = {"KR_6048833978",
+                "KR_6048791185",
+                "KR_6047665628",
+                "KR_6047556921",
+                "KR_6045011909",
+                "KR_6044866927",
+                "KR_6044652920",
+                "KR_6044599971",
+                "KR_6044558095",
+                "KR_6044545900",
+                "KR_6043272985",
+                "KR_6043196788",
+                "KR_6043163990",
+                "KR_6042147114",
+                "KR_6041967954",
+                "KR_6041961802",
+                "KR_6032993563",
+                "KR_6032944098",
+                "KR_6032809258",
+                "KR_6031458458"};
+        getMatchInfo(new HashSet<>(Arrays.asList(st)));
+    }
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
         Long endTime = System.currentTimeMillis() / 1000;
@@ -140,7 +163,8 @@ public class RiotService implements ApplicationRunner{
 
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
 
-            String tier = getTier(response_match.getBody());
+            //String tier = getTier(response_match.getBody());
+            String tier = "gold";
 
             setSolo(response_match.getBody(),playerItemList,puuIdMap, tier);
             setDuo(response_match.getBody(),playerItemList,puuIdMap, tier);
@@ -291,6 +315,7 @@ public class RiotService implements ApplicationRunner{
         });
         if(number==2){
             duoRepository.save(new DuoEntity(tier,win,positionMap,itemListMap,spellListMap,championList,perkListMap) );
+
         }
         else if(number==3){
             trioRepository.save(new TrioEntity(tier,win,positionMap,itemListMap,spellListMap,championList,perkListMap));
@@ -385,6 +410,7 @@ public class RiotService implements ApplicationRunner{
         for(String championId : championIdList){
             championRepository.save(new ChampionEntity(Long.parseLong(championList.getBody().getData().get(championId).getKey()), championList.getBody().getData().get(championId).getName(),championId + ".png"));
         }
+        championRepository.save(new ChampionEntity(0L,"?","?.png"));
     }
     private void setSpell(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/summoner.json";
