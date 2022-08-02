@@ -11,6 +11,7 @@ import com.lolduo.duo.repository.gameInfo.SoloRepository;
 import com.lolduo.duo.repository.gameInfo.TrioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -135,59 +136,8 @@ public class ClientService {
        list.add(new ChampionInfoDTO(championId,position));
        return list;
     }
-    private String calWinRateDuo(TreeSet<Long> championList, Map<Long,String> positionMap) {
-        int All = duoRepository.findAllByChampionAndPosition(championList, positionMap).size();
-        if (All == 0) {
-            return "NULL";
-        }
-        int Win = duoRepository.findAllByChampionAndPositionAndWinTrue(championList,positionMap).size();
-        return String.format("%.2f",(Win /  (double)All) * 100.0) + "%";
-    }
-    private List<ChampionInfoDTO> makeChampionInfoDuo(TreeSet<Long> championList, Map<Long,String> positionMap){
-        List<ChampionInfoDTO> list = new ArrayList<>();
-        for(Long id : championList){
-            list.add(new ChampionInfoDTO(id,positionMap.get(id)));
-        }
-        return list;
-    }
     private List<ChampionInfoDTOList>  makeDuo(List<ChampionInfoDTO> championInfoDTOList){
         List<ChampionInfoDTOList> result = new ArrayList<>();
-        String winRate = "";
-        ChampionInfoDTO target1 = championInfoDTOList.get(0);
-        ChampionInfoDTO target2 = championInfoDTOList.get(1);
-        if(target1.getChampionId()!=0 && target2.getChampionId() != 0 ) {
-            if(!target1.getPosition().equals("ALL")&&!target2.getPosition().equals("ALL")){
-                TreeSet<Long> championList = new TreeSet<>();
-                championList.add(target1.getChampionId());
-                championList.add(target2.getChampionId());
-                Map<Long,String> positionMap = new HashMap<>();
-                positionMap.put(target1.getChampionId(),target1.getPosition());
-                positionMap.put(target2.getChampionId(),target2.getPosition());
-
-                winRate = calWinRateDuo(championList,positionMap);
-                if(!winRate.equals("NULL")) {
-                    result.add(new ChampionInfoDTOList(makeChampionInfoDuo(championList,positionMap),winRate));
-                }
-            }
-            else if(!target1.getPosition().equals("ALL") && target2.getPosition().equals("ALL")){
-
-            }
-            else if(target1.getPosition().equals("ALL") && !target2.getPosition().equals("ALL")){
-
-            }
-            else {
-
-            }
-        }
-        else if(target1.getChampionId() != 0 && target2.getChampionId() ==0){
-
-        }
-        else if(target1.getChampionId()==0 && target2.getChampionId()!=0){
-
-        }
-        else{
-
-        }
         return result;
     }
 

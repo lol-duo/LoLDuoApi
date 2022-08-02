@@ -65,15 +65,14 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-7f70530a-e516-4b64-8637-4cbff3593b77");
+        setKey("RGAPI-69e43217-0003-4aed-9bc4-d8fc5dadc0f8");
         setVersion("12.14.1");
         setItem();
         setChampion();
         setSpell();
         setPerk();
-        All();
-
-        //test();
+        //All();
+        test();
     }
     public void test(){
         String[] st = {"KR_6048833978",
@@ -164,7 +163,7 @@ public class RiotService implements ApplicationRunner{
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
 
             //String tier = getTier(response_match.getBody());
-            String tier = "gold";
+            String tier = "gold"; // 로컬 테스트 용 임시 티어
 
             setSolo(response_match.getBody(),playerItemList,puuIdMap, tier);
             setDuo(response_match.getBody(),playerItemList,puuIdMap, tier);
@@ -410,7 +409,7 @@ public class RiotService implements ApplicationRunner{
         for(String championId : championIdList){
             championRepository.save(new ChampionEntity(Long.parseLong(championList.getBody().getData().get(championId).getKey()), championList.getBody().getData().get(championId).getName(),championId + ".png"));
         }
-        championRepository.save(new ChampionEntity(0L,"?","?.png"));
+        championRepository.save(new ChampionEntity(0L,"A","A.png"));
     }
     private void setSpell(){
         String url = "https://ddragon.leagueoflegends.com/cdn/"+version+"/data/ko_KR/summoner.json";
