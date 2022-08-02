@@ -9,12 +9,12 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ChampionInfoDTOList implements Comparable<ChampionInfoDTOList>{
-    private List<ChampionInfoDTO> championInfoDTOList;
+    private List<ClinetChampionInfoDTO> clinetChampionInfoDTOList;
     @ApiModelProperty(example = "58.7%")
     private String winRate;
 
-    public ChampionInfoDTOList(List<ChampionInfoDTO> championInfoDTOList, String winRate) {
-        this.championInfoDTOList = championInfoDTOList;
+    public ChampionInfoDTOList(List<ClinetChampionInfoDTO> clinetChampionInfoDTOList, String winRate) {
+        this.clinetChampionInfoDTOList = clinetChampionInfoDTOList;
         this.winRate = winRate;
     }
 
