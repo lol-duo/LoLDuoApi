@@ -65,7 +65,7 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-69e43217-0003-4aed-9bc4-d8fc5dadc0f8");
+        setKey("RGAPI-570e453f-1f2d-42d6-951e-ff79a2bffc29");
         setVersion("12.14.1");
         setItem();
         setChampion();

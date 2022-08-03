@@ -51,5 +51,5 @@ spring:
       on-profile: serverdb
   datasource:
     username: root
-    url: jdbc:mariadb://lol-duo-mariadb.cswfqjzaqdu0.ap-northeast-2.rds.amazonaws.com:3306/lolduo
-    password: fhfebdh1
+    url: ${rds.mariadb.url}
+    password: ${rds.mariadb.password}
