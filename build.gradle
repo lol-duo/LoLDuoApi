@@ -31,6 +31,10 @@ dependencies {
     //Swagger
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
+    // Configuration using bootstrap.yml
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap:3.1.3'
+    // AWS secret manager
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws-secrets-manager-config:2.2.6.RELEASE'
 }
 
 jar{
