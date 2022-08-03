@@ -6,11 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeSet;
 
 public interface DuoRepository extends JpaRepository<DuoEntity, Long> {
-    @Query(value = "SELECT * FROM duo i WHERE i.champion =?1 and i.position =?2",nativeQuery = true)
-    List<SoloRepository> findAllByChampionAndPosition(TreeSet<Long> champion, Map<Long, String> position);
-    @Query(value = "SELECT * FROM duo i WHERE i.champion =?1 and i.position =?2 and i.win =true",nativeQuery = true)
-    List<SoloRepository> findAllByChampionAndPositionAndWinTrue(TreeSet<Long> champion,Map<Long, String> position);
+    @Query(value = "select * from duo where json_contains(champion,?1) and  json_contains(position,?2)",nativeQuery = true)
+    Optional<DuoEntity> findByChampionandpAndPosition(String championId, String position);
 }

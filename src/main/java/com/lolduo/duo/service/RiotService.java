@@ -1,6 +1,7 @@
 package com.lolduo.duo.service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import com.lolduo.duo.dto.champion.ChampionDto;
 import com.lolduo.duo.dto.item.ItemDto;
@@ -57,6 +58,7 @@ public class RiotService implements ApplicationRunner{
     private final QuintetRepository quintetRepository;
     private final LoLUserRepository lolUserRepository;
 
+    private final InfoService infoService;
     public void setKey(String key) {
         this.key = key;
     }
@@ -65,14 +67,15 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-69e43217-0003-4aed-9bc4-d8fc5dadc0f8");
+        setKey("RGAPI-3d5d8505-35f8-4e47-8997-cc42ef5ca42f");
         setVersion("12.14.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
         //All();
-        test();
+        //test();
+        infoService.makeDuoInfo();
     }
     public void test(){
         String[] st = {"KR_6048833978",
@@ -174,7 +177,6 @@ public class RiotService implements ApplicationRunner{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
         });
     }
     private String getTier(MatchDto matchDto){

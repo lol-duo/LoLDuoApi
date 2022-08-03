@@ -64,8 +64,6 @@ public class ClientService {
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
-
-
     private String calWinRateSolo(Long championId, String position){
         int All = soloRepository.findAllByChampionAndPosition(championId, position).size();
         if(All == 0) {
