@@ -17,24 +17,13 @@ import java.util.List;
 public class ClientApi {
     private final ClientService clientService;
 
-    /*
-    @GetMapping("/getChampionList")
-    @ApiOperation(value ="riot key 세팅", notes = "기존의 riot key값을 변경한다.")
-    public List<ChampionEntity> getChampionList(){
-        return clientService.getChampionList();
-    }
-     */
+
     @GetMapping("/getChampionList")
     @ApiOperation(value ="riot key 세팅", notes = "기존의 riot key값을 변경한다.")
     public ResponseEntity<?> getChampionList() {
         return clientService.getChampionList();
     }
-    /*
-    @PostMapping("/getInfo")
-    public List<ChampionInfoDTOList> getInfo(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
-            return clientService.getChampionInfoList(championInfoDTOList);
-    }
-     */
+
     @PostMapping("/getInfo")
     public ResponseEntity<?> getInfo(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
         return clientService.getChampionInfoList(championInfoDTOList);

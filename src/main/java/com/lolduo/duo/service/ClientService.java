@@ -40,7 +40,11 @@ public class ClientService {
         log.info(championRepository.findAll().size()+" 사이즈가 0 인 경우, ritoService에서 setChampion 실행 아직 안된 상태");
         ChampionEntity champion = championRepository.findById(championInfoDTO.getChampionId()).orElse(new ChampionEntity(0L,"A","A.png"));
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/";
-        return new ClinetChampionInfoDTO(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition());
+        String positionUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/";
+        if(championInfoDTO.getPosition().equals("ALL")){
+            return new ClinetChampionInfoDTO(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition(),positionUrl+"TOP.png");
+        }
+        return new ClinetChampionInfoDTO(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition(),positionUrl+championInfoDTO.getPosition()+".png");
     }
     private List<ClinetChampionInfoDTO> makeDummy(List<ChampionInfoDTO> championInfoDTOList ){
         List<ClinetChampionInfoDTO> result  = new ArrayList<>();
