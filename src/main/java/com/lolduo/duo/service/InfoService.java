@@ -1,6 +1,7 @@
 package com.lolduo.duo.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.entity.clientInfo.*;
 import com.lolduo.duo.entity.gameInfo.DuoEntity;
@@ -36,27 +37,27 @@ public class InfoService {
 
         duoEntityList.forEach(duoEntity -> {
             try{
-                String duo =duoInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(duoEntity.getChampion()),objectMapper.writeValueAsString(duoEntity.getPosition())).orElse(null);
-                   //DuoInfoEntity duo =  duoInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(duoEntity.getChampion()),objectMapper.writeValueAsString(duoEntity.getPosition())).orElse(null);
+
+                DuoInfoEntity duo =  duoInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(duoEntity.getChampion()),objectMapper.writeValueAsString(duoEntity.getPosition())).orElse(null);
+                /*
+                DuoInfoEntity t =  duoInfoRepository.findById(3L).orElse(null);
+                if(t==null) log.info("안댐");
+                else log.info(t.getPosition().toString());
+                 */
                 if(duo==null){
-                    Map<Map<Long, List<Long>>, Long> perkList = new HashMap<>();
-                    Map<Map<Long, TreeSet<Long>>, Long> spellList = new HashMap<>();
-                    Map<Map<Long,List<Long>>,Long> itemList = new HashMap<>();
+                    Perk perk =new Perk(duoEntity.getPerkList(),0L);
+                    Spell spell =new Spell(duoEntity.getSpellList(),0L);
+                    Item item = new Item(duoEntity.getItemList(),0L);
                     if(duoEntity.getWin()){
-                        perkList.put(duoEntity.getPerkList(),1L);
-                        spellList.put(duoEntity.getSpellList(),1L);
-                        itemList.put(duoEntity.getItemList(),1L);
-                        duoInfoRepository.save(new DuoInfoEntity(duoEntity.getChampion(),duoEntity.getPosition(),1L,1L,perkList,spellList,itemList));
+                        //duoInfoRepository.save(new DuoInfoEntity(duoEntity.getChampion(),duoEntity.getPosition(),1L,1L,perkList,spellList,itemList));
                     }
                     else{
-                        perkList.put(duoEntity.getPerkList(),0L);
-                        spellList.put(duoEntity.getSpellList(),0L);
-                        itemList.put(duoEntity.getItemList(),0L);
-                        duoInfoRepository.save(new DuoInfoEntity(duoEntity.getChampion(),duoEntity.getPosition(),1L,0L,perkList,spellList,itemList));
+                        //duoInfoRepository.save(new DuoInfoEntity(duoEntity.getChampion(),duoEntity.getPosition(),1L,0L,perkList,spellList,itemList));
                     }
                 }
                 else{
-                    log.info(duo);
+                   // DuoInfoEntity test = objectMapper.readValue(duo, new TypeReference<DuoInfoEntity>() {});
+                    // log.info(test.toString());
                 }
             } catch (JsonProcessingException e) {
                 log.info("objectMapper 파싱 런타임 에러");

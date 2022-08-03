@@ -38,27 +38,17 @@ public class DuoInfoEntity {
 
     @Type(type = "json")
     @Column(name = "perk_list", columnDefinition = "json")
-    private Map<Map<Long, List<Long>>, Long> perkList;
+    private List<Perk> perkList;
 
     @Type(type = "json")
     @Column(name = "spell_list", columnDefinition = "json")
-    private Map<Map<Long,TreeSet<Long>>,Long> spellList;
+    private List<Spell> spellList;
 
     @Type(type = "json")
     @Column(name = "item_list", columnDefinition = "json")
-    private Map<Map<Long,List<Long>>,Long> itemList;
+    private List<Item> itemList;
 
-    public DuoInfoEntity(TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, Map<Map<Long, List<Long>>, Long> perkList, Map<Map<Long, TreeSet<Long>>, Long> spellList, Map<Map<Long, List<Long>>, Long> itemList) {
-        this.championId = championId;
-        this.position = position;
-        this.allCount = allCount;
-        this.winCount = winCount;
-        this.perkList = perkList;
-        this.spellList = spellList;
-        this.itemList = itemList;
-    }
-    public DuoInfoEntity(Long id, TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, Map<Map<Long, List<Long>>, Long> perkList, Map<Map<Long, TreeSet<Long>>, Long> spellList, Map<Map<Long, List<Long>>, Long> itemList) {
-        this.id = id;
+    public DuoInfoEntity(TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, List<Perk> perkList, List<Spell> spellList, List<Item> itemList) {
         this.championId = championId;
         this.position = position;
         this.allCount = allCount;
