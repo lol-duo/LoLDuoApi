@@ -71,8 +71,8 @@ public class RiotService implements ApplicationRunner{
         setChampion();
         setSpell();
         setPerk();
-        //All();
-        test();
+        All();
+        //test();
     }
     public void test(){
         String[] st = {"KR_6048833978",
