@@ -1,12 +1,15 @@
 package com.lolduo.duo.entity.clientInfo;
 
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -15,8 +18,9 @@ import java.util.TreeSet;
 @NoArgsConstructor
 @Getter
 @Table(name = "duo_info")
-@TypeDef(name = "json", typeClass = JsonStringType.class)
-public class DuoInfoEntity {
+@Setter
+@TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
+public class DuoInfoEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

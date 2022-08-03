@@ -2,12 +2,15 @@ package com.lolduo.duo.entity.clientInfo;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.TreeSet;
 @Getter
 @NoArgsConstructor
-public class Spell {
+@Setter
+public class Spell implements Serializable {
     private Map<Long, TreeSet<Long>> spellMap;
     private Long win;
 
