@@ -66,12 +66,12 @@ public class RiotService implements ApplicationRunner{
     @Override
     public void run(ApplicationArguments args) throws Exception{
         setKey("RGAPI-62a925f1-91f8-4233-8636-9781ce06ff8a");
-        setVersion("12.14.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
-        All();
+        //setVersion("12.14.1");
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
+        //All();
     }
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
