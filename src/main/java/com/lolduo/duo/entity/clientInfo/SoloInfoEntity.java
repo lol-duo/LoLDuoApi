@@ -24,10 +24,8 @@ public class SoloInfoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Type(type = "json")
     @Column(name = "champion_id")
     private Long championId;
-    @Type(type = "json")
     @Column(name = "position")
     private String position;
     @Column(name = "all_count")
