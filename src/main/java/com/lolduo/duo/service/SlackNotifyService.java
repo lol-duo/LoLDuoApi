@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +29,13 @@ public class SlackNotifyService {
 
     @EventListener(ContextRefreshedEvent.class)
     public void onContextRefreshedEvent(ContextRefreshedEvent event) {
-        if (springProfile.equals("local")) {
+        if (springProfile.equals("server")) {
             if (notifyChannelId == null)
                 initChannelId();
 
-            sendMessage(LocalDateTime.now() + " - 서버를 기동합니다.");
+            sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                    .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                    + " - 서버를 기동합니다.");
         }
     }
 
@@ -40,7 +45,9 @@ public class SlackNotifyService {
             if (notifyChannelId == null)
                 initChannelId();
 
-            sendMessage(LocalDateTime.now() + " - 서버가 종료되었습니다.");
+            sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                    .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                    + " - 서버가 종료되었습니다.");
         }
     }
 
