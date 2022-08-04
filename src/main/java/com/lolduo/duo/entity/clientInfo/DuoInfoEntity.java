@@ -16,9 +16,9 @@ import java.util.TreeSet;
 
 @Entity
 @NoArgsConstructor
-@Getter
 @Table(name = "duo_info")
 @Setter
+@Getter
 @TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
 public class DuoInfoEntity implements Serializable {
     @Id
