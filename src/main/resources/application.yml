@@ -22,7 +22,7 @@ spring:
       matching-strategy: ant_path_matcher
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     defer-datasource-initialization: true
     show-sql: true
 
@@ -58,8 +58,8 @@ spring:
       on-profile: serverdb
   datasource:
     username: root
-    url: ${rds.mariadb.url}
-    password: ${rds.mariadb.password}
+    url: jdbc:mariadb://lol-duo-mariadb.cswfqjzaqdu0.ap-northeast-2.rds.amazonaws.com:3306/lolduo
+    password: fhfebdh1
 slack:
   token: ${slackapi.token}
 riot:
