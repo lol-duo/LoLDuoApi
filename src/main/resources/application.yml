@@ -36,12 +36,17 @@ server:
 
 spring:
   config:
+    import: classpath:/localkey.yml
     activate:
       on-profile: localdb
   datasource:
     username: root
     url: jdbc:mariadb://localhost:3306/lolduo
     password: 1234
+slack:
+  token: ${localkey.slackapi.token}
+riot:
+  key: ${localkey.riotapi.key}
 
 ---
 
@@ -53,3 +58,7 @@ spring:
     username: root
     url: ${rds.mariadb.url}
     password: ${rds.mariadb.password}
+slack:
+  token: ${slackapi.token}
+riot:
+  key: ${riotapi.key}
