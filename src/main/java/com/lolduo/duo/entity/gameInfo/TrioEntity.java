@@ -30,7 +30,7 @@ public class TrioEntity {
 
 
     @Type(type = "json")
-    @Column(name = "position")
+    @Column(name = "position",columnDefinition = "json")
     private Map<Long,String> positionMap;
 
     @Type(type = "json")
@@ -42,7 +42,7 @@ public class TrioEntity {
     private Map<Long,TreeSet<Long>> spellListMap;
 
     @Type(type = "json")
-    @Column(name = "champion")
+    @Column(name = "champion",columnDefinition = "json")
     private TreeSet<Long> championList;
 
     @Type(type = "json")
