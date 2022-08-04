@@ -36,19 +36,20 @@ public class ClientService {
         Collections.sort(championEntityList);
         return new ResponseEntity<>(championEntityList, HttpStatus.OK);
     }
+    private List<ClinetChampionInfoDTO> makeDummy(List<ChampionInfoDTO> championInfoDTOList ){
+        List<ClinetChampionInfoDTO> result  = new ArrayList<>();
+        championInfoDTOList.forEach(championInfoDTO -> {
+            result.add(championInfo2ClientChampionInfo(championInfoDTO));
+        });
+        return result;
+    }
     private ClinetChampionInfoDTO championInfo2ClientChampionInfo(ChampionInfoDTO championInfoDTO){
         log.info(championRepository.findAll().size()+" 사이즈가 0 인 경우, ritoService에서 setChampion 실행 아직 안된 상태");
         ChampionEntity champion = championRepository.findById(championInfoDTO.getChampionId()).orElse(new ChampionEntity(0L,"A","A.png"));
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/";
         return new ClinetChampionInfoDTO(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition());
     }
-    private List<ClinetChampionInfoDTO> makeDummy(List<ChampionInfoDTO> championInfoDTOList ){
-        List<ClinetChampionInfoDTO> result  = new ArrayList<>();
-        championInfoDTOList.forEach(championInfoDTO -> {
-                result.add(championInfo2ClientChampionInfo(championInfoDTO));
-        });
-        return result;
-    }
+
     public ResponseEntity<?> getChampionInfoList(ArrayList<ChampionInfoDTO> championInfoDTOList){
         List<ChampionInfoDTOList> result = new ArrayList<>();
         if(1<=championInfoDTOList.size() && championInfoDTOList.size() <= 5){
@@ -64,14 +65,6 @@ public class ClientService {
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
-    private String calWinRateSolo(Long championId, String position){
-        int All = soloRepository.findAllByChampionAndPosition(championId, position).size();
-        if(All == 0) {
-            return "NULL";
-        }
-        int Win = soloRepository.findAllByChampionAndPositionAndWinTrue(championId,position).size();
-        return String.format("%.2f", (Win / (double)All) * 100.0)+"%";
-    }
     private List<ChampionInfoDTO> makeChampionInfoSolo(Long championId, String position){
         List<ChampionInfoDTO> list = new ArrayList<>();
         list.add(new ChampionInfoDTO(championId,position));

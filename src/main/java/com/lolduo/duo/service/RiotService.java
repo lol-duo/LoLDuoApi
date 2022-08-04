@@ -1,8 +1,6 @@
 package com.lolduo.duo.service;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import com.lolduo.duo.dto.champion.ChampionDto;
 import com.lolduo.duo.dto.item.ItemDto;
 import com.lolduo.duo.dto.league_v4.LeagueListDTO;
@@ -67,38 +65,13 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-3d5d8505-35f8-4e47-8997-cc42ef5ca42f");
+        setKey("RGAPI-62a925f1-91f8-4233-8636-9781ce06ff8a");
         setVersion("12.14.1");
-        //setItem();
-        //setChampion();
-        //setSpell();
-        //setPerk();
-        //All();
-        //test();
-        infoService.makeDuoInfo();
-    }
-    public void test(){
-        String[] st = {"KR_6048833978",
-                "KR_6048791185",
-                "KR_6047665628",
-                "KR_6047556921",
-                "KR_6045011909",
-                "KR_6044866927",
-                "KR_6044652920",
-                "KR_6044599971",
-                "KR_6044558095",
-                "KR_6044545900",
-                "KR_6043272985",
-                "KR_6043196788",
-                "KR_6043163990",
-                "KR_6042147114",
-                "KR_6041967954",
-                "KR_6041961802",
-                "KR_6032993563",
-                "KR_6032944098",
-                "KR_6032809258",
-                "KR_6031458458"};
-        getMatchInfo(new HashSet<>(Arrays.asList(st)));
+        setItem();
+        setChampion();
+        setSpell();
+        setPerk();
+        All();
     }
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
@@ -107,15 +80,22 @@ public class RiotService implements ApplicationRunner{
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        AllLeaguePuuid.put("master",getPuuIdList("master"));
+        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        //AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
 
         getMatchInfo(matchIdList);
+        log.info("solo~team 정보 저장완료 ");
+        log.info("2차 가공 start");
+        infoService.makeSoloInfo();
+        infoService.makeDuoInfo();
+        infoService.makeTrioInfo();
+        infoService.makeQuintetInfo();
+        log.info("2차 가공 end");
     }
 
     private void makeFullItem(ItemDto item){
@@ -165,8 +145,7 @@ public class RiotService implements ApplicationRunner{
 
             ResponseEntity<MatchDto> response_match = restTemplate.exchange(url + matchId, HttpMethod.GET, requestEntity, MatchDto.class);
 
-            //String tier = getTier(response_match.getBody());
-            String tier = "gold"; // 로컬 테스트 용 임시 티어
+            String tier = getTier(response_match.getBody());
 
             setSolo(response_match.getBody(),playerItemList,puuIdMap, tier);
             setDuo(response_match.getBody(),playerItemList,puuIdMap, tier);
@@ -192,8 +171,16 @@ public class RiotService implements ApplicationRunner{
 
         Long tierNum = 0L;
         List<Participant> participantList = matchDto.getInfo().getParticipants();
-        for(Participant participant : participantList)
-            tierNum += tierNumList.get(lolUserRepository.findById(participant.getPuuid()).orElse(null).getTier());
+        LoLUserEntity loLUserEntity = null ;
+        for(Participant participant : participantList) {
+            loLUserEntity = lolUserRepository.findById(participant.getPuuid()).orElse(null);
+            if(loLUserEntity==null){
+                tierNum += 3;
+            }
+            else{
+                tierNum += tierNumList.get(loLUserEntity.getTier());
+            }
+        }
         return tierNameList.get(Math.round(tierNum/ 10));
     }
 
