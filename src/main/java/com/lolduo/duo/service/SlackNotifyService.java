@@ -35,7 +35,7 @@ public class SlackNotifyService {
 
             sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
                     .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
-                    + " - 서버를 기동합니다.");
+                    + " - 서버를 기동합니다.\n프론트 페이지: http://13.124.202.156/\nSwagger: http://52.78.55.104/swagger-ui.html#/\nDatadog: https://www.datadoghq.com/");
         }
     }
 
@@ -47,7 +47,7 @@ public class SlackNotifyService {
 
             sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
                     .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
-                    + " - 서버가 종료되었습니다.");
+                    + " - 서버가 종료되었습니다.\nDatadog: https://www.datadoghq.com/");
         }
     }
 
