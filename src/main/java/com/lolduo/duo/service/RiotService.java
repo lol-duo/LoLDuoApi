@@ -66,11 +66,11 @@ public class RiotService implements ApplicationRunner{
     @Override
     public void run(ApplicationArguments args) throws Exception{
         setKey("RGAPI-62a925f1-91f8-4233-8636-9781ce06ff8a");
-        //setVersion("12.14.1");
-        //setItem();
-        //setChampion();
-        //setSpell();
-        //setPerk();
+        setVersion("12.14.1");
+        setItem();
+        setChampion();
+        setSpell();
+        setPerk();
         //All();
     }
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
@@ -80,13 +80,13 @@ public class RiotService implements ApplicationRunner{
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        //AllLeaguePuuid.put("master",getPuuIdList("master"));
+        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
 
         getMatchInfo(matchIdList);
         log.info("solo~team 정보 저장완료 ");
