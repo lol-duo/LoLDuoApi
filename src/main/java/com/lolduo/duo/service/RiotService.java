@@ -25,6 +25,7 @@ import com.lolduo.duo.repository.gameInfo.SoloRepository;
 import com.lolduo.duo.repository.gameInfo.TrioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.http.HttpEntity;
@@ -43,6 +44,8 @@ import java.util.*;
 @RequiredArgsConstructor
 @Slf4j
 public class RiotService implements ApplicationRunner{
+
+    @Value("${riot.key}")
     private String key;
     private String version;
     private final ItemRepository itemRepository;
@@ -65,13 +68,12 @@ public class RiotService implements ApplicationRunner{
     }
     @Override
     public void run(ApplicationArguments args) throws Exception{
-        setKey("RGAPI-62a925f1-91f8-4233-8636-9781ce06ff8a");
         setVersion("12.14.1");
         setItem();
         setChampion();
         setSpell();
         setPerk();
-        //All();
+        All();
     }
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){

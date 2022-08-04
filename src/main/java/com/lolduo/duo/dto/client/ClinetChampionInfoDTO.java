@@ -15,9 +15,14 @@ public class ClinetChampionInfoDTO {
     @ApiModelProperty(example = "TOP")
     private String position;
 
-    public ClinetChampionInfoDTO(String championName, String imgUrl, String position) {
+    @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/BOTTOM.png")
+    private String positionUrl;
+
+
+    public ClinetChampionInfoDTO(String championName, String imgUrl, String position, String positionUrl) {
         this.championName = championName;
         this.imgUrl = imgUrl;
         this.position = position;
+        this.positionUrl = positionUrl;
     }
 }

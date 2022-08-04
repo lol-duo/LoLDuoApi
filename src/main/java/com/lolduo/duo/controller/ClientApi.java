@@ -13,7 +13,7 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class ClientApi {
     private final ClientService clientService;
-
+    
     @GetMapping("/getChampionList")
     @ApiOperation(value ="riot key 세팅", notes = "기존의 riot key값을 변경한다.")
     public ResponseEntity<?> getChampionList() {
