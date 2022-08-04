@@ -16,7 +16,7 @@ spring:
       on-profile: common
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-
+    
   mvc:
     path match:
       matching-strategy: ant_path_matcher
@@ -24,6 +24,8 @@ spring:
     hibernate:
       ddl-auto: create
     defer-datasource-initialization: true
+    show-sql: true
+
   sql:
     init:
       encoding: UTF-8
