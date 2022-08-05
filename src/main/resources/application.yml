@@ -6,7 +6,7 @@ spring:
     active: local
 logging:
   level:
-    root: debug
+    root: info
 
 ---
 
