@@ -19,7 +19,7 @@ public class ClinetChampionInfoDTO {
     private String positionUrl;
 
 
-    public ClinetChampionInfoDTO(String championName, String imgUrl, String position) {
+    public ClinetChampionInfoDTO(String championName, String imgUrl, String position, String positionUrl) {
         this.championName = championName;
         this.imgUrl = imgUrl;
         this.position = position;
