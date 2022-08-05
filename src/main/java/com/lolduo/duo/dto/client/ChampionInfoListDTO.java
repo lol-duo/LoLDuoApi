@@ -8,15 +8,14 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ChampionInfoListDTO implements Comparable<ChampionInfoListDTO>{
-    private List<ClinetChampionInfoDTO> clinetChampionInfoDTOList;
+    private List<ClientChampionInfoDTO> clientChampionInfoDTOList;
     @ApiModelProperty(example = "58.7%")
     private String winRate;
 
-    public ChampionInfoListDTO(List<ClinetChampionInfoDTO> clinetChampionInfoDTOList, String winRate) {
-        this.clinetChampionInfoDTOList = clinetChampionInfoDTOList;
+    public ChampionInfoListDTO(List<ClientChampionInfoDTO> clientChampionInfoDTOList, String winRate) {
+        this.clientChampionInfoDTOList = clientChampionInfoDTOList;
         this.winRate = winRate;
     }
-
 
     @Override
     public int compareTo(ChampionInfoListDTO championInfoListDTO) {

@@ -20,7 +20,7 @@ import java.util.TreeSet;
 @Setter
 @Getter
 @TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
-public class DuoInfoEntity implements Serializable {
+public class DuoInfoEntity implements Serializable, ICombinationInfoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

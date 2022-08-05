@@ -39,10 +39,11 @@ public class InfoService {
     public void makeQuintetInfo(){
         List<QuintetEntity> quintetEntityList = quintetRepository.findAll();
         ObjectMapper objectMapper = new ObjectMapper();
+
         quintetEntityList.forEach(quintetEntity -> {
-            QuintetInfoEntity quintetInfoEntity = null;
+            ICombinationInfoEntity quintetInfoEntity = null;
             try {
-                quintetInfoEntity = quintetInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(quintetEntity.getChampionList()),objectMapper.writeValueAsString(quintetEntity.getPositionMap())).orElse(null);
+                quintetInfoEntity =  quintetInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(quintetEntity.getChampionList()),objectMapper.writeValueAsString(quintetEntity.getPositionMap())).orElse(null);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
@@ -78,7 +79,7 @@ public class InfoService {
                     updateSpellList(quintetInfoEntity.getSpellList(),quintetEntity.getSpellListMap());
                 }
                 log.info("값 존재,수정 후 save: " );
-                quintetInfoRepository.save(quintetInfoEntity);
+                quintetInfoRepository.save((QuintetInfoEntity) quintetInfoEntity);
             }
         });
         log.info("makeQuintetInfo-end");
@@ -87,9 +88,9 @@ public class InfoService {
         List<TrioEntity> trioEntityList = trioRepository.findAll();
         ObjectMapper objectMapper = new ObjectMapper();
         trioEntityList.forEach(trioEntity -> {
-            TrioInfoEntity trioInfoEntity =null;
+            ICombinationInfoEntity trioInfoEntity =null;
             try {
-                trioInfoEntity =  trioInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(trioEntity.getChampionList()),objectMapper.writeValueAsString(trioEntity.getPositionMap())).orElse(null);
+                trioInfoEntity = trioInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(trioEntity.getChampionList()),objectMapper.writeValueAsString(trioEntity.getPositionMap())).orElse(null);
             } catch (JsonProcessingException e) {
                 log.error("objectMapper writeValue error");
             }
@@ -125,7 +126,7 @@ public class InfoService {
                     updateSpellList(trioInfoEntity.getSpellList(),trioEntity.getSpellListMap());
                 }
                 log.info("값 존재,수정 후 save: " );
-                trioInfoRepository.save(trioInfoEntity);
+                trioInfoRepository.save((TrioInfoEntity) trioInfoEntity);
             }
         });
         log.info("makeTrioInfo-end");
@@ -188,7 +189,7 @@ public class InfoService {
         List<DuoEntity> duoEntityList = duoRepository.findAll();
         ObjectMapper objectMapper = new ObjectMapper();
         duoEntityList.forEach(duoEntity -> {
-            DuoInfoEntity duoInfoEntity = null;
+            ICombinationInfoEntity duoInfoEntity = null;
             try {
                 duoInfoEntity = duoInfoRepository.findByChampionIdAndPosition(objectMapper.writeValueAsString(duoEntity.getChampion()),objectMapper.writeValueAsString(duoEntity.getPosition())).orElse(null);
             } catch (JsonProcessingException e) {
@@ -226,7 +227,7 @@ public class InfoService {
                     updateSpellList(duoInfoEntity.getSpellList(),duoEntity.getSpellList());
                 }
                 log.info("값 존재,수정 후 save: " );
-                duoInfoRepository.save(duoInfoEntity);
+                duoInfoRepository.save((DuoInfoEntity) duoInfoEntity);
             }
         });
         log.info("makeDuoInfo-end");
