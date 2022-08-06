@@ -69,11 +69,44 @@ public class RiotService implements ApplicationRunner{
     @Override
     public void run(ApplicationArguments args) throws Exception{
         setVersion("12.14.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
-        All();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
+        //All();
+        log.info("test 시작");
+        //test();
+        log.info("ready");
+    }
+    public void test(){
+        String[] st = {"KR_6048833978",
+                "KR_6048791185",
+                "KR_6047665628",
+                "KR_6047556921",
+                "KR_6045011909",
+                "KR_6044866927",
+                "KR_6044652920",
+                "KR_6044599971",
+                "KR_6044558095",
+                "KR_6044545900",
+                "KR_6043272985",
+                "KR_6043196788",
+                "KR_6043163990",
+                "KR_6042147114",
+                "KR_6041967954",
+                "KR_6041961802",
+                "KR_6032993563",
+                "KR_6032944098",
+                "KR_6032809258",
+                "KR_6031458458"};
+        getMatchInfo(new HashSet<>(Arrays.asList(st)));
+        log.info("solo~team 정보 저장완료 ");
+        log.info("2차 가공 start");
+        infoService.makeSoloInfo();
+        infoService.makeDuoInfo();
+        infoService.makeTrioInfo();
+        infoService.makeQuintetInfo();
+        log.info("2차 가공 end");
     }
     @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){

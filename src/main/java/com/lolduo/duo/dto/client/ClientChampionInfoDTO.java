@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
-public class ClinetChampionInfoDTO {
+public class ClientChampionInfoDTO {
     @ApiModelProperty(example = "가렌")
     private String championName;
 
@@ -19,7 +19,7 @@ public class ClinetChampionInfoDTO {
     private String positionUrl;
 
 
-    public ClinetChampionInfoDTO(String championName, String imgUrl, String position, String positionUrl) {
+    public ClientChampionInfoDTO(String championName, String imgUrl, String position, String positionUrl) {
         this.championName = championName;
         this.imgUrl = imgUrl;
         this.position = position;
