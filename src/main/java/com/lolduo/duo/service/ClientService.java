@@ -54,10 +54,8 @@ public class ClientService {
         return new ClientChampionInfoDTO(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition());
     }
 
-
     public ResponseEntity<?> getChampionInfoList(ArrayList<ChampionInfoDTO> championInfoDTOList){
         List<ChampionInfoListDTO> result = new ArrayList<>();
-        String winRate;
         ICombinationInfoRepository infoRepository;
         int championCount = championInfoDTOList.size();
 
@@ -84,51 +82,59 @@ public class ClientService {
 
         if (championCount == 1) {
             ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            ArrayList<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<>(1);
 
-            clientChampionInfoList.add(championInfo2ClientChampionInfo(championInfoDTO));
-            Optional<SoloInfoEntity> infoEntityOptional = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+            log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+            SoloInfoEntity infoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
 
-            if (infoEntityOptional.isPresent()) {
-                winRate = String.format("%.2f%%", 100 * ((double) infoEntityOptional.get().getWinCount() / infoEntityOptional.get().getAllCount()));
-                log.info("getChampionInfoList() - 매치 데이터 검색.\nchampionId = {}\nposition = {}\nAllCount = {}\nWinCount = {}",
-                        championInfoDTO.getChampionId(), championInfoDTO.getPosition(), infoEntityOptional.get().getAllCount(), infoEntityOptional.get().getWinCount());
+            if (infoEntity != null) {
+                log.info("getChampionInfoList() - 검색 결과");
+                log.info("championId = {}, position = {}, AllCount = {}, WinCount = {}",
+                        infoEntity.getChampionId(), infoEntity.getPosition(), infoEntity.getAllCount(), infoEntity.getWinCount());
+
+                List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<>(1);
+                clientChampionInfoList.add(championInfo2ClientChampionInfo(new ChampionInfoDTO(infoEntity.getChampionId(), infoEntity.getPosition())));
+                result.add(new ChampionInfoListDTO(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount()))));
             }
             else {
-                winRate = "데이터가 존재하지 않습니다.";
-                log.info("getChampionInfoList() - 매치 데이터 검색.\nchampionId = {}\nposition = {}\n해당하는 데이터 행이 존재하지 않습니다.",
-                        championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+                log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
+                List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<>(1);
+                result.add(new ChampionInfoListDTO(clientChampionInfoList, "데이터가 존재하지 않습니다."));
             }
-
-            result.add(new ChampionInfoListDTO(clientChampionInfoList, winRate));
         }
         else {
             TreeSet<Long> championIdSet = new TreeSet<Long>();
             Map<Long, String> positionMap = new HashMap<Long, String>();
-            List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>();
 
             championInfoDTOList.forEach(championInfoDTO -> {
-                championIdSet.add(championInfoDTO.getChampionId());
-                positionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
-                clientChampionInfoList.add(championInfo2ClientChampionInfo(championInfoDTO));
+                if (championInfoDTO.getChampionId() != 0)
+                    championIdSet.add(championInfoDTO.getChampionId());
+
+                if (!championInfoDTO.getPosition().equals("ALL"))
+                    positionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
             });
 
             try {
-                Optional<? extends ICombinationInfoEntity> infoEntityOptional = infoRepository
-                        .findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap));
+                List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
+                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap)).orElse(null);
+                log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}",
+                        objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap));
 
-                if (infoEntityOptional.isPresent()) {
-                    winRate = String.format("%.2f%%", 100 * ((double) infoEntityOptional.get().getWinCount() / infoEntityOptional.get().getAllCount()));
-                    log.info("getChampionInfoList() - 매치 데이터 검색.\nchampionIdSet = {}\npositionMap = {}\nAllCount = {}\nWinCount = {}",
-                            objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap), infoEntityOptional.get().getAllCount(), infoEntityOptional.get().getWinCount());
+                if (infoEntityList != null) {
+                    log.info("getChampionInfoList() - 검색 결과.");
+
+                    infoEntityList.forEach(infoEntity -> {
+                        List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>();
+                        infoEntity.getPosition().forEach((championId, position) -> {
+                            clientChampionInfoList.add(championInfo2ClientChampionInfo(new ChampionInfoDTO(championId, position)));
+                        });
+                        result.add(new ChampionInfoListDTO(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount()))));
+                    });
                 }
                 else {
-                    winRate = "데이터가 존재하지 않습니다.";
-                    log.info("getChampionInfoList() - 매치 데이터 검색.\nchampionIdSet = {}\npositionMap = {}\n해당하는 데이터 행이 존재하지 않습니다.",
-                            objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap));
+                    log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
+                    List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>();
+                    result.add(new ChampionInfoListDTO(clientChampionInfoList, "데이터가 존재하지 않습니다."));
                 }
-
-                result.add(new ChampionInfoListDTO(clientChampionInfoList, winRate));
             } catch (JsonProcessingException e) {
                 log.error("objectMapper writeValue error");
                 return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
