@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.*;
 
@@ -103,26 +105,40 @@ public class ClientService {
             }
         }
         else {
-            TreeSet<Long> championIdSet = new TreeSet<Long>();
+            TreeSet<Long> selectedChampionIdSet = new TreeSet<Long>();
             Map<Long, String> positionMap = new HashMap<Long, String>();
+            List<String> excludePositionList = new ArrayList<>(5);
 
             championInfoDTOList.forEach(championInfoDTO -> {
-                if (championInfoDTO.getChampionId() != 0)
-                    championIdSet.add(championInfoDTO.getChampionId());
-
-                if (!championInfoDTO.getPosition().equals("ALL"))
-                    positionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+                if (championInfoDTO.getChampionId() == 0) {
+                    if (!championInfoDTO.getPosition().equals("ALL"))
+                        excludePositionList.add(championInfoDTO.getPosition());
+                }
+                else {
+                    selectedChampionIdSet.add(championInfoDTO.getChampionId());
+                    if (!championInfoDTO.getPosition().equals("ALL"))
+                        positionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+                }
             });
 
             try {
                 List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
-                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap)).orElse(null);
-                log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}",
-                        objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap));
+                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(positionMap)).orElse(null);
+                log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}\n선택한 챔피언들에게 금지된 position = {}",
+                        objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(excludePositionList));
+
+                if (infoEntityList != null) {
+                    infoEntityList.removeIf(infoEntity -> {
+                        for (Long selectedChampionId : selectedChampionIdSet) {
+                            if (excludePositionList.contains(infoEntity.getPosition().get(selectedChampionId)))
+                                return true;
+                        }
+                        return false;
+                    });
+                }
 
                 if (infoEntityList != null && !infoEntityList.isEmpty()) {
                     log.info("getChampionInfoList() - 검색 결과.");
-
                     infoEntityList.forEach(infoEntity -> {
                         List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>();
                         infoEntity.getPosition().forEach((championId, position) -> {
