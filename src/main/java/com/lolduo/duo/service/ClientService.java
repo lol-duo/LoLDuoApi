@@ -98,7 +98,8 @@ public class ClientService {
             }
             else {
                 log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
-                List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<>(1);
+                List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>(1);
+                clientChampionInfoList.add(championInfo2ClientChampionInfo(championInfoDTO));
                 result.add(new ChampionInfoListDTO(clientChampionInfoList, "데이터가 존재하지 않습니다."));
             }
         }
@@ -153,6 +154,9 @@ public class ClientService {
                 else {
                     log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
                     List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>();
+                    championInfoDTOList.forEach(championInfoDTO ->
+                            clientChampionInfoList.add(championInfo2ClientChampionInfo(championInfoDTO))
+                    );
                     result.add(new ChampionInfoListDTO(clientChampionInfoList, "데이터가 존재하지 않습니다."));
                 }
             } catch (JsonProcessingException e) {
@@ -160,7 +164,6 @@ public class ClientService {
                 return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
             }
         }
-
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
