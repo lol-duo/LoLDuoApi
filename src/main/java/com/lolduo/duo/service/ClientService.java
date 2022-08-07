@@ -120,7 +120,7 @@ public class ClientService {
                 log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}",
                         objectMapper.writeValueAsString(championIdSet), objectMapper.writeValueAsString(positionMap));
 
-                if (infoEntityList != null) {
+                if (infoEntityList != null && !infoEntityList.isEmpty()) {
                     log.info("getChampionInfoList() - 검색 결과.");
 
                     infoEntityList.forEach(infoEntity -> {
