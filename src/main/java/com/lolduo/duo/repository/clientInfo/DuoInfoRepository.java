@@ -9,11 +9,11 @@ import java.util.Optional;
 
 public interface DuoInfoRepository extends JpaRepository<DuoInfoEntity,Long>, ICombinationInfoRepository {
 
-    @Query(value = "select * from duo_info where json_contains(champion_id,?1) and json_contains(position,?2) order by win_count / all_count DESC limit 100",nativeQuery = true)
-    Optional<List<DuoInfoEntity>> findAllByChampionIdAndPositionDesc(String championId, String position);
+    @Query(value = "select * from duo_info where json_contains(champion_id,?1) and json_contains(position,?2) and json_contains(json_extract(position, '$.*'), ?3) order by win_count / all_count DESC limit 100",nativeQuery = true)
+    Optional<List<DuoInfoEntity>> findAllByChampionIdAndPositionDesc(String championId, String position, String positionList);
 
-    @Query(value = "select * from duo_info where json_contains(champion_id,?1) and json_contains(position,?2) order by win_count / all_count ASC limit 100",nativeQuery = true)
-    Optional<List<DuoInfoEntity>> findAllByChampionIdAndPositionAsc(String championId, String position);
+    @Query(value = "select * from duo_info where json_contains(champion_id,?1) and json_contains(position,?2) and json_contains(json_extract(position, '$.*'), ?3) order by win_count / all_count ASC limit 100",nativeQuery = true)
+    Optional<List<DuoInfoEntity>> findAllByChampionIdAndPositionAsc(String championId, String position, String positionList);
 
     @Query(value = "select * from duo_info where json_contains(champion_id,?1) and json_contains(position,?2)",nativeQuery = true)
     Optional<DuoInfoEntity> findByChampionIdAndPosition(String championId, String position);
