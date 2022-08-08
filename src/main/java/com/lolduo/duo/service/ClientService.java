@@ -93,7 +93,7 @@ public class ClientService {
                     infoEntityList = soloInfoRepository.findAllByChampionIdDesc(championInfoDTO.getChampionId()).orElse(null);
             }
 
-            if (infoEntityList != null) {
+            if (infoEntityList != null && !infoEntityList.isEmpty()) {
                 log.info("getChampionInfoList() - 검색 결과.");
                 infoEntityList.forEach( infoEntity -> {
                     log.info("championId = {}, position = {}, AllCount = {}, WinCount = {}",
