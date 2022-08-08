@@ -74,7 +74,6 @@ public class RiotService implements ApplicationRunner{
         //setSpell();
         //setPerk();
         //All();
-        log.info("test 시작");
         //test();
         log.info("ready");
     }
