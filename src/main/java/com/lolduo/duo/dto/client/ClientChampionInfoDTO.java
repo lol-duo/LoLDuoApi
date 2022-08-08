@@ -3,6 +3,8 @@ package com.lolduo.duo.dto.client;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+
 @Getter
 @NoArgsConstructor
 public class ClientChampionInfoDTO {
