@@ -40,13 +40,7 @@ public class ClientService {
         Collections.sort(championEntityList);
         return new ResponseEntity<>(championEntityList, HttpStatus.OK);
     }
-    private List<ClientChampionInfoDTO> makeDummy(List<ChampionInfoDTO> championInfoDTOList ){
-        List<ClientChampionInfoDTO> result  = new ArrayList<>();
-        championInfoDTOList.forEach(championInfoDTO -> {
-            result.add(championInfo2ClientChampionInfo(championInfoDTO));
-        });
-        return result;
-    }
+
     private ClientChampionInfoDTO championInfo2ClientChampionInfo(ChampionInfoDTO championInfoDTO){  // 챔피언 이름, 이미지 URL, 포지션 가져옴
         log.info(championRepository.findAll().size()+" 사이즈가 0 인 경우, ritoService에서 setChampion 실행 아직 안된 상태");
         ChampionEntity champion = championRepository.findById(championInfoDTO.getChampionId()).orElse(new ChampionEntity(0L,"A","A.png"));
@@ -83,18 +77,32 @@ public class ClientService {
 
         if (championCount == 1) {
             ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
+            List<SoloInfoEntity> infoEntityList;
 
             log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
-            SoloInfoEntity infoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+            if (championInfoDTO.getChampionId() == 0) { // ?일 때
+                if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
+                    infoEntityList = soloInfoRepository.findAllByPositionDesc(championInfoDTO.getPosition()).orElse(null);
+                else
+                    infoEntityList = soloInfoRepository.findAllDesc().orElse(null);
+            }
+            else { // ?이 아닐 때
+                 if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
+                    infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionDesc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+                 else
+                    infoEntityList = soloInfoRepository.findAllByChampionIdDesc(championInfoDTO.getChampionId()).orElse(null);
+            }
 
-            if (infoEntity != null) {
-                log.info("getChampionInfoList() - 검색 결과");
-                log.info("championId = {}, position = {}, AllCount = {}, WinCount = {}",
-                        infoEntity.getChampionId(), infoEntity.getPosition(), infoEntity.getAllCount(), infoEntity.getWinCount());
+            if (infoEntityList != null) {
+                log.info("getChampionInfoList() - 검색 결과.");
+                infoEntityList.forEach( infoEntity -> {
+                    log.info("championId = {}, position = {}, AllCount = {}, WinCount = {}",
+                            infoEntity.getChampionId(), infoEntity.getPosition(), infoEntity.getAllCount(), infoEntity.getWinCount());
 
-                List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<>(1);
-                clientChampionInfoList.add(championInfo2ClientChampionInfo(new ChampionInfoDTO(infoEntity.getChampionId(), infoEntity.getPosition())));
-                result.add(new ChampionInfoListDTO(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount()))));
+                    List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<>(1);
+                    clientChampionInfoList.add(championInfo2ClientChampionInfo(new ChampionInfoDTO(infoEntity.getChampionId(), infoEntity.getPosition())));
+                    result.add(new ChampionInfoListDTO(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount()))));
+                });
             }
             else {
                 log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
@@ -109,21 +117,30 @@ public class ClientService {
             List<String> selectedPositionList = new ArrayList<>(5);
             List<String> excludePositionList = new ArrayList<>(5);
 
-            championInfoDTOList.forEach(championInfoDTO -> {
+            Long inputOrder = 0L;
+            Map<Long, Long> championOrderMap = new HashMap<>();
+            Map<String, Long> positionOrderMap = new HashMap<>();
+            Queue<ClientChampionInfoDTO> allQueue = new LinkedList<ClientChampionInfoDTO>();
+
+            for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
                 if (championInfoDTO.getChampionId() == 0) {
                     if (!championInfoDTO.getPosition().equals("ALL")) {
+                        positionOrderMap.put(championInfoDTO.getPosition(), inputOrder);
                         excludePositionList.add(championInfoDTO.getPosition());
                         selectedPositionList.add(championInfoDTO.getPosition());
                     }
                 }
                 else {
                     selectedChampionIdSet.add(championInfoDTO.getChampionId());
+                    championOrderMap.put(championInfoDTO.getChampionId(), inputOrder);
                     if (!championInfoDTO.getPosition().equals("ALL")) {
                         positionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
                         selectedPositionList.add(championInfoDTO.getPosition());
+                        positionOrderMap.put(championInfoDTO.getPosition(), inputOrder);
                     }
                 }
-            });
+                inputOrder++;
+            }
 
             try {
                 List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
@@ -134,11 +151,29 @@ public class ClientService {
                 if (infoEntityList != null && !infoEntityList.isEmpty()) {
                     log.info("getChampionInfoList() - 검색 결과.");
                     infoEntityList.forEach(infoEntity -> {
-                        List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>();
-                        infoEntity.getPosition().forEach((championId, position) -> {
-                            clientChampionInfoList.add(championInfo2ClientChampionInfo(new ChampionInfoDTO(championId, position)));
-                        });
-                        result.add(new ChampionInfoListDTO(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount()))));
+                        log.info("championId = {}, position = {}, AllCount = {}, WinCount = {}",
+                                infoEntity.getChampionId().toString(), infoEntity.getPosition().toString(), infoEntity.getAllCount(), infoEntity.getWinCount());
+
+                        ClientChampionInfoDTO[] clientChampionInfoDTOArray = new ClientChampionInfoDTO[championCount];
+                        for (Map.Entry<Long, String> positionEntry : infoEntity.getPosition().entrySet()) {
+                            Long order = -1L;
+                            if (positionOrderMap.containsKey(positionEntry.getValue()))
+                                order = positionOrderMap.get(positionEntry.getValue());
+                            else if (championOrderMap.containsKey(positionEntry.getKey()))
+                                order = championOrderMap.get(positionEntry.getKey());
+
+                            if (order != -1L)
+                                clientChampionInfoDTOArray[order.intValue()] = championInfo2ClientChampionInfo(new ChampionInfoDTO(positionEntry.getKey(), positionEntry.getValue()));
+                            else
+                                allQueue.offer(championInfo2ClientChampionInfo(new ChampionInfoDTO(positionEntry.getKey(), positionEntry.getValue())));
+                        }
+
+                        for (int i = 0; i < clientChampionInfoDTOArray.length; i++) {
+                            if (clientChampionInfoDTOArray[i] == null)
+                                clientChampionInfoDTOArray[i] = allQueue.poll();
+                        }
+
+                        result.add(new ChampionInfoListDTO(Arrays.asList(clientChampionInfoDTOArray), String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount()))));
                     });
                 }
                 else {

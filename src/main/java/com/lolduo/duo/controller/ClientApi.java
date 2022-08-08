@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-@CrossOrigin(originPatterns = "http://13.124.202.156/")
+@CrossOrigin(originPatterns = "http://lolduo.net/")
 @RestController
 @RequiredArgsConstructor
 public class ClientApi {
