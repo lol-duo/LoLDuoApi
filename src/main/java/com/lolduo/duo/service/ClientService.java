@@ -123,23 +123,13 @@ public class ClientService {
                         selectedPositionList.add(championInfoDTO.getPosition());
                     }
                 }
-            });;
+            });
 
             try {
                 List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
-                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(selectedPositionList)).orElse(null);
+                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(selectedPositionList), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
                 log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n지정 position = {}\n실제 검색 position = {}\n선택한 챔피언들에게 금지된 position = {}",
                         objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(selectedPositionList), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(excludePositionList));
-
-                if (infoEntityList != null) {
-                    infoEntityList.removeIf(infoEntity -> {
-                        for (Long selectedChampionId : selectedChampionIdSet) {
-                            if (excludePositionList.contains(infoEntity.getPosition().get(selectedChampionId)))
-                                return true;
-                        }
-                        return false;
-                    });
-                }
 
                 if (infoEntityList != null && !infoEntityList.isEmpty()) {
                     log.info("getChampionInfoList() - 검색 결과.");
