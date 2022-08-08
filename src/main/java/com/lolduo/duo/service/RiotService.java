@@ -113,15 +113,22 @@ public class RiotService implements ApplicationRunner{
         Long startTime = endTime - 86400;
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
+        log.info("get challenger start");
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
+        log.info("get grandmaster start");
         AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        log.info("get master start");
         AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
+        log.info("make challenger matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
+        log.info("make cgrandmaster matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        log.info("get master matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
 
+        log.info("getMatch Info start");
         getMatchInfo(matchIdList);
         log.info("solo~team 정보 저장완료 ");
         log.info("2차 가공 start");
@@ -362,6 +369,7 @@ public class RiotService implements ApplicationRunner{
             try {
                 Thread.sleep(1500);
             } catch (InterruptedException e) {
+                log.info("getSummonerId Error!");
                 throw new RuntimeException(e);
             }
 
