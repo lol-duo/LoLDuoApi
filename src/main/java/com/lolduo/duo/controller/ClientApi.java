@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-@CrossOrigin(originPatterns = "*")
+
 @RestController
 @RequiredArgsConstructor
 public class ClientApi {
