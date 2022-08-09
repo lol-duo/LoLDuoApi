@@ -123,7 +123,7 @@ public class RiotService implements ApplicationRunner{
         Set<String> matchIdList = new HashSet<>();
         log.info("make challenger matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        //log.info("make cgrandmaster matchIList start");
+        //log.info("make grandmaster matchIList start");
         //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
         //log.info("get master matchIList start");
         //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
