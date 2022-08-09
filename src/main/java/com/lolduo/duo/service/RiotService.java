@@ -115,7 +115,7 @@ public class RiotService implements ApplicationRunner{
 
         log.info("get challenger start");
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        //log.info("get grandmaster start");
+        log.info("get grandmaster start");
         //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
         //log.info("get master start");
         //AllLeaguePuuid.put("master",getPuuIdList("master"));
@@ -228,7 +228,7 @@ public class RiotService implements ApplicationRunner{
     private void setSolo(MatchDto matchDto, List<List<Long>> playerItemList, Map<String, Long> puuIdMap,String tier){
         matchDto.getInfo().getParticipants().forEach(participant -> {
             Boolean win = participant.getWin();
-            String position = participant.getIndividualPosition();
+            String position = participant.getTeamPosition();
             List<Long> itemList = playerItemList.get(puuIdMap.get(participant.getPuuid()).intValue());
             TreeSet<Long> spellList = new TreeSet<>();
             spellList.add(participant.getSummoner1Id());
@@ -319,7 +319,7 @@ public class RiotService implements ApplicationRunner{
 
         // 260line까지 sestSolo와 중복되는 부분, 추후에 가능하면 AOP 적용
         participantList.forEach(participant -> {
-            String position = participant.getIndividualPosition();
+            String position = participant.getTeamPosition();
             List<Long> itemList = playerItemList.get(puuIdMap.get(participant.getPuuid()).intValue());
             TreeSet<Long> spellList = new TreeSet<>();
             spellList.add(participant.getSummoner1Id());
