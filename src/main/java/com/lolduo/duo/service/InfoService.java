@@ -37,7 +37,9 @@ public class InfoService {
     private final TrioInfoRepository trioInfoRepository;
     private final QuintetInfoRepository quintetInfoRepository;
     public void makeQuintetInfo(){
+        log.info("makeQuintetInfo-start");
         List<QuintetEntity> quintetEntityList = quintetRepository.findAll();
+        log.info("makeDuoInfo - quintetRepository.findAll() end");
         ObjectMapper objectMapper = new ObjectMapper();
 
         quintetEntityList.forEach(quintetEntity -> {
@@ -85,7 +87,9 @@ public class InfoService {
         log.info("makeQuintetInfo-end");
     }
     public void makeTrioInfo(){
+        log.info("makeTrioInfo-start");
         List<TrioEntity> trioEntityList = trioRepository.findAll();
+        log.info("makeDuoInfo - trioRepository.findAll() end");
         ObjectMapper objectMapper = new ObjectMapper();
         trioEntityList.forEach(trioEntity -> {
             ICombinationInfoEntity trioInfoEntity =null;
@@ -132,6 +136,7 @@ public class InfoService {
         log.info("makeTrioInfo-end");
     }
     public void makeSoloInfo(){
+        log.info("makeSoloInfo-start");
         List<SoloEntity> soloEntityList = soloRepository.findAll();
         soloEntityList.forEach(soloEntity -> {
             SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(soloEntity.getChampion(),soloEntity.getPosition()).orElse(null);
@@ -186,7 +191,9 @@ public class InfoService {
         log.info("makeSoloInfo-end");
     }
     public void makeDuoInfo()  {
+        log.info("makeDuoInfo-start");
         List<DuoEntity> duoEntityList = duoRepository.findAll();
+        log.info("makeDuoInfo - duoRepository.findAll() end");
         ObjectMapper objectMapper = new ObjectMapper();
         duoEntityList.forEach(duoEntity -> {
             ICombinationInfoEntity duoInfoEntity = null;
