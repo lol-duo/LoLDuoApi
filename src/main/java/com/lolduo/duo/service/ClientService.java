@@ -54,6 +54,7 @@ public class ClientService {
         ICombinationInfoRepository infoRepository;
         int championCount = championInfoDTOList.size();
 
+        // 챔피언 수에 해당하는 리포지토리를 가져오는 부분
         if (championCount == 1) {
             log.info("getChampionInfoList() - championCount : {}, 1명", championCount);
             infoRepository = null;
@@ -75,11 +76,13 @@ public class ClientService {
             return new ResponseEntity<>("요청한 챔피언 개수가 올바르지 않습니다. (1, 2, 3, 5만 가능)",HttpStatus.BAD_REQUEST);
         }
 
+        // 챔피언 수가 1일 때
         if (championCount == 1) {
             ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
             List<SoloInfoEntity> infoEntityList;
 
             log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+            // 리포지토리에서 조합 정보를 검색하는 부분
             if (championInfoDTO.getChampionId() == 0) { // ?일 때
                 if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
                     infoEntityList = soloInfoRepository.findAllByPositionDesc(championInfoDTO.getPosition()).orElse(null);
@@ -87,12 +90,13 @@ public class ClientService {
                     infoEntityList = soloInfoRepository.findAllDesc().orElse(null);
             }
             else { // ?이 아닐 때
-                 if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
+                if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
                     infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionDesc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-                 else
+                else
                     infoEntityList = soloInfoRepository.findAllByChampionIdDesc(championInfoDTO.getChampionId()).orElse(null);
             }
 
+            // 조합 정보가 존재한다면 ClientChampionInfo의 List를 만들고, 승률을 계산해 반환한다.
             if (infoEntityList != null && !infoEntityList.isEmpty()) {
                 log.info("getChampionInfoList() - 검색 결과.");
                 infoEntityList.forEach( infoEntity -> {
@@ -105,6 +109,7 @@ public class ClientService {
                 });
             }
             else {
+                // 조합 정보가 존재하지 않는다면 입력 값을 그대로 ClientChampionInfo로 변환한 List만 반환한다.
                 log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
                 List<ClientChampionInfoDTO> clientChampionInfoList = new ArrayList<ClientChampionInfoDTO>(1);
                 clientChampionInfoList.add(championInfo2ClientChampionInfo(championInfoDTO));
@@ -112,31 +117,28 @@ public class ClientService {
             }
         }
         else {
-            TreeSet<Long> selectedChampionIdSet = new TreeSet<Long>();
+            //챔피언 수가 2 이상일 때
             Map<Long, String> positionMap = new HashMap<Long, String>();
-            List<String> selectedPositionList = new ArrayList<>(5);
             List<String> excludePositionList = new ArrayList<>(5);
 
             Long inputOrder = 0L;
-            Map<Long, Long> championOrderMap = new HashMap<>();
-            Map<String, Long> positionOrderMap = new HashMap<>();
+            Map<Long, Long> selectedChampionOrderMap = new HashMap<>();
+            Map<String, Long> selectedPositionOrderMap = new HashMap<>();
             Queue<ClientChampionInfoDTO> allQueue = new LinkedList<ClientChampionInfoDTO>();
 
+            // 입력된 챔피언 각각에 대해 ?인지, 그리고 ALL포지션인지 확인하여 포지션, 챔피언 목록과 관련된객체를 채워 넣는다.
             for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
                 if (championInfoDTO.getChampionId() == 0) {
                     if (!championInfoDTO.getPosition().equals("ALL")) {
-                        positionOrderMap.put(championInfoDTO.getPosition(), inputOrder);
+                        selectedPositionOrderMap.put(championInfoDTO.getPosition(), inputOrder);
                         excludePositionList.add(championInfoDTO.getPosition());
-                        selectedPositionList.add(championInfoDTO.getPosition());
                     }
                 }
                 else {
-                    selectedChampionIdSet.add(championInfoDTO.getChampionId());
-                    championOrderMap.put(championInfoDTO.getChampionId(), inputOrder);
+                    selectedChampionOrderMap.put(championInfoDTO.getChampionId(), inputOrder);
                     if (!championInfoDTO.getPosition().equals("ALL")) {
                         positionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
-                        selectedPositionList.add(championInfoDTO.getPosition());
-                        positionOrderMap.put(championInfoDTO.getPosition(), inputOrder);
+                        selectedPositionOrderMap.put(championInfoDTO.getPosition(), inputOrder);
                     }
                 }
                 inputOrder++;
@@ -144,9 +146,9 @@ public class ClientService {
 
             try {
                 List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
-                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(selectedPositionList), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
-                log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n지정 position = {}\n실제 검색 position = {}\n선택한 챔피언들에게 금지된 position = {}",
-                        objectMapper.writeValueAsString(selectedChampionIdSet), objectMapper.writeValueAsString(selectedPositionList), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(excludePositionList));
+                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+                log.info("getChampionInfoList() - 매치 데이터 검색.\n지정된 championId = {}\n지정된 position = {}\n실제 검색 position = {}\n선택한 챔피언들에게 금지된 position = {}",
+                        objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(positionMap), objectMapper.writeValueAsString(excludePositionList));
 
                 if (infoEntityList != null && !infoEntityList.isEmpty()) {
                     log.info("getChampionInfoList() - 검색 결과.");
@@ -157,10 +159,10 @@ public class ClientService {
                         ClientChampionInfoDTO[] clientChampionInfoDTOArray = new ClientChampionInfoDTO[championCount];
                         for (Map.Entry<Long, String> positionEntry : infoEntity.getPosition().entrySet()) {
                             Long order = -1L;
-                            if (positionOrderMap.containsKey(positionEntry.getValue()))
-                                order = positionOrderMap.get(positionEntry.getValue());
-                            else if (championOrderMap.containsKey(positionEntry.getKey()))
-                                order = championOrderMap.get(positionEntry.getKey());
+                            if (selectedPositionOrderMap.containsKey(positionEntry.getValue()))
+                                order = selectedPositionOrderMap.get(positionEntry.getValue());
+                            else if (selectedChampionOrderMap.containsKey(positionEntry.getKey()))
+                                order = selectedChampionOrderMap.get(positionEntry.getKey());
 
                             if (order != -1L)
                                 clientChampionInfoDTOArray[order.intValue()] = championInfo2ClientChampionInfo(new ChampionInfoDTO(positionEntry.getKey(), positionEntry.getValue()));
