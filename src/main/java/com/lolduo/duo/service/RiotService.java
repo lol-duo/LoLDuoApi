@@ -69,11 +69,11 @@ public class RiotService implements ApplicationRunner{
     @Override
     public void run(ApplicationArguments args) throws Exception{
         setVersion("12.14.1");
-        //setItem();
-        //setChampion();
-        //setSpell();
-        //setPerk();
-        //All();
+        setItem();
+        setChampion();
+        setSpell();
+        setPerk();
+        All();
         //test();
         log.info("ready");
     }
