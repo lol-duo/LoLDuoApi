@@ -20,11 +20,6 @@ spring:
   mvc:
     path match:
       matching-strategy: ant_path_matcher
-  jpa:
-    hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
-    show-sql: true
 
   sql:
     init:
@@ -43,6 +38,11 @@ spring:
     username: root
     url: jdbc:mariadb://localhost:3306/lolduo
     password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    show-sql: true
 slack:
   token: ${localkey.slackapi.token}
 riot:
@@ -60,6 +60,11 @@ spring:
     username: root
     url: ${rds.mariadb.url}
     password: ${rds.mariadb.password}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true
+    show-sql: true
 slack:
   token: ${slackapi.token}
 riot:

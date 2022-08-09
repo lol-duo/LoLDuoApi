@@ -69,10 +69,10 @@ public class RiotService implements ApplicationRunner{
     @Override
     public void run(ApplicationArguments args) throws Exception{
         setVersion("12.14.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
         All();
         //test();
         log.info("ready");
@@ -113,20 +113,20 @@ public class RiotService implements ApplicationRunner{
         Long startTime = endTime - 86400;
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
-        //log.info("get challenger start");
-        //AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
-        log.info("get grandmaster start");
-        AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
-        log.info("get master start");
-        AllLeaguePuuid.put("master",getPuuIdList("master"));
+        log.info("get challenger start");
+        AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
+        //log.info("get grandmaster start");
+        //AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        //log.info("get master start");
+        //AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
-        //log.info("make challenger matchIList start");
-        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
-        log.info("make grandmaster matchIList start");
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        log.info("get master matchIList start");
-        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
+        log.info("make challenger matchIList start");
+        matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
+        //log.info("make grandmaster matchIList start");
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
+        //log.info("get master matchIList start");
+        //matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
 
         log.info("getMatch Info start");
         getMatchInfo(matchIdList);
