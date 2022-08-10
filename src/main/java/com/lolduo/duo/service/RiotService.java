@@ -110,7 +110,7 @@ public class RiotService implements ApplicationRunner{
         infoService.makeQuintetInfo();
         log.info("2차 가공 end");
     }
-    //@Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
         Long endTime = System.currentTimeMillis() / 1000;
         Long startTime = endTime - 43200;
