@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Service
+
 @RequiredArgsConstructor
 @Slf4j
 public class InfoService {
@@ -137,6 +137,7 @@ public class InfoService {
     }
     public void makeSoloInfo(){
         log.info("makeSoloInfo-start");
+        //solo 날짜 추가하여 진행.
         List<SoloEntity> soloEntityList = soloRepository.findAll();
         soloEntityList.forEach(soloEntity -> {
             SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(soloEntity.getChampion(),soloEntity.getPosition()).orElse(null);
@@ -151,32 +152,19 @@ public class InfoService {
             itemMap.put(soloEntity.getChampion(),soloEntity.getItemList());
 
             if(soloInfoEntity==null){
+                Perk perk = new Perk(perkMap, soloEntity.getWin() ? 1L : 0L);
+                Spell spell =new Spell(spellMap,soloEntity.getWin() ? 1L : 0L);
+                Item item =new Item(itemMap,soloEntity.getWin() ? 1L : 0L);
 
-                Perk perk = new Perk(perkMap, 1L);
-                Spell spell =new Spell(spellMap,1L);
-                Item item =new Item(itemMap,1L);
+                List<Perk> perkList = new ArrayList<>();
+                List<Spell> spellList = new ArrayList<>();
+                List<Item> itemList = new ArrayList<>();
 
-                List<Perk> perkList = new LinkedList<>();
-                List<Spell> spellList = new LinkedList<>();
-                List<Item> itemList = new LinkedList<>();
-
-                if(soloEntity.getWin()){
-                    perkList.add(perk);
-                    spellList.add(spell);
-                    itemList.add(item);
-                    log.info("soloInfo Save : championId = {}, position = {}, AllCount = {}, WinCount = {}", soloEntity.getPosition(), soloEntity.getPosition(), 1,1);
-                    soloInfoRepository.save(new SoloInfoEntity(soloEntity.getChampion(), soloEntity.getPosition(),1L,1L,perkList,spellList,itemList));
-                }
-                else{
-                    perk.setWin(0L);
-                    spell.setWin(0L);
-                    item.setWin(0L);
-                    perkList.add(perk);
-                    spellList.add(spell);
-                    itemList.add(item);
-                    log.info("soloInfo Save : championId = {}, position = {}, AllCount = {}, WinCount = {}", soloEntity.getPosition(), soloEntity.getPosition(), 1,1);
-                    soloInfoRepository.save(new SoloInfoEntity(soloEntity.getChampion(), soloEntity.getPosition(),1L,0L,perkList,spellList,itemList));
-                }
+                perkList.add(perk);
+                spellList.add(spell);
+                itemList.add(item);
+                log.info("soloInfo Save : championId = {}, position = {}, AllCount = {}, WinCount = {}", soloEntity.getPosition(), soloEntity.getPosition(), 1,1);
+                soloInfoRepository.save(new SoloInfoEntity(soloEntity.getChampion(), soloEntity.getPosition(),1L,soloEntity.getWin() ? 1L : 0L,perkList,spellList,itemList));
             }
             else{
                 soloInfoEntity.setAllCount(soloInfoEntity.getAllCount()+1);
@@ -250,9 +238,7 @@ public class InfoService {
         for(int i = 0 ; i <infoItemList.size();i++){
             Item item = infoItemList.get(i);
             if(item.getItemMap().values().containsAll(itemList.values())){
-                item.setWin(item.getWin()+1);
-                infoItemList.add(i,item);
-                infoItemList.remove(i+1);
+                infoItemList.get(i).setWin(item.getWin()+1);
                 isUpdated =true;
                 break;
             }
@@ -267,9 +253,7 @@ public class InfoService {
         for(int i = 0 ; i < infoPerkList.size();i++){
             Perk perk = infoPerkList.get(i);
             if(perk.getPerkMap().values().containsAll(perkList.values())){
-                perk.setWin(perk.getWin()+1);
-                infoPerkList.add(i,perk);
-                infoPerkList.remove(i+1);
+                infoPerkList.get(i).setWin(perk.getWin()+1);
                 isUpdated=true;
                 break;
             }
