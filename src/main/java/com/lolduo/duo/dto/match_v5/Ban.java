@@ -1,4 +1,4 @@
-package com.lolduo.duo.entity.match_v5;
+package com.lolduo.duo.dto.match_v5;
 
 
 import lombok.Getter;
