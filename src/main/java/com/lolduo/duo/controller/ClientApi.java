@@ -15,7 +15,7 @@ public class ClientApi {
     private final ClientService clientService;
     
     @GetMapping("/getChampionList")
-    @ApiOperation(value ="riot key 세팅", notes = "기존의 riot key값을 변경한다.")
+    @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.")
     public ResponseEntity<?> getChampionList() {
         return clientService.getChampionList();
     }

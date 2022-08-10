@@ -164,6 +164,7 @@ public class InfoService {
                     perkList.add(perk);
                     spellList.add(spell);
                     itemList.add(item);
+                    log.info("soloInfo Save : championId = {}, position = {}, AllCount = {}, WinCount = {}", soloEntity.getPosition(), soloEntity.getPosition(), 1,1);
                     soloInfoRepository.save(new SoloInfoEntity(soloEntity.getChampion(), soloEntity.getPosition(),1L,1L,perkList,spellList,itemList));
                 }
                 else{
@@ -173,6 +174,7 @@ public class InfoService {
                     perkList.add(perk);
                     spellList.add(spell);
                     itemList.add(item);
+                    log.info("soloInfo Save : championId = {}, position = {}, AllCount = {}, WinCount = {}", soloEntity.getPosition(), soloEntity.getPosition(), 1,1);
                     soloInfoRepository.save(new SoloInfoEntity(soloEntity.getChampion(), soloEntity.getPosition(),1L,0L,perkList,spellList,itemList));
                 }
             }
@@ -185,6 +187,7 @@ public class InfoService {
                     updateSpellList(soloInfoEntity.getSpellList(),spellMap);
                 }
                 log.info("값 존재,수정 후 save: " );
+                log.info("soloInfo Update : championId = {}, position = {}, AllCount = {}, WinCount = {}", soloInfoEntity.getPosition(), soloInfoEntity.getPosition(), soloInfoEntity.getAllCount(),soloInfoEntity.getWinCount());
                 soloInfoRepository.save(soloInfoEntity);
             }
         });

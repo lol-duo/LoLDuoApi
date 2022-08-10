@@ -37,6 +37,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -58,7 +61,7 @@ public class RiotService implements ApplicationRunner{
     private final TrioRepository trioRepository;
     private final QuintetRepository quintetRepository;
     private final LoLUserRepository lolUserRepository;
-
+    private final SlackNotifyService slackNotifyService;
     private final InfoService infoService;
     public void setKey(String key) {
         this.key = key;
@@ -69,11 +72,11 @@ public class RiotService implements ApplicationRunner{
     @Override
     public void run(ApplicationArguments args) throws Exception{
         setVersion("12.14.1");
-        setItem();
-        setChampion();
-        setSpell();
-        setPerk();
-        All();
+        //setItem();
+        //setChampion();
+        //setSpell();
+        //setPerk();
+        //All();
         //test();
         log.info("ready");
     }
@@ -107,34 +110,70 @@ public class RiotService implements ApplicationRunner{
         infoService.makeQuintetInfo();
         log.info("2차 가공 end");
     }
-    @Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
+    //@Scheduled(cron = "1 0 0 * * *", zone = "Asia/Seoul")
     private void All(){
         Long endTime = System.currentTimeMillis() / 1000;
         Long startTime = endTime - 43200;
         Map<String, List<String>> AllLeaguePuuid = new HashMap<>();
 
+
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "challenger list 가져오기 start");
         log.info("get challenger start");
         AllLeaguePuuid.put("challenger",getPuuIdList("challenger"));
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "grandmaster list 가져오기 start");
         log.info("get grandmaster start");
         AllLeaguePuuid.put("grandmaster",getPuuIdList("grandmaster"));
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "master list 가져오기 start");
         log.info("get master start");
         AllLeaguePuuid.put("master",getPuuIdList("master"));
 
         Set<String> matchIdList = new HashSet<>();
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "challenger matchId 만들기 start");
         log.info("make challenger matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("challenger")));
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "grandmaster matchId 만들기 start");
         log.info("make grandmaster matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("grandmaster")));
-        log.info("get master matchIList start");
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "master matchId 만들기 start");
+        log.info("make master matchIList start");
         matchIdList.addAll(getMatchId(startTime,endTime,AllLeaguePuuid.get("master")));
 
+
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "master matchId 만들기 start");
         log.info("getMatch Info start");
         getMatchInfo(matchIdList);
         log.info("solo~team 정보 저장완료 ");
         log.info("2차 가공 start");
+
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "SoloInfo 만들기 start");
         infoService.makeSoloInfo();
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "DuoInfo 만들기 start");
         infoService.makeDuoInfo();
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "TrioInfo 만들기 start");
         infoService.makeTrioInfo();
+        slackNotifyService.sendMessage(ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH:mm:ss"))
+                + "QuintetInfo 만들기 start");
         infoService.makeQuintetInfo();
         log.info("2차 가공 end");
     }
