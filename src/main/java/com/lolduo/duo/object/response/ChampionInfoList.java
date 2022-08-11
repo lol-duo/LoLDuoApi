@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ChampionInfoList implements Comparable<ChampionInfoList>{
+
     private List<ChampionInfo> championInfoList;
     @ApiModelProperty(example = "58.7%")
     private String winRate;
