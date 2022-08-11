@@ -1,6 +1,6 @@
 package com.lolduo.duo.controller;
 
-import com.lolduo.duo.dto.client.ChampionInfoDTO;
+import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
 import com.lolduo.duo.service.ClientService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -24,4 +24,5 @@ public class ClientApi {
     public ResponseEntity<?> getInfo(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
         return clientService.getChampionInfoList(championInfoDTOList);
     }
+
 }
