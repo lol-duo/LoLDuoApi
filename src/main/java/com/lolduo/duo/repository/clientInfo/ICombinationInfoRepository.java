@@ -1,6 +1,6 @@
 package com.lolduo.duo.repository.clientInfo;
 
-import com.lolduo.duo.entity.clientInfo.ICombinationInfoEntity;
+import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
 
 import java.util.List;
 import java.util.Optional;

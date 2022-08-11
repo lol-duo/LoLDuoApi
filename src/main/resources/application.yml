@@ -46,7 +46,7 @@ spring:
 slack:
   token: ${localkey.slackapi.token}
 riot:
-  key: ${localkey.riotapi.key}
+
 server:
   port: '8080'
 
@@ -68,6 +68,6 @@ spring:
 slack:
   token: ${slackapi.token}
 riot:
-  key: ${riotapi.key}
+
 server:
   port: '80'
