@@ -63,6 +63,7 @@ public class RiotService implements ApplicationRunner{
     private final MatchDetailRepository matchDetailRepository;
     private final SlackNotifyService slackNotifyService;
     private final InfoService infoService;
+
     public void setKey(String key) {
         this.key = key;
     }
@@ -114,8 +115,6 @@ public class RiotService implements ApplicationRunner{
     private void All(){
         Long endTime = System.currentTimeMillis() / 1000;
         Long startTime = endTime - 43200;
-
-
         slackNotifyService.sendMessage(slackNotifyService.nowTime() + "challenger list 가져오기 start");
         log.info("get challenger start");
         getPuuIdList("challenger");

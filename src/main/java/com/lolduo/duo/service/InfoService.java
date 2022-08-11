@@ -17,25 +17,26 @@ import com.lolduo.duo.repository.gameInfo.SoloRepository;
 import com.lolduo.duo.repository.gameInfo.TrioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 
 import java.util.*;
 
-
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class InfoService {
-
     private final SoloRepository soloRepository;
     private final DuoRepository duoRepository;
     private final TrioRepository trioRepository;
     private final QuintetRepository quintetRepository;
-
     private final SoloInfoRepository soloInfoRepository;
     private final DuoInfoRepository duoInfoRepository;
     private final TrioInfoRepository trioInfoRepository;
     private final QuintetInfoRepository quintetInfoRepository;
+
+
     public void makeQuintetInfo(){
         log.info("makeQuintetInfo-start");
         List<QuintetEntity> quintetEntityList = quintetRepository.findAll();
