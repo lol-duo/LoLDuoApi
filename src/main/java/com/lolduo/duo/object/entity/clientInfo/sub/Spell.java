@@ -10,12 +10,11 @@ import java.util.TreeSet;
 @Getter
 @NoArgsConstructor
 @Setter
-public class Spell implements Serializable {
+public class Spell extends Sub  {
     private Map<Long, TreeSet<Long>> spellMap;
-    private Long win;
 
     public Spell(Map<Long, TreeSet<Long>> spellMap, Long win) {
+        super(win);
         this.spellMap = spellMap;
-        this.win = win;
     }
 }
