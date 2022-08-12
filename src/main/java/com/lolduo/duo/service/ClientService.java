@@ -8,7 +8,10 @@ import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
 import com.lolduo.duo.object.entity.clientInfo.sub.Sub;
+import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.ChampionInfoList;
+import com.lolduo.duo.object.response.championDetail.PerkUrl;
+import com.lolduo.duo.object.response.championDetail.ResponsePerk;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
 import com.lolduo.duo.object.entity.ChampionEntity;
 import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
@@ -19,6 +22,8 @@ import com.lolduo.duo.repository.clientInfo.repository.DuoInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.QuintetInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.SoloInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.TrioInfoRepository;
+import com.lolduo.duo.repository.initialInfo.PerkRepository;
+import com.lolduo.duo.service.slack.PrimaryPerkMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -36,8 +41,8 @@ public class ClientService {
     private final TrioInfoRepository trioInfoRepository;
     private final QuintetInfoRepository quintetInfoRepository;
     private final ChampionRepository championRepository;
+    private final PerkRepository perkRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
 
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
@@ -232,6 +237,7 @@ public class ClientService {
         }
         return Arrays.asList(championInfoArray);
     }
+
     public List<Spell> getSpellDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
         ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
         List<Spell> spellList = new ArrayList<>();
@@ -301,6 +307,80 @@ public class ClientService {
             });
         }
         return itemList;
+    }
+    public List<String> findPrimaryAndSecondaryPerk(List<Long> perkList){
+        String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
+        List<String> urlList = new ArrayList<>();
+        PrimaryPerkMap primaryPerkMap =new PrimaryPerkMap();
+        List<Long> secondaryPerk = new ArrayList<>();
+        Long primaryPerk  = 0L;
+        Long primaryMainPerk = 0L;
+        for (Long perk : perkList) {
+            if (perk >= 8000L && perk % 100 == 0)
+                secondaryPerk.add(perk);
+            if (primaryPerkMap.getPrimaryMap().containsKey(perk))
+                primaryMainPerk = perk;
+        }
+        primaryPerk = primaryPerkMap.getPrimaryMap().get(primaryMainPerk);
+        if(primaryPerk==null) primaryPerk=0L; //Exception handling
+        PerkEntity perkEntity = perkRepository.findById(primaryPerk).orElse(null);
+        if(perkEntity==null){
+            urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+            log.info("perkEntity가 null 입니다.");
+        }
+        else{
+            urlList.add(baseUrl+perkEntity.getImgUrl());
+        }
+        perkEntity = perkRepository.findById(primaryMainPerk).orElse(null);
+        if(perkEntity==null){
+            urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+            log.info("perkEntity가 null 입니다.");
+        }
+        else{
+            urlList.add(baseUrl+perkEntity.getImgUrl());
+        }
+        if(secondaryPerk.size()<1) secondaryPerk.add(0L); //Exception handling
+        perkEntity = perkRepository.findById(secondaryPerk.get(0)).orElse(null);
+        if(perkEntity==null){
+            urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+            log.info("perkEntity가 null 입니다.");
+        }
+        else{
+            urlList.add(baseUrl+perkEntity.getImgUrl());
+        }
+        return urlList;
+    }
+    public List<ResponsePerk> editPerkDetail(List<Perk> perkList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
+        List<ResponsePerk> responsePerks = new ArrayList<>();
+        if(perkList==null || perkList.size()==0){
+            log.info("perkList가 null 입니다.");
+            return null;
+        }
+        for( Perk perk : perkList){
+            List<PerkUrl> perkUrlList = new ArrayList<>();
+            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
+                List<String> urlList  = findPrimaryAndSecondaryPerk(perk.getPerkMap().get(championInfoDTO.getChampionId()));
+                PerkUrl perkUrl = new PerkUrl(urlList);
+                perkUrlList.add(perkUrl);
+            }
+            ResponsePerk temp = new ResponsePerk(perkUrlList
+                    ,String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
+                    ,String.format("%.2f%%", 100 * ((double) perk.getWin() / allCount)));
+            responsePerks.add(temp);
+        }
+        if(perkList.size()==1){ //결과가 1개밖에없을때 임시로 넣는값.
+            List<PerkUrl> tempList = new ArrayList<>();
+            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
+                List<String> urlList = new ArrayList<>();
+                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+                PerkUrl perkUrl = new PerkUrl(urlList);
+                tempList.add(perkUrl);
+            }
+            responsePerks.add(new ResponsePerk(tempList,"0 게임","0.00%"));
+        }
+        return responsePerks;
     }
     public List<Perk> getPerkDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
         ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
