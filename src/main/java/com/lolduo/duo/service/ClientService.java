@@ -5,6 +5,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
 import com.lolduo.duo.object.response.ChampionInfoList;
+import com.lolduo.duo.object.response.championDetail.ChampionDetail;
+import com.lolduo.duo.object.response.championDetail.ResponseItem;
+import com.lolduo.duo.object.response.championDetail.ResponsePerk;
+import com.lolduo.duo.object.response.championDetail.ResponseSpell;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
 import com.lolduo.duo.object.entity.ChampionEntity;
 import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
@@ -33,10 +37,9 @@ public class ClientService {
     private final TrioInfoRepository trioInfoRepository;
     private final QuintetInfoRepository quintetInfoRepository;
     private final ChampionRepository championRepository;
-
-    private final PerkRepository perkRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ChampionDetailComponent championDetailComponent;
+
 
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
@@ -54,7 +57,18 @@ public class ClientService {
         String positionbaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/";
         return new ChampionInfo(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition(),positionbaseUrl + championInfoDTO.getPosition()+".png");
     }
-
+    public ResponseEntity<?> getChampionDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
+            if (championInfoDTO.getPosition().equals("ALL") || championInfoDTO.getChampionId() == 0) {
+                return new ResponseEntity<>("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+            }
+        }
+        Long allCount = championDetailComponent.getAllCount(championInfoDTOList);
+        List<ResponsePerk> perkInfo = championDetailComponent.editPerkDetail(championDetailComponent.getPerkDetail(championInfoDTOList),championInfoDTOList,allCount);
+        List<ResponseSpell> spellInfo=championDetailComponent.editSpellDetail(championDetailComponent.getSpellDetail(championInfoDTOList), championInfoDTOList,allCount) ;
+        List<ResponseItem> itemInfo = championDetailComponent.editItemDetail(championDetailComponent.getItemDetail(championInfoDTOList),championInfoDTOList,allCount);
+        return new ResponseEntity<>(new ChampionDetail(perkInfo,spellInfo,itemInfo),HttpStatus.OK);
+    }
     public ResponseEntity<?> getChampionInfoList(ArrayList<ChampionInfoDTO> championInfoDTOList){
         // 주석은 모듈화를 위해 임시로 추가한 것. 이후 삭제해야 함.
         List<ChampionInfoList> result = new ArrayList<>();

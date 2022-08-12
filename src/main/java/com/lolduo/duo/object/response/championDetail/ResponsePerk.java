@@ -15,8 +15,6 @@ public class ResponsePerk {
     @ApiModelProperty(example = "22.22%")
     private String winRate;
 
-
-
     public ResponsePerk(List<PerkUrl> perkList,  String allCount,String winRate) {
         this.perkList = perkList;
         this.winRate = winRate;

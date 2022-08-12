@@ -10,13 +10,10 @@ import java.util.List;
 @NoArgsConstructor
 public class ResponseSpell {
     private List<SpellUrl> spellList;
-
     @ApiModelProperty(example = "1,000게임")
     private String allCount;
     @ApiModelProperty(example = "22.22%")
     private String winRate;
-
-
 
     public ResponseSpell(List<SpellUrl> spellList, String allCount, String winRate) {
         this.spellList = spellList;

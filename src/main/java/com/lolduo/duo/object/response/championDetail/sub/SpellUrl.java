@@ -5,11 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
 @Getter
 @NoArgsConstructor
 public class SpellUrl {
-    @ApiModelProperty(example = "1img,2img,3img")
+    @ApiModelProperty(example = "[img1,img2]")
     private List<String> spellUrlList;
 
     public SpellUrl(List<String> spellUrlList) {

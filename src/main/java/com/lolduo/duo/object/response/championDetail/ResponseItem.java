@@ -6,11 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
 @Getter
 @NoArgsConstructor
 public class ResponseItem {
-    List<ItemUrl> itemList;
+    private List<ItemUrl> itemList;
     @ApiModelProperty(example = "1,000게임")
     private String allCount;
     @ApiModelProperty(example = "22.22%")

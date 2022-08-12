@@ -8,8 +8,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class PerkUrl {
-
-    @ApiModelProperty(example = "1img,2img,3img")
+    @ApiModelProperty(example = "[img1,img2,img3]")
     private List<String> perkUrlList;
 
     public PerkUrl(List<String> perkUrlList) {

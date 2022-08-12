@@ -47,6 +47,31 @@ public class ChampionDetailComponent {
     private final TrioInfoRepository trioInfoRepository;
     private final QuintetInfoRepository quintetInfoRepository;
 
+    public Long getAllCount(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
+        if(championInfoDTOList.size()==1){
+            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
+            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+            if(soloInfoEntity==null){
+                log.info("1명일때 soloInfoEntity null 오류!");
+                return 0L;
+            }
+            return soloInfoEntity.getAllCount();
+        }
+        else{
+            Map<Long, String> champPositionMap = new HashMap<Long, String>();
+            TreeSet<Long> championIdSet = new TreeSet<>();
+            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
+            ICombinationInfoEntity infoEntity =null;
+            try {
+                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
+            } catch (JsonProcessingException e) {
+                log.info("objectMapper Json Parsing 오류!");
+                return 0L;
+            }
+            return infoEntity.getAllCount();
+        }
+    }
     //Spell
     public List<Spell> getSpellDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
         ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
@@ -92,18 +117,38 @@ public class ChampionDetailComponent {
         }
         return urlList;
     }
-    public List<String> findItem(List<Long> itemList){
-        String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
-        List<String> urlList = new ArrayList<>();
-        for(int i = 0 ; i < itemList.size();i++){
-            Long itemId = itemList.get(i);
-            ItemEntity itemEntity = itemRepository.findById(itemId).orElse(new ItemEntity(0L,"No Item","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png"));
-            urlList.add(baseUrl+itemEntity.getImgUrl());
-            if(i+1<itemList.size()){
-                urlList.add(baseUrl+"next.png");
-            }
+
+    public List<ResponseSpell> editSpellDetail(List<Spell> spellList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
+        List<ResponseSpell> responseSpells = new ArrayList<>();
+        if(spellList==null || spellList.size()==0){
+            log.info("spellList가 null 입니다.");
+            return null;
         }
-        return urlList;
+        for(Spell spell : spellList){
+            List<SpellUrl> spellUrlList = new ArrayList<>();
+            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
+                List<String> urlList =findSpell(spell.getSpellMap().get(championInfoDTO.getChampionId()));
+                SpellUrl spellUrl = new SpellUrl(urlList);
+                spellUrlList.add(spellUrl);
+            }
+            ResponseSpell responseSpell = new ResponseSpell(spellUrlList
+                    ,String.valueOf(spell.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") +" 게임"
+                    , String.format("%.2f%%", 100 * ((double) spell.getWin() / allCount)));
+            responseSpells.add(responseSpell);
+        }
+        if(spellList.size()==1){ //결과가 1개밖에없을때 임시로 넣는값.
+            log.info("spellList.size()가 1이라, 더미값을 추가합니다.");
+            List<SpellUrl> tempList = new ArrayList<>();
+            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
+                List<String> urlList = new ArrayList<>();
+                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+                SpellUrl spellUrl = new SpellUrl(urlList);
+                tempList.add(spellUrl);
+            }
+            responseSpells.add(new ResponseSpell(tempList, "0 게임", "0.00%"));
+        }
+        return responseSpells;
     }
     public List<ResponseItem> editItemDetail(List<Item> itemList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
         List<ResponseItem> responseItems = new ArrayList<>();
@@ -140,39 +185,20 @@ public class ChampionDetailComponent {
         }
         return responseItems;
     }
-    public List<ResponseSpell> editSpellDetail(List<Spell> spellList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
-        List<ResponseSpell> responseSpells = new ArrayList<>();
-        if(spellList==null || spellList.size()==0){
-            log.info("spellList가 null 입니다.");
-            return null;
-        }
-        for(Spell spell : spellList){
-            List<SpellUrl> spellUrlList = new ArrayList<>();
-            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList =findSpell(spell.getSpellMap().get(championInfoDTO.getChampionId()));
-                SpellUrl spellUrl = new SpellUrl(urlList);
-                spellUrlList.add(spellUrl);
-            }
-            ResponseSpell responseSpell = new ResponseSpell(spellUrlList
-                    ,String.valueOf(spell.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") +" 게임"
-                    , String.format("%.2f%%", 100 * ((double) spell.getWin() / allCount)));
-            responseSpells.add(responseSpell);
-        }
-        if(spellList.size()==1){ //결과가 1개밖에없을때 임시로 넣는값.
-            log.info("spellList.size()가 1이라, 더미값을 추가합니다.");
-            List<SpellUrl> tempList = new ArrayList<>();
-            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList = new ArrayList<>();
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                SpellUrl spellUrl = new SpellUrl(urlList);
-                tempList.add(spellUrl);
-            }
-            responseSpells.add(new ResponseSpell(tempList, "0 게임", "0.00%"));
-        }
-        return responseSpells;
-    }
     //Item
+    public List<String> findItem(List<Long> itemList){
+        String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
+        List<String> urlList = new ArrayList<>();
+        for(int i = 0 ; i < itemList.size();i++){
+            Long itemId = itemList.get(i);
+            ItemEntity itemEntity = itemRepository.findById(itemId).orElse(new ItemEntity(0L,"No Item","X.png"));
+            urlList.add(baseUrl+itemEntity.getImgUrl());
+            if(i+1<itemList.size()){
+                urlList.add(baseUrl+"next.png");
+            }
+        }
+        return urlList;
+    }
     public List<Item> getItemDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
         ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
         List<Item> itemList = new ArrayList<>();
