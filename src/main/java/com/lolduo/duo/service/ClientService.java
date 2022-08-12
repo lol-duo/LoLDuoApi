@@ -4,7 +4,9 @@ package com.lolduo.duo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
+import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
+import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
 import com.lolduo.duo.object.entity.clientInfo.sub.Sub;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
@@ -230,11 +232,45 @@ public class ClientService {
         }
         return Arrays.asList(championInfoArray);
     }
-
+    public List<Item> getItemDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
+        List<Item> itemList = new ArrayList<>();
+        if(championInfoDTOList.size()==1){ //1명일 때
+            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
+            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+            if(soloInfoEntity==null){
+                log.info("1명일때 soloInfoEntity null 오류!");
+                return null;
+            }
+            findTopK(soloInfoEntity.getItemList(),2).forEach(item ->{
+                itemList.add((Item)item);
+            });
+        }
+        else { //2명이상일 때
+            Map<Long, String> champPositionMap = new HashMap<Long, String>();
+            TreeSet<Long> championIdSet = new TreeSet<>();
+            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
+            ICombinationInfoEntity infoEntity =null;
+            try{
+                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
+            }   catch (JsonProcessingException e) {
+                log.info("objectMapper Json Parsing 오류!");
+                return null;
+            }
+            if(infoEntity ==null){
+                log.info(" 2명이상일때 infoEntity null 오류!");
+                return null;
+            }
+            findTopK(infoEntity.getItemList(),2).forEach(item ->{
+                itemList.add((Item)item);
+            });
+        }
+        return itemList;
+    }
     public List<Perk> getPerkDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
         ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
         List<Perk> perkList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){
+        if(championInfoDTOList.size()==1){ //1명 일 때
             ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
             SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(),championInfoDTO.getPosition()).orElse(null);
             if(soloInfoEntity ==null){
@@ -245,7 +281,7 @@ public class ClientService {
                 perkList.add( (Perk)perk);
             });
         }
-        else { //2이상 일 때
+        else { //2명이상일 때
             Map<Long, String> champPositionMap = new HashMap<Long, String>();
             TreeSet<Long> championIdSet = new TreeSet<>();
             setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
