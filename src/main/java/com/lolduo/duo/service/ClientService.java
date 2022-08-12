@@ -4,14 +4,7 @@ package com.lolduo.duo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
-import com.lolduo.duo.object.entity.clientInfo.sub.Item;
-import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
-import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
-import com.lolduo.duo.object.entity.clientInfo.sub.Sub;
-import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.ChampionInfoList;
-import com.lolduo.duo.object.response.championDetail.PerkUrl;
-import com.lolduo.duo.object.response.championDetail.ResponsePerk;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
 import com.lolduo.duo.object.entity.ChampionEntity;
 import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
@@ -23,7 +16,6 @@ import com.lolduo.duo.repository.clientInfo.repository.QuintetInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.SoloInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.TrioInfoRepository;
 import com.lolduo.duo.repository.initialInfo.PerkRepository;
-import com.lolduo.duo.service.slack.PrimaryPerkMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,8 +33,10 @@ public class ClientService {
     private final TrioInfoRepository trioInfoRepository;
     private final QuintetInfoRepository quintetInfoRepository;
     private final ChampionRepository championRepository;
+
     private final PerkRepository perkRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ChampionDetailComponent championDetailComponent;
 
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
@@ -238,201 +232,4 @@ public class ClientService {
         return Arrays.asList(championInfoArray);
     }
 
-    public List<Spell> getSpellDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
-        List<Spell> spellList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){ //1명일 때
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity==null){
-                log.info("1명일때 soloInfoEntity null 오류!");
-                return null;
-            }
-            findTopK(soloInfoEntity.getSpellList(),2).forEach(spell->{
-                spellList.add((Spell) spell);
-            });
-        }
-        else{ //2명이상일 때
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try{
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            } catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return null;
-            }
-            if(infoEntity ==null){
-                log.info(" 2명이상일때 infoEntity null 오류!");
-                return null;
-            }
-            findTopK(infoEntity.getSpellList(),2).forEach(spell ->{
-                spellList.add((Spell) spell);
-            });
-        }
-        return spellList;
-    }
-    public List<Item> getItemDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
-        List<Item> itemList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){ //1명일 때
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity==null){
-                log.info("1명일때 soloInfoEntity null 오류!");
-                return null;
-            }
-            findTopK(soloInfoEntity.getItemList(),2).forEach(item ->{
-                itemList.add((Item)item);
-            });
-        }
-        else { //2명이상일 때
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try{
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            }   catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return null;
-            }
-            if(infoEntity ==null){
-                log.info(" 2명이상일때 infoEntity null 오류!");
-                return null;
-            }
-            findTopK(infoEntity.getItemList(),2).forEach(item ->{
-                itemList.add((Item)item);
-            });
-        }
-        return itemList;
-    }
-    public List<String> findPrimaryAndSecondaryPerk(List<Long> perkList){
-        String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
-        List<String> urlList = new ArrayList<>();
-        PrimaryPerkMap primaryPerkMap =new PrimaryPerkMap();
-        List<Long> secondaryPerk = new ArrayList<>();
-        Long primaryPerk  = 0L;
-        Long primaryMainPerk = 0L;
-        for (Long perk : perkList) {
-            if (perk >= 8000L && perk % 100 == 0)
-                secondaryPerk.add(perk);
-            if (primaryPerkMap.getPrimaryMap().containsKey(perk))
-                primaryMainPerk = perk;
-        }
-        primaryPerk = primaryPerkMap.getPrimaryMap().get(primaryMainPerk);
-        if(primaryPerk==null) primaryPerk=0L; //Exception handling
-        PerkEntity perkEntity = perkRepository.findById(primaryPerk).orElse(null);
-        if(perkEntity==null){
-            urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            log.info("perkEntity가 null 입니다.");
-        }
-        else{
-            urlList.add(baseUrl+perkEntity.getImgUrl());
-        }
-        perkEntity = perkRepository.findById(primaryMainPerk).orElse(null);
-        if(perkEntity==null){
-            urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            log.info("perkEntity가 null 입니다.");
-        }
-        else{
-            urlList.add(baseUrl+perkEntity.getImgUrl());
-        }
-        if(secondaryPerk.size()<1) secondaryPerk.add(0L); //Exception handling
-        perkEntity = perkRepository.findById(secondaryPerk.get(0)).orElse(null);
-        if(perkEntity==null){
-            urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            log.info("perkEntity가 null 입니다.");
-        }
-        else{
-            urlList.add(baseUrl+perkEntity.getImgUrl());
-        }
-        return urlList;
-    }
-    public List<ResponsePerk> editPerkDetail(List<Perk> perkList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
-        List<ResponsePerk> responsePerks = new ArrayList<>();
-        if(perkList==null || perkList.size()==0){
-            log.info("perkList가 null 입니다.");
-            return null;
-        }
-        for( Perk perk : perkList){
-            List<PerkUrl> perkUrlList = new ArrayList<>();
-            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList  = findPrimaryAndSecondaryPerk(perk.getPerkMap().get(championInfoDTO.getChampionId()));
-                PerkUrl perkUrl = new PerkUrl(urlList);
-                perkUrlList.add(perkUrl);
-            }
-            ResponsePerk temp = new ResponsePerk(perkUrlList
-                    ,String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
-                    ,String.format("%.2f%%", 100 * ((double) perk.getWin() / allCount)));
-            responsePerks.add(temp);
-        }
-        if(perkList.size()==1){ //결과가 1개밖에없을때 임시로 넣는값.
-            List<PerkUrl> tempList = new ArrayList<>();
-            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList = new ArrayList<>();
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                PerkUrl perkUrl = new PerkUrl(urlList);
-                tempList.add(perkUrl);
-            }
-            responsePerks.add(new ResponsePerk(tempList,"0 게임","0.00%"));
-        }
-        return responsePerks;
-    }
-    public List<Perk> getPerkDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
-        List<Perk> perkList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){ //1명 일 때
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(),championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity ==null){
-                log.info(" soloInfoEntity null 오류!");
-                return null;
-            }
-            findTopK(soloInfoEntity.getPerkList(),2).forEach(perk ->{
-                perkList.add( (Perk)perk);
-            });
-        }
-        else { //2명이상일 때
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try {
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            } catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return null;
-            }
-            if(infoEntity ==null){
-                log.info(" infoEntity null 오류!");
-                return null;
-            }
-            findTopK(infoEntity.getPerkList(),2).forEach(perk ->{
-                perkList.add( (Perk) perk);
-            });
-        }
-        return perkList;
-    }
-    public List<? extends Sub> findTopK(List<? extends  Sub> input , int k){
-        PriorityQueue<Sub> maxHeap = new PriorityQueue<>();
-        for (Sub element : input) {
-            maxHeap.add(element);
-            if (maxHeap.size() > k) {
-                maxHeap.poll();
-            }
-        }
-        List<Sub> topList = new ArrayList<>(maxHeap);
-        Collections.reverse(topList);
-        return topList;
-    }
-    public void setChampAndPositionInfo(List<ChampionInfoDTO> championInfoDTOList, Map<Long, String> champPositionMap,Set<Long> championIdSet){
-        for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
-            champPositionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
-            championIdSet.add(championInfoDTO.getChampionId());
-        }
-    }
 }

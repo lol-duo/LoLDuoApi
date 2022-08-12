@@ -1,4 +1,4 @@
-package com.lolduo.duo.object.response.championDetail;
+package com.lolduo.duo.object.response.championDetail.sub;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;

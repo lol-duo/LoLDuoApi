@@ -1,4 +1,4 @@
-package com.lolduo.duo.service.slack;
+package com.lolduo.duo.service.temp;
 
 
 import lombok.Getter;
