@@ -4,6 +4,8 @@ package com.lolduo.duo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
+import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
+import com.lolduo.duo.object.entity.clientInfo.sub.Sub;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
 import com.lolduo.duo.object.entity.ChampionEntity;
@@ -227,5 +229,59 @@ public class ClientService {
             log.info("createClientChampionInfoDTOList() - {}번째 원소 : {}={}", i + 1, championInfoArray[i].getChampionName(), championInfoArray[i].getPosition());
         }
         return Arrays.asList(championInfoArray);
+    }
+
+    public List<Perk> getPerkDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
+        List<Perk> perkList = new ArrayList<>();
+        if(championInfoDTOList.size()==1){
+            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
+            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(),championInfoDTO.getPosition()).orElse(null);
+            if(soloInfoEntity ==null){
+                log.info(" soloInfoEntity null 오류!");
+                return null;
+            }
+            findTopK(soloInfoEntity.getPerkList(),2).forEach(perk ->{
+                perkList.add( (Perk)perk);
+            });
+        }
+        else { //2이상 일 때
+            Map<Long, String> champPositionMap = new HashMap<Long, String>();
+            TreeSet<Long> championIdSet = new TreeSet<>();
+            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
+            ICombinationInfoEntity infoEntity =null;
+            try {
+                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
+            } catch (JsonProcessingException e) {
+                log.info("objectMapper Json Parsing 오류!");
+                return null;
+            }
+            if(infoEntity ==null){
+                log.info(" infoEntity null 오류!");
+                return null;
+            }
+            findTopK(infoEntity.getPerkList(),2).forEach(perk ->{
+                perkList.add( (Perk) perk);
+            });
+        }
+        return perkList;
+    }
+    public List<? extends Sub> findTopK(List<? extends  Sub> input , int k){
+        PriorityQueue<Sub> maxHeap = new PriorityQueue<>();
+        for (Sub element : input) {
+            maxHeap.add(element);
+            if (maxHeap.size() > k) {
+                maxHeap.poll();
+            }
+        }
+        List<Sub> topList = new ArrayList<>(maxHeap);
+        Collections.reverse(topList);
+        return topList;
+    }
+    public void setChampAndPositionInfo(List<ChampionInfoDTO> championInfoDTOList, Map<Long, String> champPositionMap,Set<Long> championIdSet){
+        for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
+            champPositionMap.put(championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+            championIdSet.add(championInfoDTO.getChampionId());
+        }
     }
 }
