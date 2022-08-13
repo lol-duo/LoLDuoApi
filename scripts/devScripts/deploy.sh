@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPOSITORY=/home/build
+REPOSITORY=/home/build/dev
 JAR_NAME=$(ls -tr $REPOSITORY/*.jar | tail -n 1)
 DATADOG=$(ls -tr $REPOSITORY/datadog/*.jar | tail -n 1)
 CURRENT_PID=$(pgrep -fla $JAR_NAME | awk '{print $1}')
@@ -21,4 +21,4 @@ echo "> $JAR_NAME 에 실행권한 추가"
 chmod +x $JAR_NAME
 
 echo "> $JAR_NAME 실행"
-nohup /opt/jdk-17/bin/java -javaagent:$DATADOG -Ddd.logs.injection=true -jar -Dspring.profiles.active=server $JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
+nohup /opt/jdk-17/bin/java -javaagent:$DATADOG -Ddd.logs.injection=true -Ddd.service=api-dev-server -jar -Dspring.profiles.active=devserver $JAR_NAME > $REPOSITORY/nohup.out 2>&1 &
