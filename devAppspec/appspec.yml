@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: /home/build
+    destination: /home/build/dev
 permissions:
-  - object: /home/build
+  - object: /home/build/dev
     pattern: "**"
     owner: root
     mode: 777
