@@ -1,17 +1,4 @@
 spring:
-  profiles:
-    group:
-      local: "localdb,common"
-      server: "serverdb,common"
-      devserver : "devserver,common"
-    active: local
-logging:
-  level:
-    root: info
-
----
-
-spring:
   config:
     activate:
       on-profile: common
