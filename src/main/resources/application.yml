@@ -79,4 +79,4 @@ slack:
 riot:
 
 server:
-  port: '9000'
+  port: '1000'
