@@ -1,8 +1,9 @@
 #!/bin/bash
 
 REPOSITORY=/home/build/dev
+
 JAR_NAME=$(ls -tr $REPOSITORY/*.jar | tail -n 1)
-DATADOG=$(ls -tr $REPOSITORY/datadog/*.jar | tail -n 1)
+DATADOG=$(ls -tr /home/build/datadog/*.jar | tail -n 1)
 CURRENT_PID=$(pgrep -fla $JAR_NAME | awk '{print $1}')
 echo "> 현재 구동 중인 애플리케이션 pid 확인"
 echo "현재 구동 중인 애플리케이션 pid: $CURRENT_PID"
