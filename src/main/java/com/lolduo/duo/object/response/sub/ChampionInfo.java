@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ChampionInfo {
+    @ApiModelProperty(example = "1")
+    private Long championId;
+
     @ApiModelProperty(example = "애니")
     private String championName;
 
@@ -18,7 +21,8 @@ public class ChampionInfo {
 
     @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/UTILITY.png")
     private String positionUrl;
-    public ChampionInfo(String championName, String imgUrl, String position, String positionUrl) {
+    public ChampionInfo(Long championId, String championName, String imgUrl, String position, String positionUrl) {
+        this.championId = championId;
         this.championName = championName;
         this.imgUrl = imgUrl;
         this.position = position;
