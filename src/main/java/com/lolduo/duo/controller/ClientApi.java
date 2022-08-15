@@ -4,6 +4,7 @@ import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
 import com.lolduo.duo.object.entity.ChampionEntity;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
+import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.service.ClientService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class ClientApi {
     private final ClientService clientService;
 
     @GetMapping("/getChampionList")
-    @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = ChampionEntity[].class)
+    @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
     public ResponseEntity<?> getChampionList() {
         return clientService.getChampionList();
     }
