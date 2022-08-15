@@ -24,7 +24,7 @@ spring:
       on-profile: localdb
   datasource:
     username: root
-    url: jdbc:mariadb://localhost:3306/lolduo
+    url: jdbc:mariadb://localhost:3306/lolduo_dev
     password: 1234
   jpa:
     hibernate:
@@ -34,7 +34,7 @@ spring:
 slack:
   token: ${localkey.slackapi.token}
 riot:
-  key: ${localkey.riotapi.key}
+
 server:
   port: '8080'
 
@@ -56,7 +56,7 @@ spring:
 slack:
   token: ${slackapi.token}
 riot:
-  key: ${riotapi.key}
+
 server:
   port: '80'
 
@@ -77,6 +77,6 @@ spring:
 slack:
   token: ${slackapi.token}
 riot:
-  key: ${riotapi.key}
+
 server:
   port: '1000'

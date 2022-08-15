@@ -20,16 +20,10 @@ import com.lolduo.duo.repository.clientInfo.repository.DuoInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.QuintetInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.SoloInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.TrioInfoRepository;
-import com.lolduo.duo.repository.initialInfo.PerkRepository;
-import com.lolduo.duo.service.temp.ChampionDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -39,7 +33,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ClientService implements ApplicationRunner {
+public class ClientService {
     private final SoloInfoRepository soloInfoRepository;
     private final DuoInfoRepository duoInfoRepository;
     private final TrioInfoRepository trioInfoRepository;
@@ -48,30 +42,7 @@ public class ClientService implements ApplicationRunner {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ChampionDetailComponent championDetailComponent;
 
-    @Value("${riot.key}")
-    private String key;
-    @Override
-    public void run(ApplicationArguments args) throws Exception{
-        setChampion();
-        //test();
-        log.info("ready");
-    }
-    private void setChampion(){
-        String url = "https://ddragon.leagueoflegends.com/cdn/12.14.1/data/ko_KR/champion.json";
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Riot-Token", key);
-        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-
-        ResponseEntity<ChampionDto> championList = restTemplate.exchange(url, HttpMethod.GET, requestEntity, ChampionDto.class);
-
-        Set<String> championIdList = championList.getBody().getData().keySet();
-        for(String championId : championIdList){
-            championRepository.save(new ChampionEntity(Long.parseLong(championList.getBody().getData().get(championId).getKey()), championList.getBody().getData().get(championId).getName(),championId + ".png"));
-        }
-        championRepository.save(new ChampionEntity(0L,"ALL","ALL.png"));
-    }
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
         List<Champion> championList = new ArrayList<>();
