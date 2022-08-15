@@ -64,19 +64,30 @@ public class ClientService {
         return new ChampionInfo(championInfoDTO.getChampionId(), champion.getName(), baseUrl+champion.getImgUrl(), championInfoDTO.getPosition(), positionbaseUrl + championInfoDTO.getPosition() + ".png");
     }
     public ResponseEntity<?> getChampionDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
-        if(championInfoDTOList==null) return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+        if(championInfoDTOList==null) {
+            log.info("요청정보 자체가 null입니다. 잘못된 요청입니다. 404 리턴");
+            return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+        }
         for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
             if(championInfoDTO.getPosition()==null){
+                log.info("포지션 정보가 null입니다. 잘못된 요청입니다. 404 리턴");
                 return new ResponseEntity<>("포지션 정보가 null 입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+
             }
             if (championInfoDTO.getPosition().equals("ALL") || championInfoDTO.getChampionId() == 0) {
+                log.info("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다. 404 리턴");
                 return new ResponseEntity<>("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
             }
         }
         Long allCount = championDetailComponent.getAllCount(championInfoDTOList);
+        log.info("getChampionDetail : perkInfo start");
         List<ResponsePerk> perkInfo = championDetailComponent.editPerkDetail(championDetailComponent.getPerkDetail(championInfoDTOList),championInfoDTOList,allCount);
+        log.info("getChampionDetail : spellInfo start");
         List<ResponseSpell> spellInfo=championDetailComponent.editSpellDetail(championDetailComponent.getSpellDetail(championInfoDTOList), championInfoDTOList,allCount) ;
+        log.info("getChampionDetail : itemInfo start");
         List<ResponseItem> itemInfo = championDetailComponent.editItemDetail(championDetailComponent.getItemDetail(championInfoDTOList),championInfoDTOList,allCount);
+
+        log.info("정상처리, 200 리턴");
         return new ResponseEntity<>(new ChampionDetail(perkInfo,spellInfo,itemInfo),HttpStatus.OK);
     }
     public ResponseEntity<?> getChampionInfoList(ArrayList<ChampionInfoDTO> championInfoDTOList){
