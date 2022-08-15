@@ -9,6 +9,7 @@ import com.lolduo.duo.object.response.championDetail.ChampionDetail;
 import com.lolduo.duo.object.response.championDetail.ResponseItem;
 import com.lolduo.duo.object.response.championDetail.ResponsePerk;
 import com.lolduo.duo.object.response.championDetail.ResponseSpell;
+import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
 import com.lolduo.duo.object.entity.ChampionEntity;
 import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
@@ -43,11 +44,15 @@ public class ClientService {
 
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
-        for(ChampionEntity champion : championEntityList){
-            champion.setImgUrl("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/"+champion.getImgUrl());
+        List<Champion> championList = new ArrayList<>();
+        for(ChampionEntity championEntity : championEntityList){
+            String engName = championEntity.getImgUrl().substring(0,championEntity.getImgUrl().length()-4);
+            Champion temp = new Champion(championEntity.getId(),championEntity.getName(),engName,
+                    "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/"+championEntity.getImgUrl());
+            championList.add(temp);
         }
-        Collections.sort(championEntityList);
-        return new ResponseEntity<>(championEntityList, HttpStatus.OK);
+        Collections.sort(championList);
+        return new ResponseEntity<>(championList, HttpStatus.OK);
     }
 
     //ㅇㅇrequst테스트 지울것
