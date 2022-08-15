@@ -180,6 +180,7 @@ public class ClientService {
                 return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
             }
         }
+        log.info("getChampionInfoList() - 시간 측정 : API 처리 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
