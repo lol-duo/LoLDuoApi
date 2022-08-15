@@ -27,6 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -108,6 +111,7 @@ public class ClientService {
 
             log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
             // 리포지토리에서 조합 정보를 검색하는 부분
+            log.info("getChampionInfoList() - 시간 측정 : DB 검색 시작 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             if (championInfoDTO.getChampionId() == 0) { // ?일 때
                 if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
                     infoEntityList = soloInfoRepository.findAllByPositionDesc(championInfoDTO.getPosition()).orElse(null);
@@ -120,6 +124,7 @@ public class ClientService {
                 else
                     infoEntityList = soloInfoRepository.findAllByChampionIdDesc(championInfoDTO.getChampionId()).orElse(null);
             }
+            log.info("getChampionInfoList() - 시간 측정 : DB 검색 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
             // 조합 정보가 존재한다면 ClientChampionInfo의 List를 만들고, 승률을 계산해 반환한다.
             if (infoEntityList != null && !infoEntityList.isEmpty()) {
@@ -133,7 +138,9 @@ public class ClientService {
                     result.add(new ChampionInfoList(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount())),
                             String.valueOf(infoEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"));
                 });
+                log.info("getChampionInfoList() - 시간 측정 : championInfo로 변환 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             }
+
             // 조합 정보가 존재하지 않는다면 입력 값을 그대로 ClientChampionInfo로 변환한 List만 반환한다.
             else {
                 log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
@@ -152,17 +159,22 @@ public class ClientService {
             Queue<ChampionInfo> allQueue = new LinkedList<ChampionInfo>();
 
             // 입력된 챔피언 각각에 대해 ?인지, 그리고 ALL포지션인지 확인하여 포지션, 챔피언 목록과 관련된 객체를 채워 넣는다.
+            log.info("getChampionInfoList() - 시간 측정 : 선택 포지션/챔피언 정보 관련 객체 생성 시작  {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             setChampAndPositionInfo(championInfoDTOList, champPositionMap, excludePositionList, selectedChampionOrderMap, selectedPositionOrderMap);
+            log.info("getChampionInfoList() - 시간 측정 : 선택 포지션/챔피언 정보 관련 객체 생성 끝  {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
             try {
                 // DB에서 조합 정보를 검색한다.
+                log.info("getChampionInfoList() - 시간 측정 : DB 검색 시작 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
                 List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
                         .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
                 log.info("getChampionInfoList() - 매치 데이터 검색.\n지정된 championId = {}\n지정된 position = {}\n실제 검색 position = {}\n선택한 챔피언들에게 금지된 position = {}",
                         objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(excludePositionList));
+                log.info("getChampionInfoList() - 시간 측정 : DB 검색 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
                 // 나온 검색 결과를 반환할 형태로 변환한 후 결과 리스트에 넣어준다.
                 putCombinationInfoToResult(result, infoEntityList, championInfoDTOList, selectedPositionOrderMap, selectedChampionOrderMap, allQueue);
+                log.info("getChampionInfoList() - 시간 측정 : 검색 결과 정렬해 결과 리스트에 저장 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             } catch (JsonProcessingException e) {
                 log.error("objectMapper writeValue error");
                 return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
@@ -226,7 +238,6 @@ public class ClientService {
                                 createClientChampionInfoDTOList(infoEntity.getChampionId().size(), infoEntity, selectedPositionOrderMap, selectedChampionOrderMap, allQueue),
                                 String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount())),
                         String.valueOf(infoEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
-
                         )
                 );
             });
