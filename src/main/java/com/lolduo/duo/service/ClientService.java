@@ -64,7 +64,11 @@ public class ClientService {
         return new ChampionInfo(championInfoDTO.getChampionId(), champion.getName(), baseUrl+champion.getImgUrl(), championInfoDTO.getPosition(), positionbaseUrl + championInfoDTO.getPosition() + ".png");
     }
     public ResponseEntity<?> getChampionDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        if(championInfoDTOList==null) return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
         for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
+            if(championInfoDTO.getPosition()==null){
+                return new ResponseEntity<>("포지션 정보가 null 입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+            }
             if (championInfoDTO.getPosition().equals("ALL") || championInfoDTO.getChampionId() == 0) {
                 return new ResponseEntity<>("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
             }
