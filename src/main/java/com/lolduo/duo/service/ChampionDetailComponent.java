@@ -196,7 +196,7 @@ public class ChampionDetailComponent {
                 return null;
             }
 
-            findTopK(soloInfoEntity.getItemList(),2).forEach(item ->{
+            findTopK(getSummarizedItemList(soloInfoEntity),2).forEach(item ->{
                 itemList.add((Item)item);
             });
         }
@@ -215,13 +215,59 @@ public class ChampionDetailComponent {
                 log.info(" 2명이상일때 infoEntity null 오류!");
                 return null;
             }
-            findTopK(infoEntity.getItemList(),2).forEach(item ->{
+
+            findTopK(getSummarizedItemList(infoEntity),2).forEach(item ->{
                 itemList.add((Item)item);
             });
         }
         return itemList;
     }
 
+    private List<Item> getSummarizedItemList(SoloInfoEntity soloInfoEntity) {
+        Map<Map<Long, List<Long>>, Long> summarizedItemMapWinMap = new HashMap<>();
+        List<Item> summarizedItemList = new ArrayList<>();
+
+        soloInfoEntity.getItemList().forEach(item -> {
+            Map<Long, List<Long>> champThreeItemMap = new HashMap<>();
+            item.getItemMap().forEach((championId, wholeItemList) -> {
+                champThreeItemMap.put(championId, wholeItemList.subList(0, 3));
+            });
+
+            if(summarizedItemMapWinMap.containsKey(champThreeItemMap))
+                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin() + summarizedItemMapWinMap.get(champThreeItemMap));
+            else
+                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin());
+        });
+
+        summarizedItemMapWinMap.forEach((threeItemMap, winCount) -> {
+            summarizedItemList.add(new Item(threeItemMap, winCount));
+        });
+
+        return summarizedItemList;
+    }
+
+    private List<Item> getSummarizedItemList(ICombinationInfoEntity infoEntity) {
+        Map<Map<Long, List<Long>>, Long> summarizedItemMapWinMap = new HashMap<>();
+        List<Item> summarizedItemList = new ArrayList<>();
+
+        infoEntity.getItemList().forEach(item -> {
+            Map<Long, List<Long>> champThreeItemMap = new HashMap<>();
+            item.getItemMap().forEach((championId, wholeItemList) -> {
+                champThreeItemMap.put(championId, wholeItemList.subList(0, 3));
+            });
+
+            if(summarizedItemMapWinMap.containsKey(champThreeItemMap))
+                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin() + summarizedItemMapWinMap.get(champThreeItemMap));
+            else
+                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin());
+        });
+
+        summarizedItemMapWinMap.forEach((threeItemMap, winCount) -> {
+            summarizedItemList.add(new Item(threeItemMap, winCount));
+        });
+
+        return summarizedItemList;
+    }
 
     //Perk
     public List<String> findPrimaryAndSecondaryPerk(List<Long> perkList){
