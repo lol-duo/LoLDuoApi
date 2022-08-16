@@ -1,7 +1,7 @@
 package com.lolduo.duo.controller;
 
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
-import com.lolduo.duo.object.entity.ChampionEntity;
+import com.lolduo.duo.object.dto.client.CombiSearchDTO;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
 import com.lolduo.duo.object.response.getChampionList.Champion;
@@ -31,9 +31,9 @@ public class ClientApi {
 
     @PostMapping("/getInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = ChampionInfoList[].class)
-    public ResponseEntity<?> getInfo(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
+    public ResponseEntity<?> getInfo(@RequestBody CombiSearchDTO combiSearchDTO){
         log.info("getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
-        return clientService.getChampionInfoList(championInfoDTOList);
+        return clientService.getChampionInfoList(combiSearchDTO);
     }
 
     @PostMapping("/championDetail")
