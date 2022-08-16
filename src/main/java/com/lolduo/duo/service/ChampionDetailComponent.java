@@ -303,11 +303,13 @@ public class ChampionDetailComponent {
 
     //Perk
     public List<String> findPrimaryAndSecondaryPerk(List<Long> perkList){
+        log.info("findPrimaryAndSecondaryPerk - perkList: {}", perkList.toString());
+
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
         List<String> urlList = new ArrayList<>();
         PrimaryPerkMap primaryPerkMap =new PrimaryPerkMap();
         List<Long> secondaryPerk = new ArrayList<>();
-        Long primaryPerk  = 0L;
+        Long primaryPerk = 0L;
         Long primaryMainPerk = 0L;
         for (Long perk : perkList) {
             if (perk >= 8000L && perk % 100 == 0)
@@ -317,31 +319,37 @@ public class ChampionDetailComponent {
         }
         primaryPerk = primaryPerkMap.getPrimaryMap().get(primaryMainPerk);
         if(primaryPerk==null) primaryPerk=0L; //Exception handling
+        log.info("findPrimaryAndSecondaryPerk - secondaryPerk: {}, primaryMainPerk: {}, primaryPerk: {}", secondaryPerk, primaryMainPerk, primaryPerk);
+
         PerkEntity perkEntity = perkRepository.findById(primaryPerk).orElse(null);
         if(perkEntity==null){
             urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            log.info("perkEntity가 null 입니다.");
+            log.info("findPrimaryAndSecondaryPerk - primaryPerk: perkEntity가 null 입니다.");
         }
         else{
             urlList.add(baseUrl+perkEntity.getImgUrl());
         }
+
         perkEntity = perkRepository.findById(primaryMainPerk).orElse(null);
         if(perkEntity==null){
             urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            log.info("perkEntity가 null 입니다.");
+            log.info("findPrimaryAndSecondaryPerk - primaryMainPerk: perkEntity가 null 입니다.");
         }
         else{
             urlList.add(baseUrl+perkEntity.getImgUrl());
         }
-        if(secondaryPerk.size()<1) secondaryPerk.add(0L); //Exception handling
+
+        secondaryPerk.remove(primaryPerk);
+        if(secondaryPerk.size() < 1) secondaryPerk.add(0L); //Exception handling
         perkEntity = perkRepository.findById(secondaryPerk.get(0)).orElse(null);
         if(perkEntity==null){
             urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            log.info("perkEntity가 null 입니다.");
+            log.info("findPrimaryAndSecondaryPerk - secondaryPerk: perkEntity가 null 입니다.");
         }
         else{
             urlList.add(baseUrl+perkEntity.getImgUrl());
         }
+
         return urlList;
     }
 
@@ -351,7 +359,8 @@ public class ChampionDetailComponent {
             log.info("perkList가 null 입니다.");
             return null;
         }
-        for( Perk perk : perkList){
+
+        for(Perk perk : perkList){
             List<PerkUrl> perkUrlList = new ArrayList<>();
             for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
                 List<String> urlList  = findPrimaryAndSecondaryPerk(perk.getPerkMap().get(championInfoDTO.getChampionId()));
@@ -363,18 +372,7 @@ public class ChampionDetailComponent {
                     ,String.format("%.2f%%", 100 * ((double) perk.getWin() / allCount)));
             responsePerks.add(responsePerk);
         }
-        if(perkList.size()==1){ //결과가 1개밖에없을때 임시로 넣는값.
-            List<PerkUrl> tempList = new ArrayList<>();
-            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList = new ArrayList<>();
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                PerkUrl perkUrl = new PerkUrl(urlList);
-                tempList.add(perkUrl);
-            }
-            responsePerks.add(new ResponsePerk(tempList,"0 게임","0.00%"));
-        }
+
         return responsePerks;
     }
     public List<Perk> getPerkDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
@@ -383,7 +381,7 @@ public class ChampionDetailComponent {
         if(championInfoDTOList.size()==1){ //1명 일 때
             ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
             SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(),championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity ==null){
+            if(soloInfoEntity == null){
                 log.info(" soloInfoEntity null 오류!");
                 return null;
             }
