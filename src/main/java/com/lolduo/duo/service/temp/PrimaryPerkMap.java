@@ -20,6 +20,7 @@ public class PrimaryPerkMap {
         primaryMap.put(8360L,8300L);
         primaryMap.put(8369L,8300L);
 
+        primaryMap.put(8005L,8000L);
         primaryMap.put(8008L,8000L);
         primaryMap.put(8021L,8000L);
         primaryMap.put(8010L,8000L);
