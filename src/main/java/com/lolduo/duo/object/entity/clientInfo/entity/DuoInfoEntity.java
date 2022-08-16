@@ -5,6 +5,7 @@ import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
 import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.*;
 @NoArgsConstructor
 @Table(name = "duo_info")
 @Getter
-@TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
+@TypeDef(name = "json", typeClass = JsonStringType.class)
 public class DuoInfoEntity implements ICombinationInfoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

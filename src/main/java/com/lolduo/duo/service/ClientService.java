@@ -4,7 +4,13 @@ package com.lolduo.duo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
+import com.lolduo.duo.object.dto.client.CombiSearchDTO;
 import com.lolduo.duo.object.response.ChampionInfoList;
+import com.lolduo.duo.object.response.championDetail.ChampionDetail;
+import com.lolduo.duo.object.response.championDetail.ResponseItem;
+import com.lolduo.duo.object.response.championDetail.ResponsePerk;
+import com.lolduo.duo.object.response.championDetail.ResponseSpell;
+import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.object.response.sub.ChampionInfo;
 import com.lolduo.duo.object.entity.ChampionEntity;
 import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
@@ -17,10 +23,12 @@ import com.lolduo.duo.repository.clientInfo.repository.SoloInfoRepository;
 import com.lolduo.duo.repository.clientInfo.repository.TrioInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -33,30 +41,61 @@ public class ClientService {
     private final QuintetInfoRepository quintetInfoRepository;
     private final ChampionRepository championRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ChampionDetailComponent championDetailComponent;
 
 
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
-        for(ChampionEntity champion : championEntityList){
-            champion.setImgUrl("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/"+champion.getImgUrl());
+        List<Champion> championList = new ArrayList<>();
+        for(ChampionEntity championEntity : championEntityList){
+            String engName = championEntity.getImgUrl().substring(0,championEntity.getImgUrl().length()-4);
+            Champion temp = new Champion(championEntity.getId(),championEntity.getName(),engName,
+                    "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/"+championEntity.getImgUrl());
+            championList.add(temp);
         }
-        Collections.sort(championEntityList);
-        return new ResponseEntity<>(championEntityList, HttpStatus.OK);
+        Collections.sort(championList);
+        return new ResponseEntity<>(championList, HttpStatus.OK);
     }
-
     private ChampionInfo championInfo2ClientChampionInfo(ChampionInfoDTO championInfoDTO){  // 챔피언 이름, 이미지 URL, 포지션 가져옴
-        log.info(championRepository.findAll().size()+" 사이즈가 0 인 경우, ritoService에서 setChampion 실행 아직 안된 상태");
-        ChampionEntity champion = championRepository.findById(championInfoDTO.getChampionId()).orElse(new ChampionEntity(0L,"A","A.png"));
+        log.info(championRepository.findAll().size()+" 사이즈가 0 인 경우, riotService에서 setChampion 실행 아직 안된 상태");
+        ChampionEntity champion = championRepository.findById(championInfoDTO.getChampionId()).orElse(new ChampionEntity(0L,"ALL","ALL.png"));
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/";
         String positionbaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/";
-        return new ChampionInfo(champion.getName() ,baseUrl+champion.getImgUrl(),championInfoDTO.getPosition(),positionbaseUrl + championInfoDTO.getPosition()+".png");
+        return new ChampionInfo(championInfoDTO.getChampionId(), champion.getName(), baseUrl+champion.getImgUrl(), championInfoDTO.getPosition(), positionbaseUrl + championInfoDTO.getPosition() + ".png");
     }
+    public ResponseEntity<?> getChampionDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        if(championInfoDTOList==null) {
+            log.info("요청정보 자체가 null입니다. 잘못된 요청입니다. 404 리턴");
+            return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+        }
+        for (ChampionInfoDTO championInfoDTO : championInfoDTOList) {
+            if(championInfoDTO.getPosition()==null){
+                log.info("포지션 정보가 null입니다. 잘못된 요청입니다. 404 리턴");
+                return new ResponseEntity<>("포지션 정보가 null 입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
 
-    public ResponseEntity<?> getChampionInfoList(ArrayList<ChampionInfoDTO> championInfoDTOList){
+            }
+            if (championInfoDTO.getPosition().equals("ALL") || championInfoDTO.getChampionId() == 0) {
+                log.info("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다. 404 리턴");
+                return new ResponseEntity<>("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
+            }
+        }
+        Long allCount = championDetailComponent.getAllCount(championInfoDTOList);
+        log.info("getChampionDetail : perkInfo start");
+        List<ResponsePerk> perkInfo = championDetailComponent.editPerkDetail(championDetailComponent.getPerkDetail(championInfoDTOList),championInfoDTOList,allCount);
+        log.info("getChampionDetail : spellInfo start");
+        List<ResponseSpell> spellInfo=championDetailComponent.editSpellDetail(championDetailComponent.getSpellDetail(championInfoDTOList), championInfoDTOList,allCount) ;
+        log.info("getChampionDetail : itemInfo start");
+        List<ResponseItem> itemInfo = championDetailComponent.editItemDetail(championDetailComponent.getItemDetail(championInfoDTOList),championInfoDTOList,allCount);
+
+        log.info("정상처리, 200 리턴");
+        return new ResponseEntity<>(new ChampionDetail(perkInfo,spellInfo,itemInfo),HttpStatus.OK);
+    }
+    public ResponseEntity<?> getChampionInfoList(CombiSearchDTO combiSearchDTO){
         // 주석은 모듈화를 위해 임시로 추가한 것. 이후 삭제해야 함.
+        log.info("getChampionInfoList - 챔피언 조합 검색. winRateAsc: {}, gameCountAsc: {}", combiSearchDTO.getWinRateAsc(), combiSearchDTO.getGameCountAsc());
         List<ChampionInfoList> result = new ArrayList<>();
         ICombinationInfoRepository infoRepository;
-        int championCount = championInfoDTOList.size();
+        int championCount = combiSearchDTO.getChampionInfoDTOList().size();
 
         // 챔피언 수에 해당하는 리포지토리를 가져오는 부분
         infoRepository = getInfoRepository(championCount);
@@ -65,23 +104,85 @@ public class ClientService {
 
         // 챔피언 수가 1일 때
         if (championCount == 1) {
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
+            ChampionInfoDTO championInfoDTO = combiSearchDTO.getChampionInfoDTOList().get(0);
             List<SoloInfoEntity> infoEntityList;
 
             log.info("getChampionInfoList() - 매치 데이터 검색.\n검색 championId = {}\n검색 position = {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
             // 리포지토리에서 조합 정보를 검색하는 부분
+            log.info("getChampionInfoList() - 시간 측정 : DB 검색 시작 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             if (championInfoDTO.getChampionId() == 0) { // ?일 때
-                if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
-                    infoEntityList = soloInfoRepository.findAllByPositionDesc(championInfoDTO.getPosition()).orElse(null);
-                else
-                    infoEntityList = soloInfoRepository.findAllDesc().orElse(null);
+                if (!championInfoDTO.getPosition().equals("ALL")) { // ALL이 아닐 때
+
+                    if (combiSearchDTO.getWinRateAsc() != null) {
+                        if (combiSearchDTO.getWinRateAsc())
+                            infoEntityList = soloInfoRepository.findAllByPositionWinRateAsc(championInfoDTO.getPosition()).orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllByPositionWinRateDesc(championInfoDTO.getPosition()).orElse(null);
+                    }
+                    else if (combiSearchDTO.getGameCountAsc() != null) {
+                        if (combiSearchDTO.getGameCountAsc())
+                            infoEntityList = soloInfoRepository.findAllByPositionGameCountAsc(championInfoDTO.getPosition()).orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllByPositionGameCountDesc(championInfoDTO.getPosition()).orElse(null);
+                    }
+                    else
+                        infoEntityList = soloInfoRepository.findAllByPositionWinRateDesc(championInfoDTO.getPosition()).orElse(null);
+                }
+                else {
+
+                    if (combiSearchDTO.getWinRateAsc() != null) {
+                        if (combiSearchDTO.getWinRateAsc())
+                            infoEntityList = soloInfoRepository.findAllWinRateAsc().orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllWinRateDesc().orElse(null);
+                    }
+                    else if (combiSearchDTO.getGameCountAsc() != null) {
+                        if (combiSearchDTO.getGameCountAsc())
+                            infoEntityList = soloInfoRepository.findAllGameCountAsc().orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllGameCountDesc().orElse(null);
+                    }
+                    else
+                        infoEntityList = soloInfoRepository.findAllWinRateDesc().orElse(null);
+                }
             }
             else { // ?이 아닐 때
-                if (!championInfoDTO.getPosition().equals("ALL")) // ALL이 아닐 때
-                    infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionDesc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-                else
-                    infoEntityList = soloInfoRepository.findAllByChampionIdDesc(championInfoDTO.getChampionId()).orElse(null);
+                if (!championInfoDTO.getPosition().equals("ALL")) { // ALL이 아닐 때
+
+                    if (combiSearchDTO.getWinRateAsc() != null) {
+                        if (combiSearchDTO.getWinRateAsc())
+                            infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionWinRateAsc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionWinRateDesc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+                    }
+                    else if (combiSearchDTO.getGameCountAsc() != null) {
+                        if (combiSearchDTO.getGameCountAsc())
+                            infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionGameCountAsc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionGameCountDesc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+                    }
+                    else
+                        infoEntityList = soloInfoRepository.findAllByChampionIdAndPositionWinRateDesc(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
+                }
+                else {
+
+                    if (combiSearchDTO.getWinRateAsc() != null) {
+                        if (combiSearchDTO.getWinRateAsc())
+                            infoEntityList = soloInfoRepository.findAllByChampionIdWinRateAsc(championInfoDTO.getChampionId()).orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllByChampionIdWinRateDesc(championInfoDTO.getChampionId()).orElse(null);
+                    }
+                    else if (combiSearchDTO.getGameCountAsc() != null) {
+                        if (combiSearchDTO.getGameCountAsc())
+                            infoEntityList = soloInfoRepository.findAllByChampionIdGameCountAsc(championInfoDTO.getChampionId()).orElse(null);
+                        else
+                            infoEntityList = soloInfoRepository.findAllByChampionIdGameCountDesc(championInfoDTO.getChampionId()).orElse(null);
+                    }
+                    else
+                        infoEntityList = soloInfoRepository.findAllByChampionIdWinRateDesc(championInfoDTO.getChampionId()).orElse(null);
+                }
             }
+            log.info("getChampionInfoList() - 시간 측정 : DB 검색 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
             // 조합 정보가 존재한다면 ClientChampionInfo의 List를 만들고, 승률을 계산해 반환한다.
             if (infoEntityList != null && !infoEntityList.isEmpty()) {
@@ -95,7 +196,9 @@ public class ClientService {
                     result.add(new ChampionInfoList(clientChampionInfoList, String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount())),
                             String.valueOf(infoEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"));
                 });
+                log.info("getChampionInfoList() - 시간 측정 : championInfo로 변환 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             }
+
             // 조합 정보가 존재하지 않는다면 입력 값을 그대로 ClientChampionInfo로 변환한 List만 반환한다.
             else {
                 log.info("getChampionInfoList() - 검색 결과.\n해당하는 데이터 행이 존재하지 않습니다.");
@@ -114,22 +217,43 @@ public class ClientService {
             Queue<ChampionInfo> allQueue = new LinkedList<ChampionInfo>();
 
             // 입력된 챔피언 각각에 대해 ?인지, 그리고 ALL포지션인지 확인하여 포지션, 챔피언 목록과 관련된 객체를 채워 넣는다.
-            setChampAndPositionInfo(championInfoDTOList, champPositionMap, excludePositionList, selectedChampionOrderMap, selectedPositionOrderMap);
+            log.info("getChampionInfoList() - 시간 측정 : 선택 포지션/챔피언 정보 관련 객체 생성 시작  {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
+            setChampAndPositionInfo(combiSearchDTO.getChampionInfoDTOList(), champPositionMap, excludePositionList, selectedChampionOrderMap, selectedPositionOrderMap);
+            log.info("getChampionInfoList() - 시간 측정 : 선택 포지션/챔피언 정보 관련 객체 생성 끝  {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
             try {
                 // DB에서 조합 정보를 검색한다.
-                List<? extends ICombinationInfoEntity> infoEntityList = infoRepository
-                        .findAllByChampionIdAndPositionDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+                log.info("getChampionInfoList() - 시간 측정 : DB 검색 시작 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
+
+                List<? extends ICombinationInfoEntity> infoEntityList;
+                if (combiSearchDTO.getWinRateAsc() != null) {
+                    if (combiSearchDTO.getWinRateAsc())
+                        infoEntityList = infoRepository.findAllByChampionIdAndPositionWinRateAsc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+                    else
+                        infoEntityList = infoRepository.findAllByChampionIdAndPositionWinRateDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+                }
+                else if (combiSearchDTO.getGameCountAsc() != null) {
+                    if (combiSearchDTO.getGameCountAsc())
+                        infoEntityList = infoRepository.findAllByChampionIdAndPositionGameCountAsc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+                    else
+                        infoEntityList = infoRepository.findAllByChampionIdAndPositionGameCountDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+                }
+                else
+                    infoEntityList = infoRepository.findAllByChampionIdAndPositionWinRateDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList)).orElse(null);
+
                 log.info("getChampionInfoList() - 매치 데이터 검색.\n지정된 championId = {}\n지정된 position = {}\n실제 검색 position = {}\n선택한 챔피언들에게 금지된 position = {}",
                         objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(excludePositionList));
+                log.info("getChampionInfoList() - 시간 측정 : DB 검색 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
                 // 나온 검색 결과를 반환할 형태로 변환한 후 결과 리스트에 넣어준다.
-                putCombinationInfoToResult(result, infoEntityList, championInfoDTOList, selectedPositionOrderMap, selectedChampionOrderMap, allQueue);
+                putCombinationInfoToResult(result, infoEntityList, combiSearchDTO.getChampionInfoDTOList(), selectedPositionOrderMap, selectedChampionOrderMap, allQueue);
+                log.info("getChampionInfoList() - 시간 측정 : 검색 결과 정렬해 결과 리스트에 저장 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
             } catch (JsonProcessingException e) {
                 log.error("objectMapper writeValue error");
                 return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
             }
         }
+        log.info("getChampionInfoList() - 시간 측정 : API 처리 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
@@ -188,7 +312,6 @@ public class ClientService {
                                 createClientChampionInfoDTOList(infoEntity.getChampionId().size(), infoEntity, selectedPositionOrderMap, selectedChampionOrderMap, allQueue),
                                 String.format("%.2f%%", 100 * ((double) infoEntity.getWinCount() / infoEntity.getAllCount())),
                         String.valueOf(infoEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
-
                         )
                 );
             });
@@ -228,4 +351,5 @@ public class ClientService {
         }
         return Arrays.asList(championInfoArray);
     }
+
 }

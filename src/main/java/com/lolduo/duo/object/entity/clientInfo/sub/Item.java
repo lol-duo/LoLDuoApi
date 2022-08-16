@@ -12,11 +12,10 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @Setter
-public class Item implements Serializable {
+public class Item extends Sub {
     private Map<Long, List<Long>> ItemMap;
-    private Long win;
     public Item(Map<Long, List<Long>> itemMap, Long win) {
+        super(win);
         ItemMap = itemMap;
-        this.win = win;
     }
 }
