@@ -196,6 +196,7 @@ public class ChampionDetailComponent {
                 return null;
             }
 
+            removeAllZeroItems(soloInfoEntity);
             findTopK(getSummarizedItemList(soloInfoEntity),2).forEach(item ->{
                 itemList.add((Item)item);
             });
@@ -216,11 +217,42 @@ public class ChampionDetailComponent {
                 return null;
             }
 
+            removeAllZeroItems(infoEntity);
             findTopK(getSummarizedItemList(infoEntity),2).forEach(item ->{
                 itemList.add((Item)item);
             });
         }
         return itemList;
+    }
+
+    private void removeAllZeroItems(SoloInfoEntity soloInfoEntity) {
+        soloInfoEntity.getItemList().removeIf(item -> {
+            for (List<Long> itemIdList : item.getItemMap().values()) {
+                boolean hasNonZero = false;
+                for (Long itemId : itemIdList)
+                    if (itemId != 0)
+                        hasNonZero = true;
+
+                if (!hasNonZero)
+                    return true;
+            }
+            return false;
+        });
+    }
+
+    private void removeAllZeroItems(ICombinationInfoEntity infoEntity) {
+        infoEntity.getItemList().removeIf(item -> {
+            for (List<Long> itemIdList : item.getItemMap().values()) {
+                boolean hasNonZero = false;
+                for (Long itemId : itemIdList)
+                    if (itemId != 0)
+                        hasNonZero = true;
+
+                if (!hasNonZero)
+                    return true;
+            }
+            return false;
+        });
     }
 
     private List<Item> getSummarizedItemList(SoloInfoEntity soloInfoEntity) {
