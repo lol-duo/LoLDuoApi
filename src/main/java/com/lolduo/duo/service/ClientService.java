@@ -64,6 +64,11 @@ public class ClientService {
         return new ChampionInfo(championInfoDTO.getChampionId(), champion.getName(), baseUrl+champion.getImgUrl(), championInfoDTO.getPosition(), positionbaseUrl + championInfoDTO.getPosition() + ".png");
     }
     public ResponseEntity<?> getChampionDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
+        log.info("getChampionDetail - 조합 상세 정보 확인.");
+        championInfoDTOList.forEach(championInfoDTO -> {
+            log.info("getChampionDetail - champion : {}, position : {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
+        });
+
         if(championInfoDTOList==null) {
             log.info("요청정보 자체가 null입니다. 잘못된 요청입니다. 404 리턴");
             return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
