@@ -159,7 +159,7 @@ public class ChampionDetailComponent {
         for(Item item : itemList){
             List<ItemUrl> itemUrlList = new ArrayList<>();
             for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList =findItem(item.getItemMap().get(championInfoDTO.getChampionId()));
+                List<String> urlList = findItem(item.getItemMap().get(championInfoDTO.getChampionId()));
                 ItemUrl itemUrl = new ItemUrl(urlList);
                 itemUrlList.add(itemUrl);
             }
@@ -168,34 +168,20 @@ public class ChampionDetailComponent {
                     ,String.format("%.2f%%", 100 * ((double) item.getWin() / allCount)));
             responseItems.add(responseItem);
         }
-        if(itemList.size()==1){
-            log.info("itemList.size()가 1이라, 더미값을 추가합니다.");
-            List<ItemUrl> tempList = new ArrayList<>();
-            for(ChampionInfoDTO championInfoDTO : championInfoDTOList){
-                List<String> urlList = new ArrayList<>();
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/next.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/next.png");
-                urlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-                ItemUrl itemUrl = new ItemUrl(urlList);
-                tempList.add(itemUrl);
-            }
-            responseItems.add(new ResponseItem(tempList,"0 게임", "0.00%"));
-        }
         return responseItems;
     }
     //Item
     public List<String> findItem(List<Long> itemList){
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
         List<String> urlList = new ArrayList<>();
-        for(int i = 0 ; i < itemList.size();i++){
+        for(int i = 0 ; i < 3; i++){
             Long itemId = itemList.get(i);
-            ItemEntity itemEntity = itemRepository.findById(itemId).orElse(new ItemEntity(0L,"No Item","X.png"));
-            urlList.add(baseUrl+itemEntity.getImgUrl());
-            if(i+1<itemList.size()){
+            ItemEntity itemEntity = itemRepository.findById(itemId).orElse(null);
+            if(itemEntity == null)
+                break;
+            if(i != 0)
                 urlList.add(baseUrl+"next.png");
-            }
+            urlList.add(baseUrl+itemEntity.getImgUrl());
         }
         return urlList;
     }
@@ -209,6 +195,7 @@ public class ChampionDetailComponent {
                 log.info("1명일때 soloInfoEntity null 오류!");
                 return null;
             }
+
             findTopK(soloInfoEntity.getItemList(),2).forEach(item ->{
                 itemList.add((Item)item);
             });
