@@ -1,4 +1,4 @@
-package com.lolduo.duo.object.entity;
+package com.lolduo.duo.object.entity.initialInfo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
