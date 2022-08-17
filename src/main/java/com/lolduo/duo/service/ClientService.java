@@ -86,11 +86,11 @@ public class ClientService {
         }
         Long allCount = championDetailComponent.getAllCount(championInfoDTOList);
         log.info("getChampionDetail : perkInfo start");
-        List<ResponsePerk> perkInfo = championDetailComponent.editPerkDetail(championDetailComponent.getPerkDetail(championInfoDTOList),championInfoDTOList,allCount);
+        List<ResponsePerk> perkInfo = championDetailComponent.editPerkDetail(championDetailComponent.getPerkDetail(championInfoDTOList, true), championInfoDTOList, allCount);
         log.info("getChampionDetail : spellInfo start");
-        List<ResponseSpell> spellInfo=championDetailComponent.editSpellDetail(championDetailComponent.getSpellDetail(championInfoDTOList), championInfoDTOList,allCount) ;
+        List<ResponseSpell> spellInfo=championDetailComponent.editSpellDetail(championDetailComponent.getSpellDetail(championInfoDTOList), championInfoDTOList, allCount) ;
         log.info("getChampionDetail : itemInfo start");
-        List<ResponseItem> itemInfo = championDetailComponent.editItemDetail(championDetailComponent.getItemDetail(championInfoDTOList),championInfoDTOList,allCount);
+        List<ResponseItem> itemInfo = championDetailComponent.editItemDetail(championDetailComponent.getItemDetail(championInfoDTOList, true), championInfoDTOList, allCount);
 
         log.info("정상처리, 200 리턴");
         return new ResponseEntity<>(new ChampionDetail(perkInfo,spellInfo,itemInfo),HttpStatus.OK);
