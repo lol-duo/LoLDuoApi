@@ -1,6 +1,6 @@
 package com.lolduo.duo.object.response;
 
-import com.lolduo.duo.object.response.sub.ChampionInfo;
+import com.lolduo.duo.object.response.sub.ChampionInfoResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,14 +9,14 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class ChampionInfoList implements Comparable<ChampionInfoList>{
-    private List<ChampionInfo> championInfoList;
+    private List<ChampionInfoResponse> championInfoResponseList;
     @ApiModelProperty(example = "58.7%")
     private String winRate;
 
     @ApiModelProperty(example = "1,000게임")
     private String allCount;
-    public ChampionInfoList(List<ChampionInfo> championInfoList, String winRate, String allCount) {
-        this.championInfoList = championInfoList;
+    public ChampionInfoList(List<ChampionInfoResponse> championInfoResponseList, String winRate, String allCount) {
+        this.championInfoResponseList = championInfoResponseList;
         this.winRate = winRate;
         this.allCount = allCount;
     }

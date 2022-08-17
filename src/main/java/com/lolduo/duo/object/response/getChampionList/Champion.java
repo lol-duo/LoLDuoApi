@@ -1,11 +1,7 @@
 package com.lolduo.duo.object.response.getChampionList;
 
-import com.lolduo.duo.object.entity.ChampionEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
-
-import javax.persistence.Column;
-import javax.persistence.Id;
 
 @Getter
 public class Champion implements Comparable<Champion>{

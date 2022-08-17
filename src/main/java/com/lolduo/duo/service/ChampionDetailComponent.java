@@ -3,8 +3,7 @@ package com.lolduo.duo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
-import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
-import com.lolduo.duo.object.entity.clientInfo.entity.SoloInfoEntity;
+import com.lolduo.duo.object.entity.clientInfo.ICombiEntity;
 import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
@@ -18,11 +17,7 @@ import com.lolduo.duo.object.response.championDetail.sub.ItemUrl;
 import com.lolduo.duo.object.response.championDetail.sub.PerkUrl;
 import com.lolduo.duo.object.response.championDetail.ResponsePerk;
 import com.lolduo.duo.object.response.championDetail.sub.SpellUrl;
-import com.lolduo.duo.repository.clientInfo.ICombinationInfoRepository;
-import com.lolduo.duo.repository.clientInfo.repository.DuoInfoRepository;
-import com.lolduo.duo.repository.clientInfo.repository.QuintetInfoRepository;
-import com.lolduo.duo.repository.clientInfo.repository.SoloInfoRepository;
-import com.lolduo.duo.repository.clientInfo.repository.TrioInfoRepository;
+import com.lolduo.duo.repository.clientInfo.*;
 import com.lolduo.duo.repository.initialInfo.ItemRepository;
 import com.lolduo.duo.repository.initialInfo.PerkRepository;
 import com.lolduo.duo.repository.initialInfo.SpellRepository;
@@ -38,79 +33,42 @@ import java.util.*;
 @Slf4j
 public class ChampionDetailComponent {
 
-    private final SoloInfoRepository soloInfoRepository;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final PerkRepository perkRepository;
     private final SpellRepository spellRepository;
     private final ItemRepository itemRepository;
-    private final DuoInfoRepository duoInfoRepository;
-    private final TrioInfoRepository trioInfoRepository;
-    private final QuintetInfoRepository quintetInfoRepository;
 
-    public Long getAllCount(ArrayList<ChampionInfoDTO> championInfoDTOList){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
-        if(championInfoDTOList.size()==1){
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity==null){
-                log.info("1명일때 soloInfoEntity null 오류!");
-                return 0L;
-            }
-            return soloInfoEntity.getAllCount();
-        }
-        else{
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try {
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            } catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return 0L;
-            }
-            return infoEntity.getAllCount();
-        }
-    }
+    private final SoloCombiRepository soloCombiRepository;
+    private final DoubleCombiRepository doubleCombiRepository;
+    private final TripleCombiRepository tripleCombiRepository;
+    private final PentaCombiRepository pentaCombiRepository;
 
     //Spell
     public List<Spell> getSpellDetail(ArrayList<ChampionInfoDTO> championInfoDTOList){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
+        ICombiRepository repository = getInfoRepository(championInfoDTOList.size());
         List<Spell> spellList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){ //1명일 때
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity==null){
-                log.info("1명일때 soloInfoEntity null 오류!");
-                return null;
-            }
-            findTopK(soloInfoEntity.getSpellList(),2).forEach(spell->{
-                spellList.add((Spell) spell);
-            });
+
+        Map<Long, String> champPositionMap = new HashMap<Long, String>();
+        TreeSet<Long> championIdSet = new TreeSet<>();
+        setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
+        ICombiEntity infoEntity =null;
+        try{
+            infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
+        } catch (JsonProcessingException e) {
+            log.info("getSpellDetail - objectMapper Json Parsing 오류!");
+            return null;
         }
-        else{ //2명이상일 때
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try{
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            } catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return null;
-            }
-            if(infoEntity ==null){
-                log.info(" 2명이상일때 infoEntity null 오류!");
-                return null;
-            }
-            findTopK(infoEntity.getSpellList(),2).forEach(spell ->{
-                spellList.add((Spell) spell);
-            });
+        if(infoEntity ==null){
+            log.info("getSpellDetail - infoEntity null 오류!");
+            return null;
         }
+        findTopK(infoEntity.getSpellList(),2).forEach(spell ->
+            spellList.add((Spell) spell)
+        );
         return spellList;
     }
 
-    public List<ResponseSpell> editSpellDetail(List<Spell> spellList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
+    public List<ResponseSpell> editSpellDetail(List<Spell> spellList,ArrayList<ChampionInfoDTO> championInfoDTOList){
         List<ResponseSpell> responseSpells = new ArrayList<>();
         if(spellList==null || spellList.size()==0){
             log.info("spellList가 null 입니다.");
@@ -124,8 +82,8 @@ public class ChampionDetailComponent {
                 spellUrlList.add(spellUrl);
             }
             ResponseSpell responseSpell = new ResponseSpell(spellUrlList
-                    ,String.valueOf(spell.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") +" 게임"
-                    , String.format("%.2f%%", 100 * ((double) spell.getWin() / allCount)));
+                    ,String.valueOf(spell.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
+                    , String.format("%.2f%%", 100 * ((double) spell.getWin() / spell.getAllCount())));
             responseSpells.add(responseSpell);
         }
         return responseSpells;
@@ -143,48 +101,33 @@ public class ChampionDetailComponent {
 
     //Item
     public List<Item> getItemDetail(ArrayList<ChampionInfoDTO> championInfoDTOList, boolean summarize){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
+        ICombiRepository repository = getInfoRepository(championInfoDTOList.size());
         List<Item> topItemList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){ //1명일 때
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(), championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity==null){
-                log.info("1명일때 soloInfoEntity null 오류!");
-                return null;
-            }
 
-            removeAllZeroItems(soloInfoEntity);
-            List<Item> allItemList = summarize? getSummarizedItemList(soloInfoEntity) : soloInfoEntity.getItemList();
-            findTopK(allItemList,2).forEach(item ->{
-                topItemList.add((Item)item);
-            });
+        Map<Long, String> champPositionMap = new HashMap<Long, String>();
+        TreeSet<Long> championIdSet = new TreeSet<>();
+        setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
+        ICombiEntity infoEntity =null;
+        try{
+            infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
+        }   catch (JsonProcessingException e) {
+            log.info("getItemDetail - objectMapper Json Parsing 오류!");
+            return null;
         }
-        else { //2명이상일 때
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try{
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            }   catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return null;
-            }
-            if(infoEntity ==null){
-                log.info(" 2명이상일때 infoEntity null 오류!");
-                return null;
-            }
+        if(infoEntity ==null){
+            log.info("getItemDetail - infoEntity null 오류!");
+            return null;
+        }
 
-            removeAllZeroItems(infoEntity);
-            List<Item> allItemList = summarize? getSummarizedItemList(infoEntity) : infoEntity.getItemList();
-            findTopK(allItemList,2).forEach(item ->{
-                topItemList.add((Item)item);
-            });
-        }
+        removeAllZeroItems(infoEntity);
+        List<Item> allItemList = summarize? getSummarizedItemList(infoEntity) : infoEntity.getItemList();
+        findTopK(allItemList,2).forEach(item ->
+            topItemList.add((Item)item)
+        );
         return topItemList;
     }
 
-    public List<ResponseItem> editItemDetail(List<Item> itemList,ArrayList<ChampionInfoDTO> championInfoDTOList,Long allCount){
+    public List<ResponseItem> editItemDetail(List<Item> itemList,ArrayList<ChampionInfoDTO> championInfoDTOList){
         List<ResponseItem> responseItems = new ArrayList<>();
         if(itemList==null || itemList.size()==0){
             log.info("itemList 가 null 입니다.");
@@ -198,8 +141,8 @@ public class ChampionDetailComponent {
                 itemUrlList.add(itemUrl);
             }
             ResponseItem responseItem = new ResponseItem(itemUrlList
-                    ,String.valueOf(item.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") +" 게임"
-                    ,String.format("%.2f%%", 100 * ((double) item.getWin() / allCount)));
+                    ,String.valueOf(item.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
+                    ,String.format("%.2f%%", 100 * ((double) item.getWin() / item.getAllCount())));
             responseItems.add(responseItem);
         }
         return responseItems;
@@ -220,22 +163,7 @@ public class ChampionDetailComponent {
         return urlList;
     }
 
-    private void removeAllZeroItems(SoloInfoEntity soloInfoEntity) {
-        soloInfoEntity.getItemList().removeIf(item -> {
-            for (List<Long> itemIdList : item.getItemMap().values()) {
-                boolean hasNonZero = false;
-                for (Long itemId : itemIdList)
-                    if (itemId != 0)
-                        hasNonZero = true;
-
-                if (!hasNonZero)
-                    return true;
-            }
-            return false;
-        });
-    }
-
-    private void removeAllZeroItems(ICombinationInfoEntity infoEntity) {
+    private void removeAllZeroItems(ICombiEntity infoEntity) {
         infoEntity.getItemList().removeIf(item -> {
             for (List<Long> itemIdList : item.getItemMap().values()) {
                 boolean hasNonZero = false;
@@ -250,31 +178,8 @@ public class ChampionDetailComponent {
         });
     }
 
-    private List<Item> getSummarizedItemList(SoloInfoEntity soloInfoEntity) {
-        Map<Map<Long, List<Long>>, Long> summarizedItemMapWinMap = new HashMap<>();
-        List<Item> summarizedItemList = new ArrayList<>();
-
-        soloInfoEntity.getItemList().forEach(item -> {
-            Map<Long, List<Long>> champThreeItemMap = new HashMap<>();
-            item.getItemMap().forEach((championId, wholeItemList) -> {
-                champThreeItemMap.put(championId, wholeItemList.subList(0, 3));
-            });
-
-            if(summarizedItemMapWinMap.containsKey(champThreeItemMap))
-                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin() + summarizedItemMapWinMap.get(champThreeItemMap));
-            else
-                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin());
-        });
-
-        summarizedItemMapWinMap.forEach((threeItemMap, winCount) -> {
-            summarizedItemList.add(new Item(threeItemMap, winCount));
-        });
-
-        return summarizedItemList;
-    }
-
-    private List<Item> getSummarizedItemList(ICombinationInfoEntity infoEntity) {
-        Map<Map<Long, List<Long>>, Long> summarizedItemMapWinMap = new HashMap<>();
+    private List<Item> getSummarizedItemList(ICombiEntity infoEntity) {
+        Map<Map<Long, List<Long>>, List<Long>> itemCombiMatchRecordMap = new HashMap<>();
         List<Item> summarizedItemList = new ArrayList<>();
 
         infoEntity.getItemList().forEach(item -> {
@@ -283,61 +188,55 @@ public class ChampionDetailComponent {
                 champThreeItemMap.put(championId, wholeItemList.subList(0, 3));
             });
 
-            if(summarizedItemMapWinMap.containsKey(champThreeItemMap))
-                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin() + summarizedItemMapWinMap.get(champThreeItemMap));
-            else
-                summarizedItemMapWinMap.put(champThreeItemMap, item.getWin());
+            if(itemCombiMatchRecordMap.containsKey(champThreeItemMap)) {
+                List<Long> matchRecord = itemCombiMatchRecordMap.get(champThreeItemMap);
+                matchRecord.set(0, matchRecord.get(0) + item.getWin());
+                matchRecord.set(1, matchRecord.get(1) + item.getAllCount());
+            }
+            else {
+                List<Long> matchRecord = new ArrayList<>(2);
+                matchRecord.add(item.getWin());
+                matchRecord.add(item.getAllCount());
+                itemCombiMatchRecordMap.put(champThreeItemMap, matchRecord);
+            }
         });
 
-        summarizedItemMapWinMap.forEach((threeItemMap, winCount) -> {
-            summarizedItemList.add(new Item(threeItemMap, winCount));
-        });
+        itemCombiMatchRecordMap.forEach((threeItemMap, matchRecord) ->
+            summarizedItemList.add(new Item(threeItemMap, matchRecord.get(0), matchRecord.get(1)))
+        );
 
         return summarizedItemList;
     }
 
     //Perk
     public List<Perk> getPerkDetail(ArrayList<ChampionInfoDTO> championInfoDTOList, boolean summarize){
-        ICombinationInfoRepository repository = getInfoRepository(championInfoDTOList.size());
+        ICombiRepository repository = getInfoRepository(championInfoDTOList.size());
         List<Perk> topPerkList = new ArrayList<>();
-        if(championInfoDTOList.size()==1){ //1명 일 때
-            ChampionInfoDTO championInfoDTO = championInfoDTOList.get(0);
-            SoloInfoEntity soloInfoEntity = soloInfoRepository.findByChampionIdAndPosition(championInfoDTO.getChampionId(),championInfoDTO.getPosition()).orElse(null);
-            if(soloInfoEntity == null){
-                log.info(" soloInfoEntity null 오류!");
-                return null;
-            }
 
-            List<Perk> allPerkList = summarize? getSummarizedPerkList(soloInfoEntity) : soloInfoEntity.getPerkList();
-            findTopK(allPerkList,2).forEach(perk ->{
-                topPerkList.add((Perk)perk);
-            });
+        Map<Long, String> champPositionMap = new HashMap<Long, String>();
+        TreeSet<Long> championIdSet = new TreeSet<>();
+        setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
+        ICombiEntity infoEntity =null;
+        try {
+            infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
+        } catch (JsonProcessingException e) {
+            log.info("objectMapper Json Parsing 오류!");
+            return null;
         }
-        else { //2명이상일 때
-            Map<Long, String> champPositionMap = new HashMap<Long, String>();
-            TreeSet<Long> championIdSet = new TreeSet<>();
-            setChampAndPositionInfo(championInfoDTOList,champPositionMap,championIdSet);
-            ICombinationInfoEntity infoEntity =null;
-            try {
-                infoEntity = repository.findByChampionIdAndPosition(objectMapper.writeValueAsString(championIdSet),objectMapper.writeValueAsString(champPositionMap)).orElse(null);
-            } catch (JsonProcessingException e) {
-                log.info("objectMapper Json Parsing 오류!");
-                return null;
-            }
-            if(infoEntity ==null){
-                log.info(" infoEntity null 오류!");
-                return null;
-            }
+        if(infoEntity ==null){
+            log.info(" infoEntity null 오류!");
+            return null;
+        }
 
-            List<Perk> allPerkList = summarize? getSummarizedPerkList(infoEntity) : infoEntity.getPerkList();
-            findTopK(allPerkList,2).forEach(perk ->{
-                topPerkList.add( (Perk) perk);
-            });
-        }
+        List<Perk> allPerkList = summarize? getSummarizedPerkList(infoEntity) : infoEntity.getPerkList();
+        findTopK(allPerkList,2).forEach(perk ->
+            topPerkList.add( (Perk) perk)
+        );
+
         return topPerkList;
     }
 
-    public List<ResponsePerk> editPerkDetail(List<Perk> perkList, ArrayList<ChampionInfoDTO> championInfoDTOList, Long allCount){
+    public List<ResponsePerk> editPerkDetail(List<Perk> perkList, ArrayList<ChampionInfoDTO> championInfoDTOList){
         List<ResponsePerk> responsePerks = new ArrayList<>();
         if(perkList==null || perkList.size()==0){
             log.info("perkList가 null 입니다.");
@@ -353,7 +252,7 @@ public class ChampionDetailComponent {
             }
             ResponsePerk responsePerk = new ResponsePerk(perkUrlList
                     ,String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임"
-                    ,String.format("%.2f%%", 100 * ((double) perk.getWin() / allCount)));
+                    ,String.format("%.2f%%", 100 * ((double) perk.getWin() / perk.getAllCount())));
             responsePerks.add(responsePerk);
         }
 
@@ -406,31 +305,8 @@ public class ChampionDetailComponent {
         return urlList;
     }
 
-    private List<Perk> getSummarizedPerkList(SoloInfoEntity soloInfoEntity) {
-        Map<Map<Long, List<Long>>, Long> summarizedPerkMapWinMap = new HashMap<>();
-        List<Perk> summarizedPerkList = new ArrayList<>();
-
-        soloInfoEntity.getPerkList().forEach(perk -> {
-            Map<Long, List<Long>> champMajorPerkMap = new HashMap<>();
-            perk.getPerkMap().forEach((championId, wholePerkList) -> {
-                champMajorPerkMap.put(championId, findMajorPerks(wholePerkList));
-            });
-
-            if(summarizedPerkMapWinMap.containsKey(champMajorPerkMap))
-                summarizedPerkMapWinMap.put(champMajorPerkMap, perk.getWin() + summarizedPerkMapWinMap.get(champMajorPerkMap));
-            else
-                summarizedPerkMapWinMap.put(champMajorPerkMap, perk.getWin());
-        });
-
-        summarizedPerkMapWinMap.forEach((majorPerkMap, winCount) -> {
-            summarizedPerkList.add(new Perk(majorPerkMap, winCount));
-        });
-
-        return summarizedPerkList;
-    }
-
-    private List<Perk> getSummarizedPerkList(ICombinationInfoEntity infoEntity) {
-        Map<Map<Long, List<Long>>, Long> summarizedPerkMapWinMap = new HashMap<>();
+    private List<Perk> getSummarizedPerkList(ICombiEntity infoEntity) {
+        Map<Map<Long, List<Long>>, List<Long>> perkCombiMatchRecordMap = new HashMap<>();
         List<Perk> summarizedPerkList = new ArrayList<>();
 
         infoEntity.getPerkList().forEach(perk -> {
@@ -439,14 +315,21 @@ public class ChampionDetailComponent {
                 champMajorPerkMap.put(championId, findMajorPerks(wholePerkList));
             });
 
-            if(summarizedPerkMapWinMap.containsKey(champMajorPerkMap))
-                summarizedPerkMapWinMap.put(champMajorPerkMap, perk.getWin() + summarizedPerkMapWinMap.get(champMajorPerkMap));
-            else
-                summarizedPerkMapWinMap.put(champMajorPerkMap, perk.getWin());
+            if(perkCombiMatchRecordMap.containsKey(champMajorPerkMap)) {
+                List<Long> matchRecord = perkCombiMatchRecordMap.get(champMajorPerkMap);
+                matchRecord.set(0, matchRecord.get(0) + perk.getWin());
+                matchRecord.set(1, matchRecord.get(1) + perk.getAllCount());
+            }
+            else {
+                List<Long> matchRecord = new ArrayList<>(2);
+                matchRecord.add(perk.getWin());
+                matchRecord.add(perk.getAllCount());
+                perkCombiMatchRecordMap.put(champMajorPerkMap, matchRecord);
+            }
         });
 
-        summarizedPerkMapWinMap.forEach((majorPerkMap, winCount) -> {
-            summarizedPerkList.add(new Perk(majorPerkMap, winCount));
+        perkCombiMatchRecordMap.forEach((majorPerkMap, matchRecord) -> {
+            summarizedPerkList.add(new Perk(majorPerkMap, matchRecord.get(0), matchRecord.get(1)));
         });
 
         return summarizedPerkList;
@@ -471,22 +354,22 @@ public class ChampionDetailComponent {
             championIdSet.add(championInfoDTO.getChampionId());
         }
     }
-    private ICombinationInfoRepository getInfoRepository(int championCount) {
+    private ICombiRepository getInfoRepository(int championCount) {
         if (championCount == 1) {
             log.info("getInfoRepository() - championCount : {}, 1명", championCount);
-            return null;
+            return soloCombiRepository;
         }
         else if (championCount == 2) {
             log.info("getInfoRepository() - championCount : {}, 2명", championCount);
-            return duoInfoRepository;
+            return doubleCombiRepository;
         }
         else if (championCount == 3) {
             log.info("getInfoRepository() - championCount : {}, 3명", championCount);
-            return trioInfoRepository;
+            return tripleCombiRepository;
         }
         else if (championCount == 5) {
             log.info("getInfoRepository() - championCount : {}, 5명", championCount);
-            return quintetInfoRepository;
+            return pentaCombiRepository;
         }
         else {
             log.info("getInfoRepository() - 요청 문제 발생");
