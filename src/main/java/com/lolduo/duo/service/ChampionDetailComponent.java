@@ -119,7 +119,7 @@ public class ChampionDetailComponent {
             return null;
         }
 
-        removeAllZeroItems(infoEntity);
+        removeItemsAmountUnderThree(infoEntity);
         List<Item> allItemList = summarize? getSummarizedItemList(infoEntity) : infoEntity.getItemList();
         findTopK(allItemList,2).forEach(item ->
             topItemList.add((Item)item)
@@ -163,15 +163,18 @@ public class ChampionDetailComponent {
         return urlList;
     }
 
-    private void removeAllZeroItems(ICombiEntity infoEntity) {
+    private void removeItemsAmountUnderThree(ICombiEntity infoEntity) {
         infoEntity.getItemList().removeIf(item -> {
             for (List<Long> itemIdList : item.getItemMap().values()) {
-                boolean hasNonZero = false;
-                for (Long itemId : itemIdList)
-                    if (itemId != 0)
-                        hasNonZero = true;
+                int count = 0;
+                for (Long itemId : itemIdList) {
+                    if (itemId == 0)
+                        break;
+                    else
+                        count++;
+                }
 
-                if (!hasNonZero)
+                if (count < 3)
                     return true;
             }
             return false;
