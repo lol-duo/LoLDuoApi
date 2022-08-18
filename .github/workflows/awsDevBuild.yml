@@ -1,7 +1,6 @@
 name: aws devServer CI/CD
 
 on:
-
   push:
     branches: [ "develop" ]
 env:
