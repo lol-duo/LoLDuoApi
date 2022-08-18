@@ -11,7 +11,7 @@ public class PrimaryPerkMap {
     Map<Long,Long> primaryMap;
     public PrimaryPerkMap(){
         primaryMap = new HashMap<>();
-        primaryMap.put(8122L,8100L);
+        primaryMap.put(8112L,8100L);
         primaryMap.put(8124L,8100L);
         primaryMap.put(8128L,8100L);
         primaryMap.put(9923L,8100L);
@@ -20,6 +20,7 @@ public class PrimaryPerkMap {
         primaryMap.put(8360L,8300L);
         primaryMap.put(8369L,8300L);
 
+        primaryMap.put(8005L,8000L);
         primaryMap.put(8008L,8000L);
         primaryMap.put(8021L,8000L);
         primaryMap.put(8010L,8000L);

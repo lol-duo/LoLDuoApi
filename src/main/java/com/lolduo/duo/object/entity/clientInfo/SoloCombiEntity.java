@@ -1,11 +1,9 @@
-package com.lolduo.duo.object.entity.clientInfo.entity;
+package com.lolduo.duo.object.entity.clientInfo;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.lolduo.duo.object.entity.clientInfo.ICombinationInfoEntity;
 import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,10 +15,10 @@ import java.util.*;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "duo_info")
+@Table(name = "solo_combi")
 @Getter
-@TypeDef(name = "json", typeClass = JsonStringType.class)
-public class DuoInfoEntity implements ICombinationInfoEntity {
+@TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
+public class SoloCombiEntity implements ICombiEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -50,7 +48,7 @@ public class DuoInfoEntity implements ICombinationInfoEntity {
 
     @Type(type = "json")
     @Column(name = "item_list", columnDefinition = "json")
-    private List<Item> itemList = new ArrayList<>();
+    private List<Item> itemList;
 
     @Override
     public void setAllCount(Long allCount) {
@@ -62,7 +60,7 @@ public class DuoInfoEntity implements ICombinationInfoEntity {
         this.winCount = winCount;
     }
 
-    public DuoInfoEntity(TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, List<Perk> perkList, List<Spell> spellList, List<Item> itemList) {
+    public SoloCombiEntity(TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, List<Perk> perkList, List<Spell> spellList, List<Item> itemList) {
         this.championId = championId;
         this.position = position;
         this.allCount = allCount;

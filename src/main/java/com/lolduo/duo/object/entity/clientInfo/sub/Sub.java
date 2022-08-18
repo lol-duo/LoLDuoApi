@@ -1,24 +1,20 @@
 package com.lolduo.duo.object.entity.clientInfo.sub;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+
 @Getter
-@NoArgsConstructor
-public class Sub implements Comparable<Sub>{
-
+public abstract class Sub implements Comparable<Sub> {
     private Long win;
+    private Long allCount;
 
-    public void setWin(Long win) {
+    public Sub(Long win, Long allCount) {
         this.win = win;
-    }
-
-    public Sub(Long win) {
-        this.win = win;
+        this.allCount = allCount;
     }
 
     @Override
     public int compareTo(@NotNull Sub sub) {
-        return this.win <= sub.getWin() ? -1 : 1;
+        return ((double) this.win / this.allCount) <= (double) sub.getWin() / sub.getAllCount() ? -1 : 1;
     }
 }
