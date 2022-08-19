@@ -161,7 +161,8 @@ public class ClientService {
         List<ResponseInfo> infoList  = new ArrayList<>();
         String perkBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
         String itemBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
-        String[] perkMythItemArr =  combiEntity.getPerkMythItem().split("|");
+        String[] perkMythItemArr =  combiEntity.getPerkMythItem().split("\\|");
+        log.info("perkMythItemArr {} {} {} {}",perkMythItemArr[0],perkMythItemArr[1],perkMythItemArr[2],perkMythItemArr[3]);
         int perkMtyhIndex = 0 ;
         for(Long ChampionId : combiEntity.getChampionId()) {
             Long championId = ChampionId;
@@ -181,7 +182,8 @@ public class ClientService {
 
             List<ResponseSpell2> spellList  = championDetailComponent2.makeSpellList(championDetailComponent2.pickSpellList(combiEntity),ChampionId);
             List<ResponseItem2> itemList = championDetailComponent2.makeItemList(championDetailComponent2.pickItemList(combiEntity),ChampionId);
-            List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMtyhIndex]),Long.valueOf(perkMythItemArr[perkMtyhIndex]+2));
+            log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMtyhIndex],perkMythItemArr[1],perkMythItemArr[2],perkMythItemArr[3]);
+            List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMtyhIndex]),Long.valueOf(perkMythItemArr[perkMtyhIndex+2]));
             perkMtyhIndex += 4;
             infoList.add(new ResponseInfo(championId,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
         }
