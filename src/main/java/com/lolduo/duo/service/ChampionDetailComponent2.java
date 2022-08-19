@@ -13,7 +13,7 @@ import com.lolduo.duo.repository.initialInfo.ChampionRepository;
 import com.lolduo.duo.repository.initialInfo.ItemRepository;
 import com.lolduo.duo.repository.initialInfo.PerkRepository;
 import com.lolduo.duo.repository.initialInfo.SpellRepository;
-import com.lolduo.duo.service.temp.PerkUrlMap;
+import com.lolduo.duo.service.temp.PerkIdMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +34,7 @@ public class ChampionDetailComponent2 {
     private final DoubleCombiRepository doubleCombiRepository;
     private final TripleCombiRepository tripleCombiRepository;
     private final PentaCombiRepository pentaCombiRepository;
-    private PerkUrlMap perkUrlMap =new PerkUrlMap();
+    private PerkIdMap perkIdMap =new PerkIdMap();
 
 
     public List<ResponseSpell2> makeSpellList(List<Spell> spellList,Long ChampionId){
@@ -99,9 +99,9 @@ public class ChampionDetailComponent2 {
         String subPerkUrl = perkRepository.findById(SecondaryPekrId).get().getImgUrl();
         result.setSubPerkUrl(baseUrl+subPerkUrl);
 
-        List<PerkUrlMap.PerkCheck> mainList = perkUrlMap.getMainPerkMap().get(MainPerkId);
-        List<PerkUrlMap.PerkCheck> subList  = perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId);
-        List<PerkUrlMap.PerkCheck> subSubList = perkUrlMap.getSubSubPerkList();
+        List<PerkIdMap.PerkCheck> mainList = perkIdMap.getMainPerkMap().get(MainPerkId);
+        List<PerkIdMap.PerkCheck> subList  = perkIdMap.getSecondaryPerkMap().get(SecondaryPekrId);
+        List<PerkIdMap.PerkCheck> subSubList = perkIdMap.getSubSubPerkList();
 
         result.setKeyPerkUrlList(mainList.get(0).getPerkList());
         result.setMain1UrlList(mainList.get(1).getPerkList());
