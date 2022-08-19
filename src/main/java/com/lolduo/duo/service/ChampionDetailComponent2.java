@@ -100,9 +100,9 @@ public class ChampionDetailComponent2 {
         List<PerkUrlMap.PerkCheck> mainList = new ArrayList<>();
         mainList.addAll(perkUrlMap.getMainPerkMap().get(MainPerkId));
         List<PerkUrlMap.PerkCheck> subList  = new ArrayList<>();
-        mainList.addAll(perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId));
+        subList.addAll(perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId));
         List<PerkUrlMap.PerkCheck> subSubList = new ArrayList<>();
-        mainList.addAll(perkUrlMap.getSubSubPerkList());
+        subSubList.addAll(perkUrlMap.getSubSubPerkList());
         for(Long perkId : perkList){
             String perkUrl ="";
             PerkEntity perkEntity= perkRepository.findById(perkId).orElse(null);
@@ -111,12 +111,14 @@ public class ChampionDetailComponent2 {
             }
             else{
                 perkUrl = baseUrl+perkEntity.getImgUrl()+"_disabled.png";
+                log.info("initResponsePerk - perkUrl : {}",perkUrl);
                 boolean isFind =false;
                 for(int i = 0 ; i <mainList.size();i++){
                     int index = mainList.get(i).getPerkList().indexOf(perkUrl);
                     if(index!=-1){
                         isFind=true;
                         mainList.get(i).getPerkList().set(index,mainList.get(i).getPerkList().get(index).substring(0,mainList.get(i).getPerkList().get(index).length()-14));
+                        break;
                     }
                 }
                 if(isFind)
@@ -126,6 +128,7 @@ public class ChampionDetailComponent2 {
                     if(index!=-1){
                         isFind=true;
                         subList.get(i).getPerkList().set(index, subList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-14)) ;
+                        break;
                     }
                 }
                 if(isFind)
@@ -134,20 +137,28 @@ public class ChampionDetailComponent2 {
                     int index = subSubList.get(i).getPerkList().indexOf(perkUrl);
                     if(index!=-1){
                         subList.get(i).getPerkList().set(index,subSubList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-14));
+                        break;
                     }
                 }
             }
         }
+        log.info("initResponsePerk - mainList size : " + mainList.size());
         result.setKeyPerkUrlList(mainList.get(0).getPerkList());
         result.setMain1UrlList(mainList.get(1).getPerkList());
         result.setMain2UrlList(mainList.get(2).getPerkList());
         result.setMain3UrlList(mainList.get(3).getPerkList());
-        result.setSub1UrlList(subList.get(0).getPerkList());
-        result.setSub2UrlList(subList.get(1).getPerkList());
-        result.setSub3UrlList(subList.get(2).getPerkList());
+
+        log.info("initResponsePerk - subsubList size : " + subSubList.size());
         result.setSubsub1UrlList(subSubList.get(0).getPerkList());
         result.setSubsub2UrlListl(subSubList.get(1).getPerkList());
         result.setSubsub3UrlList(subSubList.get(2).getPerkList());
+
+        log.info("initResponsePerk - subList size : " + subList.size());
+        result.setSub1UrlList(subList.get(0).getPerkList());
+        result.setSub2UrlList(subList.get(1).getPerkList());
+        result.setSub3UrlList(subList.get(2).getPerkList());
+
+
         return result;
     }
     public List<ResponseItem2> makeItemList(List<Item> itemList,Long ChampionId){
