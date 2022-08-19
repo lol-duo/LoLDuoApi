@@ -3,14 +3,15 @@ package com.lolduo.duo.service.temp;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Getter
 public class PerkUrlMap {
-    Map<Long,List<PerkCheck>> mainPerkMap;
-    Map<Long,List<PerkCheck>> secondaryPerkMap;
+    Map<Long,List<PerkCheck>> mainPerkMap = new HashMap<>();
+    Map<Long,List<PerkCheck>> secondaryPerkMap = new HashMap<>();
 
-    List<PerkCheck> subSubPerkList;
+    List<PerkCheck> subSubPerkList = new ArrayList<>();
     public PerkUrlMap() {
 
         //8000 정밀

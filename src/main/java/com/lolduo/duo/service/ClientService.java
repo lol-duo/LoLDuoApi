@@ -149,8 +149,8 @@ public class ClientService {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
         }
         if(combiEntity==null){
-            log.info("getChampionDetail2 - 요청한 챔피언을 찾을 수 없습니다. Entitiy가 NULL입니다. ");
-            return new ResponseEntity<>("요청한 챔피언을 찾을 수 없습니다. Entitiy가 NULL입니다.", HttpStatus.SERVICE_UNAVAILABLE);
+            log.info("getChampionDetail2 - 챔피언은 존재하나, 신화를 산 내역이 존재하지 않습니다. Entitiy가 NULL입니다. ");
+            return new ResponseEntity<>("챔피언은 찾았으나 신화를 산 기록이 존재하지 않습니다. Entitiy가 NULL입니다.", HttpStatus.SERVICE_UNAVAILABLE);
         }
         result = makeChampionDetail2(winRate,AllCount,combiEntity);
         return new ResponseEntity<>(result,HttpStatus.OK);
