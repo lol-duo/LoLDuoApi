@@ -100,9 +100,9 @@ public class ChampionDetailComponent2 {
         List<PerkUrlMap.PerkCheck> mainList = new ArrayList<>();
         mainList.addAll(perkUrlMap.getMainPerkMap().get(MainPerkId));
         List<PerkUrlMap.PerkCheck> subList  = new ArrayList<>();
-        mainList.addAll(perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId));
+        subList.addAll(perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId));
         List<PerkUrlMap.PerkCheck> subSubList = new ArrayList<>();
-        mainList.addAll(perkUrlMap.getSubSubPerkList());
+        subSubList.addAll(perkUrlMap.getSubSubPerkList());
         for(Long perkId : perkList){
             String perkUrl ="";
             PerkEntity perkEntity= perkRepository.findById(perkId).orElse(null);
