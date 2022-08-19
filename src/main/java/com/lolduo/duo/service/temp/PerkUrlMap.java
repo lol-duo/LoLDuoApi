@@ -204,7 +204,7 @@ public class PerkUrlMap {
         strList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/StatMods/StatModsArmorIcon.png_disabled.png");
         strList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/StatMods/StatModsMagicResIcon.MagicResist_Fix.png_disabled.png");
         subSubCheckList.add(new PerkCheck(strList,false));
-
+        subSubPerkList = subPerkCheckList;
 
     }
 
