@@ -32,6 +32,8 @@ public class PentaCombiEntity implements Serializable, ICombiEntity {
     @Type(type = "json")
     @Column(name = "position", columnDefinition = "json")
     private Map<Long, String> position;
+    @Column(name = "perk_myth_item")
+    private String perkMythItem;
     @Column(name = "all_count")
     private Long allCount;
     @Column(name = "win_count")
@@ -45,16 +47,6 @@ public class PentaCombiEntity implements Serializable, ICombiEntity {
     @Type(type = "json")
     @Column(name = "item_list", columnDefinition = "json")
     private List<Item> itemList;
-
-    public PentaCombiEntity(TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, List<Perk> perkList, List<Spell> spellList, List<Item> itemList) {
-        this.championId = championId;
-        this.position = position;
-        this.allCount = allCount;
-        this.winCount = winCount;
-        this.perkList = perkList;
-        this.spellList = spellList;
-        this.itemList = itemList;
-    }
 
     @Override
     public void setAllCount(Long allCount) {

@@ -17,4 +17,7 @@ public interface ICombiRepository {
     List<? extends ICombiEntity> findAllByChampionIdAndPositionGameCountAsc(String championId, String position, String positionList, String excludePositionList);
 
     Optional<? extends ICombiEntity> findByChampionIdAndPosition(String championId, String position);
+    //ChampionDetail2
+    Optional<? extends ICombiEntity> findAllCountAndWinCountByChampionPosition(String position);
+    Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
 }

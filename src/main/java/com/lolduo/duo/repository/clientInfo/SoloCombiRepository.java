@@ -1,5 +1,6 @@
 package com.lolduo.duo.repository.clientInfo;
 
+import com.lolduo.duo.object.entity.clientInfo.DoubleCombiEntity;
 import com.lolduo.duo.object.entity.clientInfo.SoloCombiEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,4 +35,9 @@ public interface SoloCombiRepository extends JpaRepository<SoloCombiEntity,Long>
 
     @Query(value = "select * from solo_combi where json_contains(champion_id,?1) and json_contains(position,?2) limit 1",nativeQuery = true)
     Optional<SoloCombiEntity> findByChampionIdAndPosition(String championId, String position);
+
+    @Query(value = "select id, position, champion_id, item_list, perk_list, spell_list, perk_myth_item, sum(win_count) as win_count, sum(all_count) as all_count from solo_combi where json_contains(position,?1) group by position limit 1",nativeQuery = true)
+    Optional<SoloCombiEntity> findAllCountAndWinCountByChampionPosition(String position);
+    @Query(value = "select * from solo_combi where json_contains(position,?1) and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
+    Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
 }

@@ -17,7 +17,7 @@ public interface ICombiEntity {
     List<Perk> getPerkList();
     List<Spell> getSpellList();
     List<Item> getItemList();
-
+    String getPerkMythItem();
     void setAllCount(Long allCount);
     void setWinCount(Long winCount);
 }
