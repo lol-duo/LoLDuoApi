@@ -15,10 +15,8 @@ public class PerkUrlMap {
     public PerkUrlMap() {
 
         //8000 정밀
-
         List<PerkCheck> mainPerkCheckList =new ArrayList<>();
         List<PerkCheck> subPerkCheckList =new ArrayList<>();
-
         List<String> strList = new ArrayList<>();
         strList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/Styles/Precision/PressTheAttack/PressTheAttack.png_disabled.png");
         strList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/Styles/Precision/LethalTempo/LethalTempoTemp.png_disabled.png");
