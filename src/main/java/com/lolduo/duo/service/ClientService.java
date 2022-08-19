@@ -150,7 +150,7 @@ public class ClientService {
         }
         if(combiEntity==null){
             log.info("getChampionDetail2 - 챔피언은 존재하나, 신화를 산 내역이 존재하지 않습니다. Entitiy가 NULL입니다. ");
-            return new ResponseEntity<>("챔피언은 찾았으나 신화를 산 기록이 존재하지 않습니다. Entitiy가 NULL입니다.", HttpStatus.SERVICE_UNAVAILABLE);
+            return new ResponseEntity<>("챔피언은 찾았으나 신화를 산 기록이 존재하지 않습니다. Entitiy가 NULL입니다.", HttpStatus.OK);
         }
         result = makeChampionDetail2(winRate,AllCount,combiEntity);
         return new ResponseEntity<>(result,HttpStatus.OK);
@@ -182,7 +182,7 @@ public class ClientService {
 
             List<ResponseSpell2> spellList  = championDetailComponent2.makeSpellList(championDetailComponent2.pickSpellList(combiEntity),ChampionId);
             List<ResponseItem2> itemList = championDetailComponent2.makeItemList(championDetailComponent2.pickItemList(combiEntity),ChampionId);
-            log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMtyhIndex],perkMythItemArr[1],perkMythItemArr[2],perkMythItemArr[3]);
+            log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMtyhIndex],perkMythItemArr[2]);
             List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMtyhIndex]),Long.valueOf(perkMythItemArr[perkMtyhIndex+2]));
             perkMtyhIndex += 4;
             infoList.add(new ResponseInfo(championId,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
