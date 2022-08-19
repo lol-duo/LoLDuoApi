@@ -93,7 +93,7 @@ public class ChampionDetailComponent2 {
 
         result.setAllCount(allCount);
         result.setWinRate(winRate);
-
+        log.info("initResponsePerk - 메인 룬 ID : " + MainPerkId + " , 보조 룬 ID : " + SecondaryPekrId);
         String mainPerkUrl = perkRepository.findById(MainPerkId).get().getImgUrl();
         result.setMainPerkUrl(baseUrl+ mainPerkUrl);
         String subPerkUrl = perkRepository.findById(SecondaryPekrId).get().getImgUrl();

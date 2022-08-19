@@ -161,7 +161,7 @@ public class ClientService {
         List<ResponseInfo> infoList  = new ArrayList<>();
         String perkBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
         String itemBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
-        String[] perkMythItemArr =  combiEntity.getPerkMythItem().split("|");
+        String[] perkMythItemArr =  combiEntity.getPerkMythItem().split("\\|");
         int perkMtyhIndex = 0 ;
         for(Long ChampionId : combiEntity.getChampionId()) {
             Long championId = ChampionId;
