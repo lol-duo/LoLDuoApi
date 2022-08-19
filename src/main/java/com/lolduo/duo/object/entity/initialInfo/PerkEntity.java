@@ -19,4 +19,5 @@ public class PerkEntity {
     private String name;
     @Column
     private String imgUrl;
+
 }

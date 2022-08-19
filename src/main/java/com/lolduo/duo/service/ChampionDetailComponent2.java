@@ -7,6 +7,7 @@ import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
 import com.lolduo.duo.object.entity.clientInfo.sub.Sub;
+import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.championDetail2.*;
 import com.lolduo.duo.repository.clientInfo.*;
 import com.lolduo.duo.repository.initialInfo.ChampionRepository;
@@ -99,10 +100,47 @@ public class ChampionDetailComponent2 {
         String subPerkUrl = perkRepository.findById(SecondaryPekrId).get().getImgUrl();
         result.setSubPerkUrl(baseUrl+subPerkUrl);
 
-        List<PerkUrlMap.PerkCheck> mainList = perkUrlMap.getMainPerkMap().get(MainPerkId);
-        List<PerkUrlMap.PerkCheck> subList  = perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId);
-        List<PerkUrlMap.PerkCheck> subSubList = perkUrlMap.getSubSubPerkList();
-
+        List<PerkUrlMap.PerkCheck> mainList = new ArrayList<>();
+        mainList.addAll(perkUrlMap.getMainPerkMap().get(MainPerkId));
+        List<PerkUrlMap.PerkCheck> subList  = new ArrayList<>();
+        mainList.addAll(perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId));
+        List<PerkUrlMap.PerkCheck> subSubList = new ArrayList<>();
+        mainList.addAll(perkUrlMap.getSubSubPerkList());
+        for(Long perkId : perkList){
+            String perkUrl ="";
+            PerkEntity perkEntity= perkRepository.findById(perkId).orElse(null);
+            if(perkEntity==null) {
+                log.info("initResponsePerk - perkEntity 가 NULL입니다. 따로 perk를 활성화 하지않습니다. perkId : {}",perkId);
+            }
+            else{
+                perkUrl = baseUrl+perkEntity.getImgUrl()+"_disabled.png";
+                boolean isFind =false;
+                for(int i = 0 ; i <mainList.size();i++){
+                    int index = mainList.get(i).getPerkList().indexOf(perkUrl);
+                    if(index!=-1){
+                        isFind=true;
+                        mainList.get(i).getPerkList().get(index).substring(0,mainList.get(i).getPerkList().get(index).length()-14);
+                    }
+                }
+                if(isFind)
+                    continue;
+                for(int i = 0 ; i <subList.size();i++){
+                    int index = subList.get(i).getPerkList().indexOf(perkUrl);
+                    if(index!=-1){
+                        isFind=true;
+                        subList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-14);
+                    }
+                }
+                if(isFind)
+                    continue;
+                for(int i = 0 ; i <subSubList.size();i++){
+                    int index = subSubList.get(i).getPerkList().indexOf(perkUrl);
+                    if(index!=-1){
+                        subSubList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-14);
+                    }
+                }
+            }
+        }
         result.setKeyPerkUrlList(mainList.get(0).getPerkList());
         result.setMain1UrlList(mainList.get(1).getPerkList());
         result.setMain2UrlList(mainList.get(2).getPerkList());
@@ -113,10 +151,6 @@ public class ChampionDetailComponent2 {
         result.setSubsub1UrlList(subSubList.get(0).getPerkList());
         result.setSubsub2UrlListl(subSubList.get(1).getPerkList());
         result.setSubsub3UrlList(subSubList.get(2).getPerkList());
-        /* 나중에 추가할 것. 활성화하는 알고리즘 추가할것.
-
-         */
-
         return result;
     }
     public List<ResponseItem2> makeItemList(List<Item> itemList,Long ChampionId){
