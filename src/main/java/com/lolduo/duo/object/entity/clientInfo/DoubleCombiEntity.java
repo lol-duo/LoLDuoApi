@@ -32,6 +32,8 @@ public class DoubleCombiEntity implements ICombiEntity {
     @Column(name = "position", columnDefinition = "json")
     private Map<Long, String> position = new HashMap<>();
 
+    @Column(name = "perk_myth_item")
+    private String perkMythItem;
     @Column(name = "all_count")
     private Long allCount;
 
@@ -58,15 +60,5 @@ public class DoubleCombiEntity implements ICombiEntity {
     @Override
     public void setWinCount(Long winCount) {
         this.winCount = winCount;
-    }
-
-    public DoubleCombiEntity(TreeSet<Long> championId, Map<Long, String> position, Long allCount, Long winCount, List<Perk> perkList, List<Spell> spellList, List<Item> itemList) {
-        this.championId = championId;
-        this.position = position;
-        this.allCount = allCount;
-        this.winCount = winCount;
-        this.perkList = perkList;
-        this.spellList = spellList;
-        this.itemList = itemList;
     }
 }
