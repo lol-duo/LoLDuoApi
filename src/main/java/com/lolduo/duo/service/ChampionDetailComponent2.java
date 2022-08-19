@@ -117,7 +117,7 @@ public class ChampionDetailComponent2 {
                     int index = mainList.get(i).getPerkList().indexOf(perkUrl);
                     if(index!=-1){
                         isFind=true;
-                        mainList.get(i).getPerkList().set(index,mainList.get(i).getPerkList().get(index).substring(0,mainList.get(i).getPerkList().get(index).length()-14));
+                        mainList.get(i).getPerkList().set(index,mainList.get(i).getPerkList().get(index).substring(0,mainList.get(i).getPerkList().get(index).length()-13));
                         break;
                     }
                 }
@@ -127,7 +127,7 @@ public class ChampionDetailComponent2 {
                     int index = subList.get(i).getPerkList().indexOf(perkUrl);
                     if(index!=-1){
                         isFind=true;
-                        subList.get(i).getPerkList().set(index, subList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-14)) ;
+                        subList.get(i).getPerkList().set(index, subList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-13)) ;
                         break;
                     }
                 }
@@ -136,7 +136,7 @@ public class ChampionDetailComponent2 {
                 for(int i = 0 ; i <subSubList.size();i++){
                     int index = subSubList.get(i).getPerkList().indexOf(perkUrl);
                     if(index!=-1){
-                        subList.get(i).getPerkList().set(index,subSubList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-14));
+                        subList.get(i).getPerkList().set(index,subSubList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-13));
                         break;
                     }
                 }
