@@ -7,14 +7,13 @@ import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
 import com.lolduo.duo.object.entity.clientInfo.sub.Sub;
-import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.championDetail2.*;
 import com.lolduo.duo.repository.clientInfo.*;
 import com.lolduo.duo.repository.initialInfo.ChampionRepository;
 import com.lolduo.duo.repository.initialInfo.ItemRepository;
 import com.lolduo.duo.repository.initialInfo.PerkRepository;
 import com.lolduo.duo.repository.initialInfo.SpellRepository;
-import com.lolduo.duo.service.temp.PerkUrlMap;
+import com.lolduo.duo.service.temp.PerkFormationMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +29,13 @@ public class ChampionDetailComponent2 {
     private final PerkRepository perkRepository;
     private final SpellRepository spellRepository;
     private final ItemRepository itemRepository;
+
     private final ChampionRepository championRepository;
     private final SoloCombiRepository soloCombiRepository;
     private final DoubleCombiRepository doubleCombiRepository;
     private final TripleCombiRepository tripleCombiRepository;
     private final PentaCombiRepository pentaCombiRepository;
-    private PerkUrlMap perkUrlMap =new PerkUrlMap();
-
+    private PerkFormationMap perkFormationMap =new PerkFormationMap();
 
     public List<ResponseSpell2> makeSpellList(List<Spell> spellList,Long ChampionId){
         List<ResponseSpell2> responseSpellList = new ArrayList<>();
@@ -82,82 +81,40 @@ public class ChampionDetailComponent2 {
         }
         return responsePerkList;
     }
-    public ResponsePerk2 initResponsePerk(Long MainPerkId, Long SecondaryPekrId,List<Long> perkList,String winRate,String allCount){
+
+    public ResponsePerk2 initResponsePerk(Long MainPerkId, Long SecondaryPerkId, List<Long> activePerkList, String winRate, String allCount){
         String baseUrl ="https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
         ResponsePerk2 result =new ResponsePerk2();
 
-        perkList.remove(MainPerkId);
-        perkList.remove(SecondaryPekrId);
+        activePerkList.remove(MainPerkId);
+        activePerkList.remove(SecondaryPerkId);
 
         result.setAllCount(allCount);
         result.setWinRate(winRate);
-        log.info("initResponsePerk - 메인 룬 ID : " + MainPerkId + " , 보조 룬 ID : " + SecondaryPekrId);
+        log.info("initResponsePerk - 메인 룬 ID : " + MainPerkId + " , 보조 룬 ID : " + SecondaryPerkId);
         String mainPerkUrl = perkRepository.findById(MainPerkId).get().getImgUrl();
         result.setMainPerkUrl(baseUrl+ mainPerkUrl);
-        String subPerkUrl = perkRepository.findById(SecondaryPekrId).get().getImgUrl();
+        String subPerkUrl = perkRepository.findById(SecondaryPerkId).get().getImgUrl();
         result.setSubPerkUrl(baseUrl+subPerkUrl);
 
-        List<PerkUrlMap.PerkCheck> mainList = new ArrayList<>();
-        mainList.addAll(perkUrlMap.getMainPerkMap().get(MainPerkId));
-        List<PerkUrlMap.PerkCheck> subList  = new ArrayList<>();
-        subList.addAll(perkUrlMap.getSecondaryPerkMap().get(SecondaryPekrId));
-        List<PerkUrlMap.PerkCheck> subSubList = new ArrayList<>();
-        subSubList.addAll(perkUrlMap.getSubSubPerkList());
-        for(Long perkId : perkList){
-            String perkUrl ="";
-            PerkEntity perkEntity= perkRepository.findById(perkId).orElse(null);
-            if(perkEntity==null) {
-                log.info("initResponsePerk - perkEntity 가 NULL입니다. 따로 perk를 활성화 하지않습니다. perkId : {}",perkId);
-            }
-            else{
-                perkUrl = baseUrl+perkEntity.getImgUrl()+"_disabled.png";
-                log.info("initResponsePerk - perkUrl : {}",perkUrl);
-                boolean isFind =false;
-                for(int i = 0 ; i <mainList.size();i++){
-                    int index = mainList.get(i).getPerkList().indexOf(perkUrl);
-                    if(index!=-1){
-                        isFind=true;
-                        mainList.get(i).getPerkList().set(index,mainList.get(i).getPerkList().get(index).substring(0,mainList.get(i).getPerkList().get(index).length()-13));
-                        break;
-                    }
-                }
-                if(isFind)
-                    continue;
-                for(int i = 0 ; i <subList.size();i++){
-                    int index = subList.get(i).getPerkList().indexOf(perkUrl);
-                    if(index!=-1){
-                        isFind=true;
-                        subList.get(i).getPerkList().set(index, subList.get(i).getPerkList().get(index).substring(0,subList.get(i).getPerkList().get(index).length()-13)) ;
-                        break;
-                    }
-                }
-                if(isFind)
-                    continue;
-                for(int i = 0 ; i <subSubList.size();i++){
-                    int index = subSubList.get(i).getPerkList().indexOf(perkUrl);
-                    if(index!=-1){
-                        subSubList.get(i).getPerkList().set(index,subSubList.get(i).getPerkList().get(index).substring(0,subSubList.get(i).getPerkList().get(index).length()-13));
-                        break;
-                    }
-                }
-            }
-        }
-        log.info("initResponsePerk - mainList size : " + mainList.size());
-        result.setKeyPerkUrlList(mainList.get(0).getPerkList());
-        result.setMain1UrlList(mainList.get(1).getPerkList());
-        result.setMain2UrlList(mainList.get(2).getPerkList());
-        result.setMain3UrlList(mainList.get(3).getPerkList());
+        List<PerkFormationMap.PerkCheck> mainPerkRowList = perkFormationMap.getMainPerkMap().get(MainPerkId);
+        List<PerkFormationMap.PerkCheck> subPerkRowList  = perkFormationMap.getSecondaryPerkMap().get(SecondaryPerkId);
+        List<PerkFormationMap.PerkCheck> statModRowList = perkFormationMap.getStatModList();
 
-        log.info("initResponsePerk - subsubList size : " + subSubList.size());
-        result.setSubsub1UrlList(subSubList.get(0).getPerkList());
-        result.setSubsub2UrlListl(subSubList.get(1).getPerkList());
-        result.setSubsub3UrlList(subSubList.get(2).getPerkList());
+        mainPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
+        subPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
+        disableInactiveStatMod(statModRowList, activePerkList);
 
-        log.info("initResponsePerk - subList size : " + subList.size());
-        result.setSub1UrlList(subList.get(0).getPerkList());
-        result.setSub2UrlList(subList.get(1).getPerkList());
-        result.setSub3UrlList(subList.get(2).getPerkList());
-
+        result.setKeyPerkUrlList(mainPerkRowList.get(0).getPerkUrlListDisableApplied());
+        result.setMain1UrlList(mainPerkRowList.get(1).getPerkUrlListDisableApplied());
+        result.setMain2UrlList(mainPerkRowList.get(2).getPerkUrlListDisableApplied());
+        result.setMain3UrlList(mainPerkRowList.get(3).getPerkUrlListDisableApplied());
+        result.setSub1UrlList(subPerkRowList.get(0).getPerkUrlListDisableApplied());
+        result.setSub2UrlList(subPerkRowList.get(1).getPerkUrlListDisableApplied());
+        result.setSub3UrlList(subPerkRowList.get(2).getPerkUrlListDisableApplied());
+        result.setSubsub1UrlList(statModRowList.get(0).getPerkUrlListDisableApplied());
+        result.setSubsub2UrlList(statModRowList.get(1).getPerkUrlListDisableApplied());
+        result.setSubsub3UrlList(statModRowList.get(2).getPerkUrlListDisableApplied());
 
         return result;
     }
@@ -225,4 +182,63 @@ public class ChampionDetailComponent2 {
         return topList;
     }
 
+    private void disableInactiveStatMod(List<PerkFormationMap.PerkCheck> statModRowList, List<Long> activePerkList) {
+        List<Long> activeStatModList = activePerkList.subList(0, 3); // StatMod가 activePerkList의 앞의 3가지 원소인 경우라 가정하고 사용. 업데이트로 statmod의 id가 변경될 경우 수정 필요.
+        log.info("disableInactiveStatMod - 활성화된 statMod ID : {}", activeStatModList.toString());
+        if (activeStatModList.contains(5001L)) { // ? - ? - 5001
+            statModRowList.get(2).initActivePerkIndexWithId(5001L);
+            if (activeStatModList.contains(5005L)) { // 5005 - ? - 5001
+                statModRowList.get(0).initActivePerkIndexWithId(5005L);
+                statModRowList.get(1).initActivePerkIndex(activeStatModList);
+            }
+            else if (activeStatModList.contains(5007L)) { // 5007 - ? - 5001
+                statModRowList.get(0).initActivePerkIndexWithId(5007L);
+                statModRowList.get(1).initActivePerkIndex(activeStatModList);
+            }
+            else { // 5008 - ? - 5001
+                statModRowList.get(0).initActivePerkIndexWithId(5008L);
+                if (activeStatModList.contains(5002L))
+                    statModRowList.get(1).initActivePerkIndexWithId(5002L);
+                else if (activeStatModList.contains(5003L))
+                    statModRowList.get(1).initActivePerkIndexWithId(5003L);
+                else
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+            }
+        }
+        else { // ? - ? - ?
+            if (activeStatModList.contains(5005L)) { // 5005 - ? - ?
+                statModRowList.get(0).initActivePerkIndexWithId(5005L);
+                if (activeStatModList.contains(5008L)) { // 5005 - 5008 - ?
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+                    statModRowList.get(2).initActivePerkIndex(activeStatModList);
+                }
+            }
+            else if (activeStatModList.contains(5007L)) { // 5007 - ? - ?
+                statModRowList.get(0).initActivePerkIndexWithId(5007L);
+                if (activeStatModList.contains(5008L)) { // 5007 - 5008 - ?
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+                    statModRowList.get(2).initActivePerkIndex(activeStatModList);
+                }
+            }
+            else { // 5008 - ? - ?
+                statModRowList.get(0).initActivePerkIndexWithId(5008L);
+                if (Collections.frequency(activeStatModList, 5008L) == 2) { // 5008 - 5008 - ?
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+                    statModRowList.get(2).initActivePerkIndex(activeStatModList);
+                }
+                else if (Collections.frequency(activeStatModList, 5002L) == 2) { // 5008 - 5002 - 5002
+                    statModRowList.get(1).initActivePerkIndexWithId(5002L);
+                    statModRowList.get(2).initActivePerkIndexWithId(5002L);
+                }
+                else if (Collections.frequency(activeStatModList, 5003L) == 2) { // 5008 - 5003 - 5003
+                    statModRowList.get(1).initActivePerkIndexWithId(5003L);
+                    statModRowList.get(2).initActivePerkIndexWithId(5003L);
+                }
+                else { // 5008 - 5002 - 5003 or // 5008 - 5003 - 5002 (둘을 하나로 통일)
+                    statModRowList.get(1).initActivePerkIndexWithId(5002L);
+                    statModRowList.get(2).initActivePerkIndexWithId(5003L);
+                }
+            }
+        }
+    }
 }
