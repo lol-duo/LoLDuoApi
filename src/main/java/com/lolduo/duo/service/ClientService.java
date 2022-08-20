@@ -158,13 +158,15 @@ public class ClientService {
     public ChampionDetail2 makeChampionDetail2(String winRate, String allCount, ICombiEntity combiEntity){
         String thisWinRate = String.format("%.2f%%", 100 * ((double) combiEntity.getWinCount() / combiEntity.getAllCount())) ;
         String thisAllCount = String.valueOf(combiEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-        List<ResponseInfo> infoList  = new ArrayList<>();
+        List<ResponseInfo> infoList = new ArrayList<>();
         String perkBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
         String itemBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
-        String[] perkMythItemArr =  combiEntity.getPerkMythItem().split("\\|");
+        String[] perkMythItemArr = combiEntity.getPerkMythItem().split("\\|");
         log.info("perkMythItemArr {} {} {} {}",perkMythItemArr[0],perkMythItemArr[1],perkMythItemArr[2],perkMythItemArr[3]);
-        int perkMtyhIndex = 0 ;
-        for(Long ChampionId : combiEntity.getChampionId()) {
+
+        int perkMythIndex = 0;
+        Set<Long> perkMythOrderedChampionIdSet = combiEntity.getPerkList().get(0).getPerkMap().keySet();
+        for(Long ChampionId : perkMythOrderedChampionIdSet) {
             Long championId = ChampionId;
             String championPosition = combiEntity.getPosition().get(ChampionId);
             String championPositionUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/" + championPosition + ".png";
@@ -175,16 +177,16 @@ public class ClientService {
             }
             championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/" + championImgUrl;
             List<String > keyStoneListUrl = new ArrayList<>();
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMtyhIndex]+".png");
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMtyhIndex+1]+".png");
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMtyhIndex+2]+".png");
-            String keyItemUrl = itemBaseUrl + perkMythItemArr[perkMtyhIndex+3]+".png";
+            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex]+".png");
+            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+1]+".png");
+            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+2]+".png");
+            String keyItemUrl = itemBaseUrl + perkMythItemArr[perkMythIndex+3]+".png";
 
             List<ResponseSpell2> spellList  = championDetailComponent2.makeSpellList(championDetailComponent2.pickSpellList(combiEntity),ChampionId);
             List<ResponseItem2> itemList = championDetailComponent2.makeItemList(championDetailComponent2.pickItemList(combiEntity),ChampionId);
-            log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMtyhIndex],perkMythItemArr[2]);
-            List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMtyhIndex]),Long.valueOf(perkMythItemArr[perkMtyhIndex+2]));
-            perkMtyhIndex += 4;
+            log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMythIndex],perkMythItemArr[2]);
+            List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMythIndex]),Long.valueOf(perkMythItemArr[perkMythIndex+2]));
+            perkMythIndex += 4;
             infoList.add(new ResponseInfo(championId,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
         }
         return new ChampionDetail2(winRate,allCount,thisWinRate,thisAllCount,infoList);

@@ -35,7 +35,7 @@ public class ChampionDetailComponent2 {
     private final DoubleCombiRepository doubleCombiRepository;
     private final TripleCombiRepository tripleCombiRepository;
     private final PentaCombiRepository pentaCombiRepository;
-    private PerkFormationMap perkFormationMap =new PerkFormationMap();
+    private PerkFormationMap perkFormationMap = new PerkFormationMap();
 
     public List<ResponseSpell2> makeSpellList(List<Spell> spellList,Long ChampionId){
         List<ResponseSpell2> responseSpellList = new ArrayList<>();
@@ -71,7 +71,7 @@ public class ChampionDetailComponent2 {
         });
         return perkList;
     }
-    public List<ResponsePerk2> makePerkList(List<Perk> perkList, Long ChampionId,Long mainPerkId,Long subPerkId){
+    public List<ResponsePerk2> makePerkList(List<Perk> perkList, Long ChampionId, Long mainPerkId, Long subPerkId){
         List<ResponsePerk2> responsePerkList = new ArrayList<>();
         for(Perk perk : perkList){
             String winRate = String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
@@ -84,7 +84,7 @@ public class ChampionDetailComponent2 {
 
     public ResponsePerk2 initResponsePerk(Long MainPerkId, Long SecondaryPerkId, List<Long> activePerkList, String winRate, String allCount){
         String baseUrl ="https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
-        ResponsePerk2 result =new ResponsePerk2();
+        ResponsePerk2 result = new ResponsePerk2();
 
         activePerkList.remove(MainPerkId);
         activePerkList.remove(SecondaryPerkId);
@@ -93,25 +93,26 @@ public class ChampionDetailComponent2 {
         result.setWinRate(winRate);
         log.info("initResponsePerk - 메인 룬 ID : " + MainPerkId + " , 보조 룬 ID : " + SecondaryPerkId);
         String mainPerkUrl = perkRepository.findById(MainPerkId).get().getImgUrl();
-        result.setMainPerkUrl(baseUrl+ mainPerkUrl);
+        result.setMainPerkUrl(baseUrl + mainPerkUrl);
         String subPerkUrl = perkRepository.findById(SecondaryPerkId).get().getImgUrl();
-        result.setSubPerkUrl(baseUrl+subPerkUrl);
+        result.setSubPerkUrl(baseUrl + subPerkUrl);
 
         List<PerkFormationMap.PerkCheck> mainPerkRowList = perkFormationMap.getMainPerkMap().get(MainPerkId);
-        List<PerkFormationMap.PerkCheck> subPerkRowList  = perkFormationMap.getSecondaryPerkMap().get(SecondaryPerkId);
+        List<PerkFormationMap.PerkCheck> subPerkRowList = perkFormationMap.getSecondaryPerkMap().get(SecondaryPerkId);
         List<PerkFormationMap.PerkCheck> statModRowList = perkFormationMap.getStatModList();
 
         mainPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
-        subPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
-        disableInactiveStatMod(statModRowList, activePerkList);
-
         result.setKeyPerkUrlList(mainPerkRowList.get(0).getPerkUrlListDisableApplied());
         result.setMain1UrlList(mainPerkRowList.get(1).getPerkUrlListDisableApplied());
         result.setMain2UrlList(mainPerkRowList.get(2).getPerkUrlListDisableApplied());
         result.setMain3UrlList(mainPerkRowList.get(3).getPerkUrlListDisableApplied());
+
+        subPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
         result.setSub1UrlList(subPerkRowList.get(0).getPerkUrlListDisableApplied());
         result.setSub2UrlList(subPerkRowList.get(1).getPerkUrlListDisableApplied());
         result.setSub3UrlList(subPerkRowList.get(2).getPerkUrlListDisableApplied());
+
+        disableInactiveStatMod(statModRowList, activePerkList);
         result.setSubsub1UrlList(statModRowList.get(0).getPerkUrlListDisableApplied());
         result.setSubsub2UrlList(statModRowList.get(1).getPerkUrlListDisableApplied());
         result.setSubsub3UrlList(statModRowList.get(2).getPerkUrlListDisableApplied());
