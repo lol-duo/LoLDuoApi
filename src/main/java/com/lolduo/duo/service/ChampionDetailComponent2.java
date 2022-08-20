@@ -97,24 +97,24 @@ public class ChampionDetailComponent2 {
         String subPerkUrl = perkRepository.findById(SecondaryPerkId).get().getImgUrl();
         result.setSubPerkUrl(baseUrl+subPerkUrl);
 
-        List<PerkFormationMap.PerkCheck> mainPerkRowList = new ArrayList<>(perkFormationMap.getMainPerkMap().get(MainPerkId));
-        List<PerkFormationMap.PerkCheck> subPerkRowList  = new ArrayList<>(perkFormationMap.getSecondaryPerkMap().get(SecondaryPerkId));
-        List<PerkFormationMap.PerkCheck> statModRowList = new ArrayList<>(perkFormationMap.getStatModList());
+        List<PerkFormationMap.PerkCheck> mainPerkRowList = perkFormationMap.getMainPerkMap().get(MainPerkId);
+        List<PerkFormationMap.PerkCheck> subPerkRowList  = perkFormationMap.getSecondaryPerkMap().get(SecondaryPerkId);
+        List<PerkFormationMap.PerkCheck> statModRowList = perkFormationMap.getStatModList();
 
-        mainPerkRowList.forEach(perkCheck -> perkCheck.disableInactivePerks(activePerkList));
-        subPerkRowList.forEach(perkCheck -> perkCheck.disableInactivePerks(activePerkList));
+        mainPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
+        subPerkRowList.forEach(perkCheck -> perkCheck.initActivePerkIndex(activePerkList));
         disableInactiveStatMod(statModRowList, activePerkList);
 
-        result.setKeyPerkUrlList(mainPerkRowList.get(0).getPerkUrlList());
-        result.setMain1UrlList(mainPerkRowList.get(1).getPerkUrlList());
-        result.setMain2UrlList(mainPerkRowList.get(2).getPerkUrlList());
-        result.setMain3UrlList(mainPerkRowList.get(3).getPerkUrlList());
-        result.setSub1UrlList(subPerkRowList.get(0).getPerkUrlList());
-        result.setSub2UrlList(subPerkRowList.get(1).getPerkUrlList());
-        result.setSub3UrlList(subPerkRowList.get(2).getPerkUrlList());
-        result.setSubsub1UrlList(statModRowList.get(0).getPerkUrlList());
-        result.setSubsub2UrlList(statModRowList.get(1).getPerkUrlList());
-        result.setSubsub3UrlList(statModRowList.get(2).getPerkUrlList());
+        result.setKeyPerkUrlList(mainPerkRowList.get(0).getPerkUrlListDisableApplied());
+        result.setMain1UrlList(mainPerkRowList.get(1).getPerkUrlListDisableApplied());
+        result.setMain2UrlList(mainPerkRowList.get(2).getPerkUrlListDisableApplied());
+        result.setMain3UrlList(mainPerkRowList.get(3).getPerkUrlListDisableApplied());
+        result.setSub1UrlList(subPerkRowList.get(0).getPerkUrlListDisableApplied());
+        result.setSub2UrlList(subPerkRowList.get(1).getPerkUrlListDisableApplied());
+        result.setSub3UrlList(subPerkRowList.get(2).getPerkUrlListDisableApplied());
+        result.setSubsub1UrlList(statModRowList.get(0).getPerkUrlListDisableApplied());
+        result.setSubsub2UrlList(statModRowList.get(1).getPerkUrlListDisableApplied());
+        result.setSubsub3UrlList(statModRowList.get(2).getPerkUrlListDisableApplied());
 
         return result;
     }
@@ -186,57 +186,57 @@ public class ChampionDetailComponent2 {
         List<Long> activeStatModList = activePerkList.subList(0, 3); // StatMod가 activePerkList의 앞의 3가지 원소인 경우라 가정하고 사용. 업데이트로 statmod의 id가 변경될 경우 수정 필요.
         log.info("disableInactiveStatMod - 활성화된 statMod ID : {}", activeStatModList.toString());
         if (activeStatModList.contains(5001L)) { // ? - ? - 5001
-            statModRowList.get(2).disablePerksExcept(5001L);
+            statModRowList.get(2).initActivePerkIndexWithId(5001L);
             if (activeStatModList.contains(5005L)) { // 5005 - ? - 5001
-                statModRowList.get(0).disablePerksExcept(5005L);
-                statModRowList.get(1).disableInactivePerks(activeStatModList);
+                statModRowList.get(0).initActivePerkIndexWithId(5005L);
+                statModRowList.get(1).initActivePerkIndex(activeStatModList);
             }
             else if (activeStatModList.contains(5007L)) { // 5007 - ? - 5001
-                statModRowList.get(0).disablePerksExcept(5007L);
-                statModRowList.get(1).disableInactivePerks(activeStatModList);
+                statModRowList.get(0).initActivePerkIndexWithId(5007L);
+                statModRowList.get(1).initActivePerkIndex(activeStatModList);
             }
             else { // 5008 - ? - 5001
-                statModRowList.get(0).disablePerksExcept(5008L);
+                statModRowList.get(0).initActivePerkIndexWithId(5008L);
                 if (activeStatModList.contains(5002L))
-                    statModRowList.get(1).disablePerksExcept(5002L);
+                    statModRowList.get(1).initActivePerkIndexWithId(5002L);
                 else if (activeStatModList.contains(5003L))
-                    statModRowList.get(1).disablePerksExcept(5003L);
+                    statModRowList.get(1).initActivePerkIndexWithId(5003L);
                 else
-                    statModRowList.get(1).disablePerksExcept(5008L);
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
             }
         }
         else { // ? - ? - ?
             if (activeStatModList.contains(5005L)) { // 5005 - ? - ?
-                statModRowList.get(0).disablePerksExcept(5005L);
+                statModRowList.get(0).initActivePerkIndexWithId(5005L);
                 if (activeStatModList.contains(5008L)) { // 5005 - 5008 - ?
-                    statModRowList.get(1).disablePerksExcept(5008L);
-                    statModRowList.get(2).disableInactivePerks(activeStatModList);
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+                    statModRowList.get(2).initActivePerkIndex(activeStatModList);
                 }
             }
             else if (activeStatModList.contains(5007L)) { // 5007 - ? - ?
-                statModRowList.get(0).disablePerksExcept(5007L);
+                statModRowList.get(0).initActivePerkIndexWithId(5007L);
                 if (activeStatModList.contains(5008L)) { // 5007 - 5008 - ?
-                    statModRowList.get(1).disablePerksExcept(5008L);
-                    statModRowList.get(2).disableInactivePerks(activeStatModList);
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+                    statModRowList.get(2).initActivePerkIndex(activeStatModList);
                 }
             }
             else { // 5008 - ? - ?
-                statModRowList.get(0).disablePerksExcept(5008L);
+                statModRowList.get(0).initActivePerkIndexWithId(5008L);
                 if (Collections.frequency(activeStatModList, 5008L) == 2) { // 5008 - 5008 - ?
-                    statModRowList.get(1).disablePerksExcept(5008L);
-                    statModRowList.get(2).disableInactivePerks(activeStatModList);
+                    statModRowList.get(1).initActivePerkIndexWithId(5008L);
+                    statModRowList.get(2).initActivePerkIndex(activeStatModList);
                 }
                 else if (Collections.frequency(activeStatModList, 5002L) == 2) { // 5008 - 5002 - 5002
-                    statModRowList.get(1).disablePerksExcept(5002L);
-                    statModRowList.get(2).disablePerksExcept(5002L);
+                    statModRowList.get(1).initActivePerkIndexWithId(5002L);
+                    statModRowList.get(2).initActivePerkIndexWithId(5002L);
                 }
                 else if (Collections.frequency(activeStatModList, 5003L) == 2) { // 5008 - 5003 - 5003
-                    statModRowList.get(1).disablePerksExcept(5003L);
-                    statModRowList.get(2).disablePerksExcept(5003L);
+                    statModRowList.get(1).initActivePerkIndexWithId(5003L);
+                    statModRowList.get(2).initActivePerkIndexWithId(5003L);
                 }
                 else { // 5008 - 5002 - 5003 or // 5008 - 5003 - 5002 (둘을 하나로 통일)
-                    statModRowList.get(1).disablePerksExcept(5002L);
-                    statModRowList.get(2).disablePerksExcept(5003L);
+                    statModRowList.get(1).initActivePerkIndexWithId(5002L);
+                    statModRowList.get(2).initActivePerkIndexWithId(5003L);
                 }
             }
         }

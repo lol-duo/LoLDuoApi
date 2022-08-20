@@ -307,33 +307,41 @@ public class PerkFormationMap {
     }
 
     public class PerkCheck{
-        ArrayList<String> perkUrlList;
-        List<Long> perkIdList;
+        private ArrayList<String> perkUrlList;
+        private List<Long> perkIdList;
+        private int activePerkIndex;
 
         public PerkCheck(List<Long> perkIdList, ArrayList<String> perkUrlList) {
             this.perkIdList = perkIdList;
             this.perkUrlList = perkUrlList;
+            activePerkIndex = -1;
         }
 
-        public List<String> getPerkUrlList() {
-            return perkUrlList;
+        public List<String> getPerkUrlListDisableApplied() {
+            ArrayList<String> perkUrlListDisableApplied = new ArrayList<>(perkUrlList);
+
+            for (int index = 0; index < perkUrlListDisableApplied.size(); index++) {
+                if (index != activePerkIndex)
+                    perkUrlListDisableApplied.set(index, perkUrlList.get(index) + "_disabled.png");
+            }
+            return perkUrlListDisableApplied;
         }
 
-        public void disableInactivePerks(List<Long> activePerkList) {
+        public void initActivePerkIndex(List<Long> activePerkList) {
             int index = 0;
             for (Long perkId : perkIdList) {
-                if (!activePerkList.contains(perkId))
-                    perkUrlList.set(index, perkUrlList.get(index) + "_disabled.png");
+                if (activePerkList.contains(perkId))
+                    activePerkIndex = index;
                 index++;
             }
         }
 
-        public void disablePerksExcept(Long exceptPerkId) {
+        public void initActivePerkIndexWithId(Long activePerkId) {
             int index = 0;
-            log.info("disablePerksExcept - exceptPerkId : {}, perkCheck's perkIdList : {}", exceptPerkId, perkIdList);
+            log.info("initActivePerkIndexWithId - activePerkId : {}, perkCheck's perkIdList : {}", activePerkId, perkIdList);
             for (Long perkId : perkIdList) {
-                if (!perkId.equals(exceptPerkId))
-                    perkUrlList.set(index, perkUrlList.get(index) + "_disabled.png");
+                if (perkId.equals(activePerkId))
+                    activePerkIndex = index;
                 index++;
             }
         }
