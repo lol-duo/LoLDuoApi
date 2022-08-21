@@ -4,13 +4,17 @@ package com.lolduo.duo.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
+import com.lolduo.duo.object.dto.client.CombiIdentityDTO;
 import com.lolduo.duo.object.dto.client.CombiSearchDTO;
+import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
+import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
 import com.lolduo.duo.object.response.championDetail.ResponseItem;
 import com.lolduo.duo.object.response.championDetail.ResponsePerk;
 import com.lolduo.duo.object.response.championDetail.ResponseSpell;
 import com.lolduo.duo.object.response.championDetail2.*;
+import com.lolduo.duo.object.response.combiPerkDetail.CombiPerkDetail;
 import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.object.response.sub.ChampionInfoResponse;
 import com.lolduo.duo.object.entity.initialInfo.ChampionEntity;
@@ -21,6 +25,8 @@ import com.lolduo.duo.repository.clientInfo.DoubleCombiRepository;
 import com.lolduo.duo.repository.clientInfo.PentaCombiRepository;
 import com.lolduo.duo.repository.clientInfo.SoloCombiRepository;
 import com.lolduo.duo.repository.clientInfo.TripleCombiRepository;
+import com.lolduo.duo.repository.initialInfo.ItemRepository;
+import com.lolduo.duo.repository.initialInfo.PerkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -40,6 +46,8 @@ public class ClientService {
     private final TripleCombiRepository tripleCombiRepository;
     private final PentaCombiRepository pentaCombiRepository;
     private final ChampionRepository championRepository;
+    private final PerkRepository perkRepository;
+    private final ItemRepository itemRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ChampionDetailComponent championDetailComponent;
     private final ChampionDetailComponent2 championDetailComponent2;
@@ -97,9 +105,6 @@ public class ClientService {
     public ResponseEntity<?> getChampionDetail2(ArrayList<ChampionInfoDTO> championInfoDTOList) {
         //Input Check Start
         log.info("getChampionDetail - 조합 상세 정보 확인.");
-        championInfoDTOList.forEach(championInfoDTO ->
-                log.info("getChampionDetail - champion : {}, position : {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition())
-        );
         if(championInfoDTOList == null) {
             log.info("요청정보 자체가 null입니다. 잘못된 요청입니다. 404 리턴");
             return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
@@ -108,8 +113,8 @@ public class ClientService {
             if(championInfoDTO.getPosition()==null){
                 log.info("포지션 정보가 null입니다. 잘못된 요청입니다. 404 리턴");
                 return new ResponseEntity<>("포지션 정보가 null 입니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
-
             }
+            log.info("getChampionDetail - champion : {}, position : {}", championInfoDTO.getChampionId(), championInfoDTO.getPosition());
             if (championInfoDTO.getPosition().equals("ALL") || championInfoDTO.getChampionId() == 0) {
                 log.info("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다. 404 리턴");
                 return new ResponseEntity<>("포지션에 ALL이나, 챔피언 ID에 0이 있습니다. 잘못된 요청입니다.",HttpStatus.BAD_REQUEST);
@@ -143,7 +148,7 @@ public class ClientService {
         AllCount = String.valueOf(combiEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
 
         try {
-            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap)).orElse(null);
+            combiEntity = combiRepository.findByPositionWhichHasMythItem(objectMapper.writeValueAsString(championPositionMap)).orElse(null);
         } catch (JsonProcessingException e) {
             log.error("getChampionDetail2 - objectMapper writeValue error");
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
@@ -171,15 +176,17 @@ public class ClientService {
             String championPosition = combiEntity.getPosition().get(ChampionId);
             String championPositionUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/" + championPosition + ".png";
             String championImgUrl = championRepository.findById(ChampionId).get().getImgUrl();
+            String championName = championRepository.findById(ChampionId).get().getName();
             if (championImgUrl == null) {
                 log.info("setChampionDetail2 - " + ChampionId + "에 해당하는 이미지URL이 ChampionTable에 존재하지 않습니다. ALL값으로 세팅합니다.");
-                championImgUrl = "ALL";
+                championImgUrl = "ALL.png";
             }
             championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/" + championImgUrl;
             List<String > keyStoneListUrl = new ArrayList<>();
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex]+".png");
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+1]+".png");
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+2]+".png");
+            for(int i = 0 ; i < 3;i++){
+                PerkEntity perkEntity = perkRepository.findById(Long.valueOf(perkMythItemArr[perkMythIndex+i])).orElse(new PerkEntity(0L,"No Perk","perk-images/X.png"));
+                keyStoneListUrl.add(perkBaseUrl + perkEntity.getImgUrl());
+            }
             String keyItemUrl = itemBaseUrl + perkMythItemArr[perkMythIndex+3]+".png";
 
             List<ResponseSpell2> spellList  = championDetailComponent2.makeSpellList(championDetailComponent2.pickSpellList(combiEntity),ChampionId);
@@ -187,9 +194,111 @@ public class ClientService {
             log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMythIndex],perkMythItemArr[2]);
             List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMythIndex]),Long.valueOf(perkMythItemArr[perkMythIndex+2]));
             perkMythIndex += 4;
-            infoList.add(new ResponseInfo(championId,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
+            infoList.add(new ResponseInfo(championId, championName,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
         }
         return new ChampionDetail2(winRate,allCount,thisWinRate,thisAllCount,infoList);
+    }
+    public ResponseEntity<?> getCombiPerkDetail(CombiIdentityDTO combiIdentityDTO) {
+        log.info("getCombiPerkDetail - 챔피언 조합 - 룬 상세 페이지 요청. positionMap : {}, perkMythItem : {}", combiIdentityDTO.getPositionMap().toString(), combiIdentityDTO.getPerkMythItem());
+        if (combiIdentityDTO == null) {
+            log.info("getCombiPerkDetail - combiIdentityDTO가 null입니다. 404 리턴");
+            return new ResponseEntity<>("요청정보 자체가 null입니다. 잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+        else if (combiIdentityDTO.getPositionMap() == null) {
+            log.info("getCombiPerkDetail - 포지션 정보가 null입니다. 잘못된 요청입니다. 404 리턴");
+            return new ResponseEntity<>("포지션 정보가 null 입니다. 잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+        else if (combiIdentityDTO.getPerkMythItem() == null) {
+            log.info("getCombiPerkDetail - perkMythItem 정보가 null입니다. 잘못된 요청입니다. 404 리턴");
+            return new ResponseEntity<>("조합의 주요 룬/신화 아이템 정보가 null 입니다. 잘못된 요청입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        CombiPerkDetail result;
+
+        int championCount = combiIdentityDTO.getPositionMap().size();
+        ICombiRepository combiRepository = getCombiRepository(championCount);
+        ICombiEntity combiEntity;
+        try {
+            combiEntity = combiRepository.findByPositionAndPerkMythItem(objectMapper.writeValueAsString(combiIdentityDTO.getPositionMap()), combiIdentityDTO.getPerkMythItem()).orElse(null);
+        }
+        catch (JsonProcessingException e) {
+            log.error("getCombiPerkDetail - objectMapper writeValue error");
+            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
+        }
+
+        if(combiEntity==null) {
+            log.info("getChampionDetail2 - 요청한 챔피언을 찾을 수 없습니다. Entitiy가 NULL입니다. ");
+            return new ResponseEntity<>("요청한 챔피언을 찾을 수 없습니다. Entitiy가 NULL입니다.", HttpStatus.SERVICE_UNAVAILABLE);
+        }
+
+        result = makeCombiPerkDetail(combiEntity);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    public CombiPerkDetail makeCombiPerkDetail(ICombiEntity combiEntity) {
+        CombiPerkDetail resultCombiPerkDetail;
+        String perkBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/";
+        String itemBaseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/";
+        String[] perkMythItemArr = combiEntity.getPerkMythItem().split("\\|");
+        log.info("makeCombiPerkDetail - perkMythItemArr : {} {} {} {}",perkMythItemArr[0],perkMythItemArr[1],perkMythItemArr[2],perkMythItemArr[3]);
+
+        int perkMythIndex = 0;
+        List<CombiPerkDetail.ResponseChampionInfo> responseChampionInfoList = new ArrayList<>();
+        List<CombiPerkDetail.CombiPerkInfo> combiPerkInfoList = new ArrayList<>();
+        Set<Long> perkMythOrderedChampionIdSet = combiEntity.getPerkList().get(0).getPerkMap().keySet();
+
+        for(Long championId : perkMythOrderedChampionIdSet) {
+            String championPosition = combiEntity.getPosition().get(championId);
+            String championPositionImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/" + championPosition + ".png";
+            String championImgUrl;
+            String MythItemImgUrl;
+
+            try {
+                championImgUrl = championRepository.findById(championId).get().getImgUrl();
+            }
+            catch (NoSuchElementException e) {
+                log.info("makeCombiPerkDetail - " + championId + "에 해당하는 이미지 URL이 ChampionTable에 존재하지 않습니다. ALL값으로 세팅합니다.");
+                championImgUrl = "ALL.png";
+            }
+            championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/" + championImgUrl;
+
+            try {
+                MythItemImgUrl = itemRepository.findById(Long.valueOf(perkMythItemArr[perkMythIndex + 3])).get().getImgUrl();
+                MythItemImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/" + championImgUrl;
+            }
+            catch (NoSuchElementException e) {
+                log.info("makeCombiPerkDetail - " + perkMythItemArr[perkMythIndex + 3] + "에 해당하는 이미지 URL이 ItemTable에 존재하지 않습니다. ALL 이미지로 세팅합니다.");
+                MythItemImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/ALL.png";
+            }
+
+            List<String> perkMythItemImgUrlList = new ArrayList<>();
+
+            for(int i = 0 ; i < 3;i++){
+                PerkEntity perkEntity = perkRepository.findById(Long.valueOf(perkMythItemArr[perkMythIndex + i])).orElse(new PerkEntity(0L,"No Perk","perk-images/X.png"));
+                perkMythItemImgUrlList.add(perkBaseUrl + perkEntity.getImgUrl());
+            }
+            perkMythItemImgUrlList.add(itemBaseUrl + perkMythItemArr[perkMythIndex + 3] + ".png");
+
+            log.info("makeCombiPerkDetail - perkMythItemArr = Main : {} Sub : {}",perkMythItemArr[perkMythIndex],perkMythItemArr[2]);
+            responseChampionInfoList.add(new CombiPerkDetail.ResponseChampionInfo(championId, championImgUrl, championPosition, championPositionImgUrl, perkMythItemImgUrlList));
+            perkMythIndex += 4;
+        }
+
+        for (Perk perk : combiEntity.getPerkList()) {
+            perkMythIndex = 0;
+            List<ResponsePerk2> responsePerkList = new ArrayList<>();
+            String winRate = String.format("%.2f%%", 100 * ((double) perk.getWin() / perk.getAllCount()));
+            String allCount =String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
+
+            for (Long championId : perkMythOrderedChampionIdSet) {
+                ResponsePerk2 responsePerk = championDetailComponent2.initResponsePerk(Long.valueOf(perkMythItemArr[perkMythIndex]), Long.valueOf(perkMythItemArr[perkMythIndex + 2]), perk.getPerkMap().get(championId), winRate, allCount);
+                responsePerkList.add(responsePerk);
+                perkMythIndex += 4;
+            }
+            combiPerkInfoList.add(new CombiPerkDetail.CombiPerkInfo(perk.getAllCount(), winRate, responsePerkList));
+        }
+
+        resultCombiPerkDetail = new CombiPerkDetail(responseChampionInfoList, combiPerkInfoList);
+        return resultCombiPerkDetail;
     }
     public ResponseEntity<?> getChampionInfoList(CombiSearchDTO combiSearchDTO){
         log.info("getChampionInfoList - 챔피언 조합 검색. winRateAsc: {}, gameCountAsc: {}", combiSearchDTO.getWinRateAsc(), combiSearchDTO.getGameCountAsc());

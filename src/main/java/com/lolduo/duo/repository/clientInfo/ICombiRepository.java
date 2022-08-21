@@ -19,5 +19,6 @@ public interface ICombiRepository {
     Optional<? extends ICombiEntity> findByChampionIdAndPosition(String championId, String position);
     //ChampionDetail2
     Optional<? extends ICombiEntity> findAllCountAndWinCountByChampionPosition(String position);
-    Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
+    Optional<? extends ICombiEntity> findByPositionWhichHasMythItem(String position);
+    Optional<? extends ICombiEntity> findByPositionAndPerkMythItem(String position, String perkMythItem);
 }

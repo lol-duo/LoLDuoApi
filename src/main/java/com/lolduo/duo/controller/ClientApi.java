@@ -1,6 +1,7 @@
 package com.lolduo.duo.controller;
 
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
+import com.lolduo.duo.object.dto.client.CombiIdentityDTO;
 import com.lolduo.duo.object.dto.client.CombiSearchDTO;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
@@ -46,5 +47,11 @@ public class ClientApi {
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠 상위 2개의 정보를 간략화해서 보여준다.  ",response = ChampionDetail2.class)
     public ResponseEntity<?> getChampionDetail2(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
         return clientService.getChampionDetail2(championInfoDTOList);
+    }
+
+    @PostMapping("/v1/combiPerkDetail")
+    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠 상위 2개의 정보를 간략화해서 보여준다.  ",response = ChampionDetail2.class)
+    public ResponseEntity<?> getCombiPerkDetail(@RequestBody CombiIdentityDTO combiIdentityDTO){
+        return clientService.getCombiPerkDetail(combiIdentityDTO);
     }
 }

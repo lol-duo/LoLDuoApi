@@ -41,8 +41,8 @@ public class ChampionDetailComponent2 {
         List<ResponseSpell2> responseSpellList = new ArrayList<>();
 
         for(Spell spell : spellList){
-            String winRate = String.valueOf(spell.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-            String AllCount =String.format("%.2f%%", 100 * ((double) spell.getWin() / spell.getAllCount()));
+            String winRate = String.format("%.2f%%", 100 * ((double) spell.getWin() / spell.getAllCount()));
+            String AllCount = String.valueOf(spell.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
             List<String> spellUrlList = new ArrayList<>();
             for (Long spellId : spell.getSpellMap().get(ChampionId)) {
                 String spellName = spellRepository.findById(spellId).get().getImgUrl();
@@ -74,8 +74,8 @@ public class ChampionDetailComponent2 {
     public List<ResponsePerk2> makePerkList(List<Perk> perkList, Long ChampionId, Long mainPerkId, Long subPerkId){
         List<ResponsePerk2> responsePerkList = new ArrayList<>();
         for(Perk perk : perkList){
-            String winRate = String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-            String AllCount =String.format("%.2f%%", 100 * ((double) perk.getWin() / perk.getAllCount()));
+            String winRate = String.format("%.2f%%", 100 * ((double) perk.getWin() / perk.getAllCount()));
+            String AllCount = String.valueOf(perk.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
             ResponsePerk2 temp = initResponsePerk(mainPerkId,subPerkId,perk.getPerkMap().get(ChampionId),winRate,AllCount);
             responsePerkList.add(temp);
         }
@@ -122,8 +122,8 @@ public class ChampionDetailComponent2 {
     public List<ResponseItem2> makeItemList(List<Item> itemList,Long ChampionId){
         List<ResponseItem2> responseItemList = new ArrayList<>();
         for(Item item : itemList){
-            String winRate = String.valueOf(item.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-            String AllCount =String.format("%.2f%%", 100 * ((double) item.getWin() / item.getAllCount()));
+            String winRate = String.format("%.2f%%", 100 * ((double) item.getWin() / item.getAllCount()));
+            String AllCount = String.valueOf(item.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
             List<String> itemUrlList = new ArrayList<>();
             for(Long itemId : item.getItemMap().get(ChampionId).subList(0,3)){
                 String itemName = itemRepository.findById(itemId).get().getImgUrl();

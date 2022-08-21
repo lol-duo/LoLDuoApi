@@ -40,5 +40,5 @@ public interface TripleCombiRepository extends JpaRepository<TripleCombiEntity,L
     Optional<TripleCombiEntity> findAllCountAndWinCountByChampionPosition(String position);
 
     @Query(value = "select * from triple_combi where json_contains(position,?1) and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
-    Optional<TripleCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
+    Optional<TripleCombiEntity> findByPositionWhichHasMythItem(String position);
 }
