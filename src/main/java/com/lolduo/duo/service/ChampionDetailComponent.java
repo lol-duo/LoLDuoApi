@@ -119,7 +119,7 @@ public class ChampionDetailComponent {
             return null;
         }
 
-        removeItemsAmountUnderThree(infoEntity);
+        removeItemsAmountUnderNumber(infoEntity, 3);
         List<Item> allItemList = summarize? getSummarizedItemList(infoEntity) : infoEntity.getItemList();
         findTopK(allItemList,2).forEach(item ->
             topItemList.add((Item)item)
@@ -163,7 +163,7 @@ public class ChampionDetailComponent {
         return urlList;
     }
 
-    private void removeItemsAmountUnderThree(ICombiEntity infoEntity) {
+    private void removeItemsAmountUnderNumber(ICombiEntity infoEntity, int number) {
         infoEntity.getItemList().removeIf(item -> {
             for (List<Long> itemIdList : item.getItemMap().values()) {
                 int count = 0;
@@ -174,7 +174,7 @@ public class ChampionDetailComponent {
                         count++;
                 }
 
-                if (count < 3)
+                if (count < number)
                     return true;
             }
             return false;
@@ -182,30 +182,30 @@ public class ChampionDetailComponent {
     }
 
     private List<Item> getSummarizedItemList(ICombiEntity infoEntity) {
-        Map<Map<Long, List<Long>>, List<Long>> itemCombiMatchRecordMap = new HashMap<>();
+        Map<Map<Long, List<Long>>, List<Long>> itemCombiAndWinAllCountsMap = new HashMap<>();
         List<Item> summarizedItemList = new ArrayList<>();
 
         infoEntity.getItemList().forEach(item -> {
             Map<Long, List<Long>> champThreeItemMap = new HashMap<>();
-            item.getItemMap().forEach((championId, wholeItemList) -> {
-                champThreeItemMap.put(championId, wholeItemList.subList(0, 3));
-            });
+            item.getItemMap().forEach((championId, wholeItemList) ->
+                champThreeItemMap.put(championId, wholeItemList.subList(0, 3))
+            );
 
-            if(itemCombiMatchRecordMap.containsKey(champThreeItemMap)) {
-                List<Long> matchRecord = itemCombiMatchRecordMap.get(champThreeItemMap);
-                matchRecord.set(0, matchRecord.get(0) + item.getWin());
-                matchRecord.set(1, matchRecord.get(1) + item.getAllCount());
+            if(itemCombiAndWinAllCountsMap.containsKey(champThreeItemMap)) {
+                List<Long> winAndAllCounts = itemCombiAndWinAllCountsMap.get(champThreeItemMap);
+                winAndAllCounts.set(0, winAndAllCounts.get(0) + item.getWin());
+                winAndAllCounts.set(1, winAndAllCounts.get(1) + item.getAllCount());
             }
             else {
-                List<Long> matchRecord = new ArrayList<>(2);
-                matchRecord.add(item.getWin());
-                matchRecord.add(item.getAllCount());
-                itemCombiMatchRecordMap.put(champThreeItemMap, matchRecord);
+                List<Long> winAndAllCounts = new ArrayList<>(2);
+                winAndAllCounts.add(item.getWin());
+                winAndAllCounts.add(item.getAllCount());
+                itemCombiAndWinAllCountsMap.put(champThreeItemMap, winAndAllCounts);
             }
         });
 
-        itemCombiMatchRecordMap.forEach((threeItemMap, matchRecord) ->
-            summarizedItemList.add(new Item(threeItemMap, matchRecord.get(0), matchRecord.get(1)))
+        itemCombiAndWinAllCountsMap.forEach((threeItemMap, winAndAllCounts) ->
+            summarizedItemList.add(new Item(threeItemMap, winAndAllCounts.get(0), winAndAllCounts.get(1)))
         );
 
         return summarizedItemList;

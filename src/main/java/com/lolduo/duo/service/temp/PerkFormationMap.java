@@ -323,25 +323,21 @@ public class PerkFormationMap {
             for (int index = 0; index < perkUrlListDisableApplied.size(); index++) {
                 if (index != activePerkIndex)
                     perkUrlListDisableApplied.set(index, perkUrlList.get(index) + "_disabled.png");
-                /*
-                else
-                    perkUrlListDisableApplied.set(index, perkUrlList.get(index).copy);
-                */
             }
-            log.info("getPerkUrlListDisableApplied - perkId : {}, activePerkIndex : {}", perkIdList.toString(), activePerkIndex);
+            log.info("getPerkUrlListDisableApplied - perkId : {}, activePerkIndex : {}", perkIdList, activePerkIndex);
             return perkUrlListDisableApplied;
         }
 
         public void initActivePerkIndex(List<Long> activePerkList) {
             int index = 0;
             activePerkIndex = -1;
-            log.info("initActivePerkIndexWithId - activePerkList : {}, perkCheck's perkIdList : {}", activePerkList.toString(), perkIdList);
+            log.info("initActivePerkIndex - activePerkList : {}, perkCheck's perkIdList : {}", activePerkList.toString(), perkIdList);
             for (Long perkId : perkIdList) {
                 if (activePerkList.contains(perkId))
                     activePerkIndex = index;
                 index++;
             }
-            log.info("initActivePerkIndex - perkId : {}, activePerkIndex : {}", perkIdList.toString(), activePerkIndex);
+            log.info("initActivePerkIndex - activePerkIndex : {}", activePerkIndex);
         }
 
         public void initActivePerkIndexWithId(Long activePerkId) {
@@ -353,7 +349,7 @@ public class PerkFormationMap {
                     activePerkIndex = index;
                 index++;
             }
-            log.info("initActivePerkIndexWithId - perkId : {}, activePerkIndex : {}", perkIdList.toString(), activePerkIndex);
+            log.info("initActivePerkIndexWithId - activePerkIndex : {}", activePerkIndex);
         }
     }
 }
