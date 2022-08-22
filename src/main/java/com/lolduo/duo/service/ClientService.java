@@ -174,6 +174,7 @@ public class ClientService {
             String championPosition = combiEntity.getPosition().get(ChampionId);
             String championPositionUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/line/" + championPosition + ".png";
             String championImgUrl = championRepository.findById(ChampionId).get().getImgUrl();
+            String championName = championRepository.findById(ChampionId).get().getName();
             if (championImgUrl == null) {
                 log.info("setChampionDetail2 - " + ChampionId + "에 해당하는 이미지URL이 ChampionTable에 존재하지 않습니다. ALL값으로 세팅합니다.");
                 championImgUrl = "ALL";
@@ -191,7 +192,7 @@ public class ClientService {
             log.info("perkMythItemArr - Main :{} Sub: {}",perkMythItemArr[perkMythIndex],perkMythItemArr[2]);
             List<ResponsePerk2> perkList = championDetailComponent2.makePerkList(championDetailComponent2.pickPerkList(combiEntity),ChampionId,Long.valueOf(perkMythItemArr[perkMythIndex]),Long.valueOf(perkMythItemArr[perkMythIndex+2]));
             perkMythIndex += 4;
-            infoList.add(new ResponseInfo(championId,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
+            infoList.add(new ResponseInfo(championId, championName,championPosition,championPositionUrl,championImgUrl,keyStoneListUrl,keyItemUrl,perkList,itemList,spellList));
         }
         return new ChampionDetail2(winRate,allCount,thisWinRate,thisAllCount,infoList);
     }

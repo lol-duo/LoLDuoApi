@@ -6,6 +6,7 @@ import java.util.List;
 @Getter
 public class ResponseInfo {
     Long championId;
+    String championName;
     String championPosition;
     String championPositionUrl;
     String championImgUrl;
@@ -15,8 +16,9 @@ public class ResponseInfo {
     List<ResponseItem2> itemList;
     List<ResponseSpell2> spellList;
 
-    public ResponseInfo(Long championId, String championPosition, String championPositionUrl, String championImgUrl, List<String> keyStoneListUrl, String keyItemUrl, List<ResponsePerk2> perkList, List<ResponseItem2> itemList, List<ResponseSpell2> spellList) {
+    public ResponseInfo(Long championId, String championName,String championPosition, String championPositionUrl, String championImgUrl, List<String> keyStoneListUrl, String keyItemUrl, List<ResponsePerk2> perkList, List<ResponseItem2> itemList, List<ResponseSpell2> spellList) {
         this.championId = championId;
+        this.championName = championName;
         this.championPosition = championPosition;
         this.championPositionUrl = championPositionUrl;
         this.championImgUrl = championImgUrl;
