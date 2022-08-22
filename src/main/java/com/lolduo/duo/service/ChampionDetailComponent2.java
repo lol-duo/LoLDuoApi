@@ -142,6 +142,7 @@ public class ChampionDetailComponent2 {
                 }
             }
         }
+        log.info("initResponsePerk - perkList : " + perkList);
         log.info("initResponsePerk - mainList size : " + mainList.size());
         result.setKeyPerkUrlList(mainList.get(0).getPerkList());
         result.setMain1UrlList(mainList.get(1).getPerkList());
