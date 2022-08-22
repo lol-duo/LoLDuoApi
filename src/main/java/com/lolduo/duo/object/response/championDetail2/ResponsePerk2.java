@@ -21,8 +21,7 @@ public class ResponsePerk2 {
     List<String> sub2UrlList;
     List<String> sub3UrlList;
 
-    List<String> subsub1UrlList;
-    List<String> subsub2UrlListl;
+    List<String> subsub1UrlList; // 이후에 subsub -> statMod 이름 변경
+    List<String> subsub2UrlList;
     List<String> subsub3UrlList;
-
 }
