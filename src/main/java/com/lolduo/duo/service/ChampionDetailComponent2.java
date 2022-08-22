@@ -74,8 +74,8 @@ public class ChampionDetailComponent2 {
     public List<ResponsePerk2> makePerkList(List<Perk> perkList, Long ChampionId, Long mainPerkId, Long subPerkId){
         List<ResponsePerk2> responsePerkList = new ArrayList<>();
         for(Perk perk : perkList){
-            String winRate = String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-            String AllCount =String.format("%.2f%%", 100 * ((double) perk.getWin() / perk.getAllCount()));
+            String winRate = String.format("%.2f%%", 100 * ((double) perk.getWin() / perk.getAllCount()));
+            String AllCount =String.valueOf(perk.getWin()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
             ResponsePerk2 temp = initResponsePerk(mainPerkId,subPerkId,perk.getPerkMap().get(ChampionId),winRate,AllCount);
             responsePerkList.add(temp);
         }

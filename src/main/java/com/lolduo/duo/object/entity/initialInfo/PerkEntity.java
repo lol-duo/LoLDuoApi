@@ -20,4 +20,9 @@ public class PerkEntity {
     @Column
     private String imgUrl;
 
+    public PerkEntity(Long id, String name, String imgUrl) {
+        this.id = id;
+        this.name = name;
+        this.imgUrl = imgUrl;
+    }
 }
