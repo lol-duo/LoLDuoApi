@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
 import com.lolduo.duo.object.dto.client.CombiSearchDTO;
+import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
 import com.lolduo.duo.object.response.championDetail.ResponseItem;
@@ -21,6 +22,7 @@ import com.lolduo.duo.repository.clientInfo.DoubleCombiRepository;
 import com.lolduo.duo.repository.clientInfo.PentaCombiRepository;
 import com.lolduo.duo.repository.clientInfo.SoloCombiRepository;
 import com.lolduo.duo.repository.clientInfo.TripleCombiRepository;
+import com.lolduo.duo.repository.initialInfo.PerkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -40,6 +42,7 @@ public class ClientService {
     private final TripleCombiRepository tripleCombiRepository;
     private final PentaCombiRepository pentaCombiRepository;
     private final ChampionRepository championRepository;
+    private final PerkRepository perkRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ChampionDetailComponent championDetailComponent;
     private final ChampionDetailComponent2 championDetailComponent2;
@@ -177,12 +180,10 @@ public class ClientService {
             }
             championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/" + championImgUrl;
             List<String > keyStoneListUrl = new ArrayList<>();
-            //keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex]+".png");
-            //keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+1]+".png");
-            //keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+2]+".png");
-            keyStoneListUrl.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            keyStoneListUrl.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
-            keyStoneListUrl.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+            for(int i = 0 ; i < 3;i++){
+                PerkEntity perkEntity = perkRepository.findById(Long.valueOf(perkMythItemArr[perkMythIndex+i])).orElse(new PerkEntity(0L,"No Perk","perk-images/X.png"));
+                keyStoneListUrl.add(perkBaseUrl + perkEntity.getImgUrl());
+            }
             String keyItemUrl = itemBaseUrl + perkMythItemArr[perkMythIndex+3]+".png";
 
             List<ResponseSpell2> spellList  = championDetailComponent2.makeSpellList(championDetailComponent2.pickSpellList(combiEntity),ChampionId);
