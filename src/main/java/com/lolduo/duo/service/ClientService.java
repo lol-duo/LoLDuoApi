@@ -177,9 +177,12 @@ public class ClientService {
             }
             championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/" + championImgUrl;
             List<String > keyStoneListUrl = new ArrayList<>();
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex]+".png");
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+1]+".png");
-            keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+2]+".png");
+            //keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex]+".png");
+            //keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+1]+".png");
+            //keyStoneListUrl.add(perkBaseUrl+perkMythItemArr[perkMythIndex+2]+".png");
+            keyStoneListUrl.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+            keyStoneListUrl.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
+            keyStoneListUrl.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/perk-images/X.png");
             String keyItemUrl = itemBaseUrl + perkMythItemArr[perkMythIndex+3]+".png";
 
             List<ResponseSpell2> spellList  = championDetailComponent2.makeSpellList(championDetailComponent2.pickSpellList(combiEntity),ChampionId);
