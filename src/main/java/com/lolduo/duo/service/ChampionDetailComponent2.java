@@ -139,14 +139,43 @@ public class ChampionDetailComponent2 {
         return responseItemList;
     }
     public List<Item> pickItemList(@NotNull ICombiEntity combiEntity){
-        List<Item> itemList =new ArrayList<>();
-        removeItemsAmountUnderThree(combiEntity);
+        removeItemsAmountUnderNumber(combiEntity, 3);
+        List<Item> summarizedItemList = getSummarizedItemList(combiEntity);
         findTopK(combiEntity.getItemList(),3).forEach(item ->
-                itemList.add((Item)item));
-        return itemList;
+                summarizedItemList.add((Item)item));
+        return summarizedItemList;
     }
-    private void removeItemsAmountUnderThree(ICombiEntity infoEntity) {
-        infoEntity.getItemList().removeIf(item -> {
+    private List<Item> getSummarizedItemList(ICombiEntity combiEntity) {
+        Map<Map<Long, List<Long>>, List<Long>> itemCombiAndWinAllCountsMap = new HashMap<>();
+        List<Item> summarizedItemList = new ArrayList<>();
+
+        combiEntity.getItemList().forEach(item -> {
+            Map<Long, List<Long>> champThreeItemMap = new HashMap<>();
+            item.getItemMap().forEach((championId, wholeItemList) ->
+                    champThreeItemMap.put(championId, wholeItemList.subList(0, 3))
+            );
+
+            if(itemCombiAndWinAllCountsMap.containsKey(champThreeItemMap)) {
+                List<Long> winAndAllCounts = itemCombiAndWinAllCountsMap.get(champThreeItemMap);
+                winAndAllCounts.set(0, winAndAllCounts.get(0) + item.getWin());
+                winAndAllCounts.set(1, winAndAllCounts.get(1) + item.getAllCount());
+            }
+            else {
+                List<Long> winAndAllCounts = new ArrayList<>(2);
+                winAndAllCounts.add(item.getWin());
+                winAndAllCounts.add(item.getAllCount());
+                itemCombiAndWinAllCountsMap.put(champThreeItemMap, winAndAllCounts);
+            }
+        });
+
+        itemCombiAndWinAllCountsMap.forEach((threeItemMap, winAndAllCounts) ->
+                summarizedItemList.add(new Item(threeItemMap, winAndAllCounts.get(0), winAndAllCounts.get(1)))
+        );
+
+        return summarizedItemList;
+    }
+    private void removeItemsAmountUnderNumber(ICombiEntity CombiEntity, int number) {
+        CombiEntity.getItemList().removeIf(item -> {
             for (List<Long> itemIdList : item.getItemMap().values()) {
                 int count = 0;
                 for (Long itemId : itemIdList) {
@@ -156,7 +185,7 @@ public class ChampionDetailComponent2 {
                         count++;
                 }
 
-                if (count < 3)
+                if (count < number)
                     return true;
             }
             return false;
