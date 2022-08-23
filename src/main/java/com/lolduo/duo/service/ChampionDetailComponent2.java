@@ -40,13 +40,29 @@ public class ChampionDetailComponent2 {
     public List<ResponseSpell2> makeSpellList(List<Spell> spellList,Long championId){
         List<ResponseSpell2> responseSpellList = new ArrayList<>();
         List<Set<Long>> addedSpellIdSetList = new ArrayList<>();
+        Map<Set<Long>, List<Long>> spellIdSetAndWinAllCountsMap = new HashMap<>();
+
+        for(Spell spell : spellList){
+            if (!spellIdSetAndWinAllCountsMap.containsKey(spell.getSpellMap().get(championId))) {
+                List<Long> winAllCounts = new ArrayList<>();
+                winAllCounts.add(spell.getWin());
+                winAllCounts.add(spell.getAllCount());
+                spellIdSetAndWinAllCountsMap.put(spell.getSpellMap().get(championId), winAllCounts);
+            }
+            else {
+                List<Long> winAllCounts = spellIdSetAndWinAllCountsMap.get(spell.getSpellMap().get(championId));
+                winAllCounts.set(0, winAllCounts.get(0) + spell.getWin());
+                winAllCounts.set(1, winAllCounts.get(1) + spell.getAllCount());
+            }
+        }
 
         for(Spell spell : spellList){
             if (!addedSpellIdSetList.contains(spell.getSpellMap().get(championId))) {
                 addedSpellIdSetList.add(spell.getSpellMap().get(championId));
 
-                String winRate = String.format("%.2f%%", 100 * ((double) spell.getWin() / spell.getAllCount()));
-                String AllCount = String.valueOf(spell.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
+                List<Long> winAllCounts = spellIdSetAndWinAllCountsMap.get(spell.getSpellMap().get(championId));
+                String winRate = String.format("%.2f%%", 100 * ((double) winAllCounts.get(0) / winAllCounts.get(1)));
+                String AllCount = String.valueOf(winAllCounts.get(1)).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
 
                 List<String> spellUrlList = new ArrayList<>();
                 for (Long spellId : spell.getSpellMap().get(championId)) {
