@@ -37,23 +37,29 @@ public class ChampionDetailComponent2 {
     private final PentaCombiRepository pentaCombiRepository;
     private PerkFormationMap perkFormationMap = new PerkFormationMap();
 
-    public List<ResponseSpell2> makeSpellList(List<Spell> spellList,Long ChampionId){
+    public List<ResponseSpell2> makeSpellList(List<Spell> spellList,Long championId){
         List<ResponseSpell2> responseSpellList = new ArrayList<>();
+        List<Set<Long>> addedSpellIdSetList = new ArrayList<>();
 
         for(Spell spell : spellList){
-            String winRate =String.format("%.2f%%", 100 * ((double) spell.getWin() / spell.getAllCount()));
-            String AllCount =String.valueOf(spell.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-            List<String> spellUrlList = new ArrayList<>();
-            for (Long spellId : spell.getSpellMap().get(ChampionId)) {
-                String spellName = spellRepository.findById(spellId).get().getImgUrl();
-                if(spellName==null){
-                    log.info("makeSpellList -> spellEntitiy가 없습니다. DB 및 spellId를 확인하세요. spellId : {} \n기본값인 애쉬Q값으로 초기화합니다." ,spellId );
-                    spellName="AsheQ.png";
+            if (!addedSpellIdSetList.contains(spell.getSpellMap().get(championId))) {
+                addedSpellIdSetList.add(spell.getSpellMap().get(championId));
+
+                String winRate = String.format("%.2f%%", 100 * ((double) spell.getWin() / spell.getAllCount()));
+                String AllCount = String.valueOf(spell.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
+
+                List<String> spellUrlList = new ArrayList<>();
+                for (Long spellId : spell.getSpellMap().get(championId)) {
+                    String spellName = spellRepository.findById(spellId).get().getImgUrl();
+                    if(spellName==null){
+                        log.info("makeSpellList -> spellEntitiy가 없습니다. DB 및 spellId를 확인하세요. spellId : {} \n기본값인 애쉬Q값으로 초기화합니다." ,spellId );
+                        spellName="AsheQ.png";
+                    }
+                    spellUrlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/" +spellName);
                 }
-                spellUrlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/" +spellName);
+                ResponseSpell2 temp = new ResponseSpell2(winRate,AllCount,spellUrlList);
+                responseSpellList.add(temp);
             }
-            ResponseSpell2 temp = new ResponseSpell2(winRate,AllCount,spellUrlList);
-            responseSpellList.add(temp);
         }
         return responseSpellList;
     }
@@ -139,17 +145,16 @@ public class ChampionDetailComponent2 {
         return responseItemList;
     }
     public List<Item> pickItemList(@NotNull ICombiEntity combiEntity){
-        removeItemsAmountUnderNumber(combiEntity, 3);
         List<Item> summarizedItemList = new ArrayList<>();
-        findTopK(getSummarizedItemList(combiEntity),3).forEach(item ->
+        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(combiEntity.getItemList(), 3)),3).forEach(item ->
                 summarizedItemList.add((Item)item));
         return summarizedItemList;
     }
-    private List<Item> getSummarizedItemList(ICombiEntity combiEntity) {
+    private List<Item> getSummarizedItemList(List<Item> originalItemList) {
         Map<Map<Long, List<Long>>, List<Long>> itemCombiAndWinAllCountsMap = new HashMap<>();
         List<Item> summarizedItemList = new ArrayList<>();
 
-        combiEntity.getItemList().forEach(item -> {
+        originalItemList.forEach(item -> {
             Map<Long, List<Long>> champThreeItemMap = new HashMap<>();
             item.getItemMap().forEach((championId, wholeItemList) ->
                     champThreeItemMap.put(championId, wholeItemList.subList(0, 3))
@@ -174,8 +179,9 @@ public class ChampionDetailComponent2 {
 
         return summarizedItemList;
     }
-    private void removeItemsAmountUnderNumber(ICombiEntity CombiEntity, int number) {
-        CombiEntity.getItemList().removeIf(item -> {
+    private List<Item> getItemListWhoseItemsNotUnderK(List<Item> originalItemList, int k) {
+        List<Item> resultItemList = new ArrayList<>(originalItemList);
+        resultItemList.removeIf(item -> {
             for (List<Long> itemIdList : item.getItemMap().values()) {
                 int count = 0;
                 for (Long itemId : itemIdList) {
@@ -185,11 +191,13 @@ public class ChampionDetailComponent2 {
                         count++;
                 }
 
-                if (count < number)
+                if (count < k)
                     return true;
             }
             return false;
         });
+
+        return resultItemList;
     }
     public Map<Long,String> initChampionPositionMap(ArrayList<ChampionInfoDTO> championInfoDTOList){
         Map<Long,String> champPositionMap = new HashMap<>();
