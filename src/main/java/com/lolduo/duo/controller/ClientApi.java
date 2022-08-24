@@ -7,6 +7,7 @@ import com.lolduo.duo.object.response.championDetail.ChampionDetail;
 import com.lolduo.duo.object.response.championDetail2.ChampionDetail2;
 import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.service.ClientService;
+import com.lolduo.duo.service.HealthCheckService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +24,18 @@ import java.util.ArrayList;
 @Slf4j
 public class ClientApi {
     private final ClientService clientService;
+    private final HealthCheckService healthCheckService;
 
     @GetMapping("/getChampionList")
     @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
     public ResponseEntity<?> getChampionList() {
         return clientService.getChampionList();
+    }
+
+    @GetMapping("/health")
+    @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
+    public ResponseEntity<?> getHealth() {
+        return healthCheckService.getHealthCheckResult();
     }
 
     @PostMapping("/getInfo")
