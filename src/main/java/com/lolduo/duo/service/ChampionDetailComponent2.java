@@ -134,7 +134,7 @@ public class ChampionDetailComponent2 {
             for(Long itemId : item.getItemMap().get(ChampionId).subList(0,3)){
                 String itemName = itemRepository.findById(itemId).get().getImgUrl();
                 if(itemName==null){
-                    log.info("makeSpellList -> spellEntitiy가 없습니다. DB 및 spellId를 확인하세요. itemId : {} \n기본값인 3330.png(허수아비)로 초기화합니다." ,itemId );
+                    log.info("makeItemList -> itemEntitiy가 없습니다. DB 및 spellId를 확인하세요. itemId : {} \n기본값인 3330.png(허수아비)로 초기화합니다." ,itemId );
                     itemName="3330.png";
                 }
                 itemUrlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/" + itemName);

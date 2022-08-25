@@ -20,4 +20,5 @@ public interface ICombiRepository {
     //ChampionDetail2
     Optional<? extends ICombiEntity> findAllCountAndWinCountByChampionPosition(String position);
     Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
+    Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndAllCountDesc(String position,Long allCount);
 }

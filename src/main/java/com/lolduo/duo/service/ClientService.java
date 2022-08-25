@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
 import com.lolduo.duo.object.dto.client.CombiSearchDTO;
+import com.lolduo.duo.object.entity.clientInfo.SoloCombiEntity;
 import com.lolduo.duo.object.entity.initialInfo.PerkEntity;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
@@ -145,14 +146,19 @@ public class ClientService {
         winRate = String.format("%.2f%%", 100 * ((double) combiEntity.getWinCount() / combiEntity.getAllCount())) ;
         AllCount = String.valueOf(combiEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
 
+        //현재는 해당 챔피언 조합의 판수가 해당 조합의 전체판수의 20% 보다 많은 것을 승률을 기준으로 뽑도록 해놓았음. 임시로 판수 제일 높은 게임을 고르도록해놨음.
+        Long atLeastAllCount = combiEntity.getAllCount() /5;
+        log.info("atLeast All Count = {}",atLeastAllCount);
+        ICombiEntity c = null;
         try {
-            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap)).orElse(null);
+            //combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap)).orElse(null);
+            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndAllCountDesc(objectMapper.writeValueAsString(championPositionMap),atLeastAllCount).orElse(null);
         } catch (JsonProcessingException e) {
             log.error("getChampionDetail2 - objectMapper writeValue error");
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
         }
         if(combiEntity==null){
-            log.info("getChampionDetail2 - 챔피언은 존재하나, 신화를 산 내역이 존재하지 않습니다. Entitiy가 NULL입니다. ");
+            log.info("getChampionDetail2 - 챔피언은 존재하나, 신화를 산 내역이 존재하지 않음. Entitiy가 NULL입니다. ");
             return new ResponseEntity<>("챔피언은 찾았으나 신화를 산 기록이 존재하지 않습니다. Entitiy가 NULL입니다.", HttpStatus.OK);
         }
         result = makeChampionDetail2(winRate,AllCount,combiEntity);
