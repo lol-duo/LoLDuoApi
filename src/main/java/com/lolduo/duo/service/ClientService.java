@@ -146,7 +146,7 @@ public class ClientService {
         AllCount = String.valueOf(combiEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
 
         try {
-            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap)).orElse(null);
+            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 5L).orElse(null);
         } catch (JsonProcessingException e) {
             log.error("getChampionDetail2 - objectMapper writeValue error");
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
