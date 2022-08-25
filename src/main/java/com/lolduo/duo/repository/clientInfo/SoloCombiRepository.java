@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SoloCombiRepository extends JpaRepository<SoloCombiEntity,Long>, ICombiRepository {
+    @Query(value = "select sum(all_count) from solo_combi",nativeQuery = true)
+    Optional<Long> findAllCountOfEveryGame();
     @Query(value = "select id, position, champion_id, item_list, perk_list, spell_list, perk_myth_item, sum(win_count) as win_count, sum(all_count) as all_count from solo_combi where json_contains(champion_id,?1) and json_contains(position,?2) and json_contains(json_extract(position, '$.*'), ?3) and not json_has_exclude_position(position, ?1, ?4) group by position having all_count >= 100 order by sum(win_count) / sum(all_count) DESC limit 30",nativeQuery = true)
     List<SoloCombiEntity> findAllByChampionIdAndPositionGroupByPositionWinRateDesc(String championId, String position, String positionList, String excludePositionList);
 
