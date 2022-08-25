@@ -4,8 +4,10 @@ import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
 import com.lolduo.duo.object.dto.client.CombiSearchDTO;
 import com.lolduo.duo.object.response.ChampionInfoList;
 import com.lolduo.duo.object.response.championDetail.ChampionDetail;
+import com.lolduo.duo.object.response.championDetail2.ChampionDetail2;
 import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.service.ClientService;
+import com.lolduo.duo.service.HealthCheckService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +24,18 @@ import java.util.ArrayList;
 @Slf4j
 public class ClientApi {
     private final ClientService clientService;
+    private final HealthCheckService healthCheckService;
 
     @GetMapping("/getChampionList")
     @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
     public ResponseEntity<?> getChampionList() {
         return clientService.getChampionList();
+    }
+
+    @GetMapping("/health")
+    @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
+    public ResponseEntity<?> getHealth() {
+        return healthCheckService.getHealthCheckResult();
     }
 
     @PostMapping("/getInfo")
@@ -40,5 +49,10 @@ public class ClientApi {
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠 상위 2개의 정보를 간략화해서 보여준다.  ",response = ChampionDetail.class)
     public ResponseEntity<?> getChampionDetail(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
         return clientService.getChampionDetail(championInfoDTOList);
+    }
+    @PostMapping("/v2/championDetail")
+    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠 상위 2개의 정보를 간략화해서 보여준다.  ",response = ChampionDetail2.class)
+    public ResponseEntity<?> getChampionDetail2(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
+        return clientService.getChampionDetail2(championInfoDTOList);
     }
 }
