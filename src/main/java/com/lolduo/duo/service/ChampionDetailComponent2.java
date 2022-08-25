@@ -141,22 +141,45 @@ public class ChampionDetailComponent2 {
 
         return result;
     }
-    public List<ResponseItem2> makeItemList(List<Item> itemList,Long ChampionId){
+    public List<ResponseItem2> makeItemList(List<Item> itemList,Long championId){
         List<ResponseItem2> responseItemList = new ArrayList<>();
+        List<List<Long>> addedItemIdListList = new ArrayList<>();
+        Map<List<Long>, List<Long>> itemIdListAndWinAllCountsMap = new HashMap<>();
+
         for(Item item : itemList){
-            String winRate =String.format("%.2f%%", 100 * ((double) item.getWin() / item.getAllCount()));
-            String AllCount =String.valueOf(item.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
-            List<String> itemUrlList = new ArrayList<>();
-            for(Long itemId : item.getItemMap().get(ChampionId).subList(0,3)){
-                String itemName = itemRepository.findById(itemId).get().getImgUrl();
-                if(itemName==null){
-                    log.info("makeSpellList -> spellEntitiy가 없습니다. DB 및 spellId를 확인하세요. itemId : {} \n기본값인 3330.png(허수아비)로 초기화합니다." ,itemId );
-                    itemName="3330.png";
-                }
-                itemUrlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/" + itemName);
+            if (!itemIdListAndWinAllCountsMap.containsKey(item.getItemMap().get(championId))) {
+                List<Long> winAllCounts = new ArrayList<>();
+                winAllCounts.add(item.getWin());
+                winAllCounts.add(item.getAllCount());
+                itemIdListAndWinAllCountsMap.put(item.getItemMap().get(championId), winAllCounts);
             }
-            ResponseItem2 temp = new ResponseItem2(winRate,AllCount,itemUrlList);
-            responseItemList.add(temp);
+            else {
+                List<Long> winAllCounts = itemIdListAndWinAllCountsMap.get(item.getItemMap().get(championId));
+                winAllCounts.set(0, winAllCounts.get(0) + item.getWin());
+                winAllCounts.set(1, winAllCounts.get(1) + item.getAllCount());
+            }
+        }
+
+        for(Item item : itemList){
+            if (!addedItemIdListList.contains(item.getItemMap().get(championId))) {
+                addedItemIdListList.add(item.getItemMap().get(championId));
+
+                List<Long> winAllCounts = itemIdListAndWinAllCountsMap.get(item.getItemMap().get(championId));
+                String winRate = String.format("%.2f%%", 100 * ((double) winAllCounts.get(0) / winAllCounts.get(1)));
+                String AllCount = String.valueOf(winAllCounts.get(1)).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
+
+                List<String> itemUrlList = new ArrayList<>();
+                for (Long itemId : item.getItemMap().get(championId)) {
+                    String itemName = itemRepository.findById(itemId).get().getImgUrl();
+                    if (itemName == null) {
+                        log.info("makeSpellList -> spellEntitiy가 없습니다. DB 및 spellId를 확인하세요. itemId : {} \n기본값인 3330.png(허수아비)로 초기화합니다.", itemId);
+                        itemName = "3330.png";
+                    }
+                    itemUrlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/" + itemName);
+                }
+                ResponseItem2 temp = new ResponseItem2(winRate, AllCount, itemUrlList);
+                responseItemList.add(temp);
+            }
         }
         return responseItemList;
     }
