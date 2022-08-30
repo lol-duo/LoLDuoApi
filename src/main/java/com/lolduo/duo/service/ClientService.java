@@ -47,8 +47,6 @@ public class ClientService {
     private final ChampionDetailComponent championDetailComponent;
     private final ChampionDetailComponent2 championDetailComponent2;
 
-    private double minPickRateForSearch = 0.00018;
-
     public ResponseEntity<?> getChampionList(){
         List<ChampionEntity> championEntityList = new ArrayList<>(championRepository.findAll());
         List<Champion> championList = new ArrayList<>();
@@ -231,20 +229,28 @@ public class ClientService {
             log.info("getChampionInfoList() - 시간 측정 : DB 검색 시작 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
             List<? extends ICombiEntity> infoEntityList;
+            int minAllCountForSearch;
+            if (championCount == 1 || championCount == 2)
+                minAllCountForSearch = 100;
+            else if (championCount == 3)
+                minAllCountForSearch = 20;
+            else
+                minAllCountForSearch = 1;
+
             if (combiSearchDTO.getWinRateAsc() != null) {
                 if (combiSearchDTO.getWinRateAsc())
-                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionWinRateAsc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minPickRateForSearch);
+                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionWinRateAsc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minAllCountForSearch);
                 else
-                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionWinRateDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minPickRateForSearch);
+                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionWinRateDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minAllCountForSearch);
             }
             else if (combiSearchDTO.getGameCountAsc() != null) {
                 if (combiSearchDTO.getGameCountAsc())
-                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionGameCountAsc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minPickRateForSearch);
+                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionGameCountAsc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minAllCountForSearch);
                 else
-                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionGameCountDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minPickRateForSearch);
+                    infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionGameCountDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minAllCountForSearch);
             }
             else
-                infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionWinRateDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minPickRateForSearch);
+                infoEntityList = combiRepository.findAllByChampionIdAndPositionGroupByPositionWinRateDesc(objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(excludePositionList), minAllCountForSearch);
              log.info("getChampionInfoList() - 매치 데이터 검색.\n지정된 championId = {}\n지정된 position = {}\n실제 검색 position = {}\n선택한 챔피언들에게 금지된 position = {}", objectMapper.writeValueAsString(selectedChampionOrderMap.keySet()), objectMapper.writeValueAsString(selectedPositionOrderMap.keySet()), objectMapper.writeValueAsString(champPositionMap), objectMapper.writeValueAsString(excludePositionList));
              log.info("getChampionInfoList() - 시간 측정 : DB 검색 끝 {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
 
