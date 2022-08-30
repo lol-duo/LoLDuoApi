@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SoloCombiRepository extends JpaRepository<SoloCombiEntity,Long>, ICombiRepository {
+
     @Query(value = "select id, position, champion_id, item_list, perk_list, spell_list, perk_myth_item, win_count_sum as win_count, all_count_sum as all_count from (select *, sum(win_count) as win_count_sum, sum(all_count) as all_count_sum from solo_combi group by position having all_count_sum >= (select count(*)/2 from penta_match) * ?5) t1 where json_contains(champion_id,?1) and json_contains(position,?2) and json_contains(json_extract(position, '$.*'), ?3) and not json_has_exclude_position(position, ?1, ?4) order by win_count_sum / all_count_sum DESC limit 100",nativeQuery = true)
     List<SoloCombiEntity> findAllByChampionIdAndPositionGroupByPositionWinRateDesc(String championId, String position, String positionList, String excludePositionList, double minPickRate);
 
@@ -38,6 +39,6 @@ public interface SoloCombiRepository extends JpaRepository<SoloCombiEntity,Long>
 
     @Query(value = "select id, position, champion_id, item_list, perk_list, spell_list, perk_myth_item, sum(win_count) as win_count, sum(all_count) as all_count from solo_combi where json_contains(position,?1) group by position limit 1",nativeQuery = true)
     Optional<SoloCombiEntity> findAllCountAndWinCountByChampionPosition(String position);
-    @Query(value = "select * from solo_combi where json_contains(position,?1) and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
-    Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
+    @Query(value = "select * from solo_combi where json_contains(position,?1) and all_count >= ?2 and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
+    Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
 }

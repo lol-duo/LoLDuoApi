@@ -40,6 +40,6 @@ public interface DoubleCombiRepository extends JpaRepository<DoubleCombiEntity,L
     @Query(value = "select id, position, champion_id, item_list, perk_list, spell_list, perk_myth_item, sum(win_count) as win_count, sum(all_count) as all_count from double_combi where json_contains(position,?1) group by position limit 1",nativeQuery = true)
     Optional<DoubleCombiEntity> findAllCountAndWinCountByChampionPosition(String position);
 
-    @Query(value = "select * from double_combi where json_contains(position,?1) and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
-    Optional<DoubleCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
+    @Query(value = "select * from double_combi where json_contains(position,?1) and all_count >= ?2 and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
+    Optional<DoubleCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
 }
