@@ -33,7 +33,7 @@ public class ClientApi {
     }
 
     @GetMapping("/health")
-    @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
+    @ApiOperation(value ="서버 정상 작동 여부 반환", notes = "서버의 HealthCheck 결과를 반환한다.",response = Champion[].class)
     public ResponseEntity<?> getHealth() {
         return healthCheckService.getHealthCheckResult();
     }
