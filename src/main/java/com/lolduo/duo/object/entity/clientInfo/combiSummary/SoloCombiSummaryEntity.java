@@ -1,6 +1,7 @@
-package com.lolduo.duo.object.entity.clientInfo;
+package com.lolduo.duo.object.entity.clientInfo.combiSummary;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.lolduo.duo.object.entity.clientInfo.ICombiEntity;
 import com.lolduo.duo.object.entity.clientInfo.sub.Item;
 import com.lolduo.duo.object.entity.clientInfo.sub.Perk;
 import com.lolduo.duo.object.entity.clientInfo.sub.Spell;
@@ -15,10 +16,10 @@ import java.util.*;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "solo_combi", indexes = @Index(name = "idx_position", columnList = "position"))
+@Table(name = "solo_combi_summary", indexes = @Index(name = "idx_all_pos_champ_winrate", columnList = "all_count_sum, position, champion_id, win_rate"))
 @Getter
 @TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
-public class SoloCombiEntity implements ICombiEntity {
+public class SoloCombiSummaryEntity implements ICombiSummaryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -32,33 +33,12 @@ public class SoloCombiEntity implements ICombiEntity {
     @Column(name = "position", columnDefinition = "varchar(100)")
     private Map<Long, String> position = new HashMap<>();
 
-    @Column(name = "perk_myth_item")
-    private String perkMythItem;
-    @Column(name = "all_count")
-    private Long allCount;
+    @Column(name = "all_count_sum")
+    private Long allCountSum;
 
-    @Column(name = "win_count")
-    private Long winCount;
+    @Column(name = "win_count_sum")
+    private Long winCountSum;
 
-    @Type(type = "json")
-    @Column(name = "perk_list", columnDefinition = "json")
-    private List<Perk> perkList = new ArrayList<>();
-
-    @Type(type = "json")
-    @Column(name = "spell_list", columnDefinition = "json")
-    private List<Spell> spellList = new ArrayList<>();
-
-    @Type(type = "json")
-    @Column(name = "item_list", columnDefinition = "json")
-    private List<Item> itemList;
-
-    @Override
-    public void setAllCount(Long allCount) {
-        this.allCount = allCount;
-    }
-
-    @Override
-    public void setWinCount(Long winCount) {
-        this.winCount = winCount;
-    }
+    @Column(name = "win_rate")
+    private Double winRate;
 }

@@ -18,7 +18,7 @@ import java.util.TreeSet;
 
 @Entity
 @NoArgsConstructor
-@Table(name = "penta_combi", indexes = @Index(name = "idx_pos_champ_win_all", columnList = "position, champion_id, win_count, all_count"))
+@Table(name = "penta_combi", indexes = @Index(name = "idx_position", columnList = "position"))
 @Getter
 @TypeDef(name = "json", typeClass = JsonType.class,defaultForType = JsonNode.class)
 public class PentaCombiEntity implements Serializable, ICombiEntity {
