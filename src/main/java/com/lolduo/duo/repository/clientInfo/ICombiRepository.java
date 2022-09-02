@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ICombiRepository {
-    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionWinRateDesc(String championId, String position, String positionList, String excludePositionList);
-    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionWinRateAsc(String championId, String position, String positionList, String excludePositionList);
-    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionGameCountDesc(String championId, String position, String positionList, String excludePositionList);
-    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionGameCountAsc(String championId, String position, String positionList, String excludePositionList);
+    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionWinRateDesc(String championId, String position, String positionList, String excludePositionList, int minAllCount);
+    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionWinRateAsc(String championId, String position, String positionList, String excludePositionList, int minAllCount);
+    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionGameCountDesc(String championId, String position, String positionList, String excludePositionList, int minAllCount);
+    List<? extends ICombiEntity> findAllByChampionIdAndPositionGroupByPositionGameCountAsc(String championId, String position, String positionList, String excludePositionList, int minAllCount);
 
     List<? extends ICombiEntity> findAllByChampionIdAndPositionWinRateDesc(String championId, String position, String positionList, String excludePositionList);
     List<? extends ICombiEntity> findAllByChampionIdAndPositionWinRateAsc(String championId, String position, String positionList, String excludePositionList);
@@ -19,5 +19,5 @@ public interface ICombiRepository {
     Optional<? extends ICombiEntity> findByChampionIdAndPosition(String championId, String position);
     //ChampionDetail2
     Optional<? extends ICombiEntity> findAllCountAndWinCountByChampionPosition(String position);
-    Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position);
+    Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
 }

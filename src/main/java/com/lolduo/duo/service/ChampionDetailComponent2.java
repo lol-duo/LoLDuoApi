@@ -170,9 +170,13 @@ public class ChampionDetailComponent2 {
 
                 List<String> itemUrlList = new ArrayList<>();
                 for (Long itemId : item.getItemMap().get(championId)) {
+                    //itemId = 0이면 따로 찾지 않음
+                    log.info("itemName : " + itemId);
+                    if(itemId==0L) continue;
+                    //
                     String itemName = itemRepository.findById(itemId).get().getImgUrl();
                     if (itemName == null) {
-                        log.info("makeSpellList -> spellEntitiy가 없습니다. DB 및 spellId를 확인하세요. itemId : {} \n기본값인 3330.png(허수아비)로 초기화합니다.", itemId);
+                        log.info("makeItemList -> itemEntitiy가 없습니다. DB 및 itemId를 확인하세요. itemId : {} \n기본값인 3330.png(허수아비)로 초기화합니다.", itemId);
                         itemName = "3330.png";
                     }
                     itemUrlList.add("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/" + itemName);
@@ -185,7 +189,7 @@ public class ChampionDetailComponent2 {
     }
     public List<Item> pickItemList(@NotNull ICombiEntity combiEntity){
         List<Item> summarizedItemList = new ArrayList<>();
-        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(combiEntity.getItemList(), 3)),3).forEach(item ->
+        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(combiEntity.getItemList(), 2)),3).forEach(item ->
                 summarizedItemList.add((Item)item));
         return summarizedItemList;
     }
