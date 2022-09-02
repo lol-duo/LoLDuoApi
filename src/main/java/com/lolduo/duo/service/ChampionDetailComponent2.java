@@ -256,6 +256,8 @@ public class ChampionDetailComponent2 {
                 if (count < k)
                     return true;
             }
+            if(item.getWin() ==0)
+                return true;
             return false;
         });
 
