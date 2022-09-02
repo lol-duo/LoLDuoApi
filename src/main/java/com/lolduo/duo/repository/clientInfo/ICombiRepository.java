@@ -24,5 +24,5 @@ public interface ICombiRepository {
     Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
 
     //all_count 내림차순으로 제일 경기 많은거 가져오는 것, 추후에 해결하면 지울 것, 임시 함수
-     Optional<DoubleCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc2(String position, Long minAllCount);
+     Optional<? extends ICombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc2(String position, Long minAllCount);
 }

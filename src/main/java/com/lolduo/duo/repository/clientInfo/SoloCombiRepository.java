@@ -43,5 +43,5 @@ public interface SoloCombiRepository extends JpaRepository<SoloCombiEntity,Long>
     Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
 
     @Query(value = "select * from double_combi where all_count >= ?2 and json_contains(position,?1) and perk_myth_item not like '%|0%' order by all_count DESC limit 1",nativeQuery = true)
-    Optional<DoubleCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc2(String position, Long minAllCount);
+    Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc2(String position, Long minAllCount);
 }
