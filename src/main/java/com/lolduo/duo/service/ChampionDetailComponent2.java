@@ -197,7 +197,7 @@ public class ChampionDetailComponent2 {
     }
     public List<Item> pickItemList(@NotNull ICombiEntity combiEntity){
         List<Item> summarizedItemList = new ArrayList<>();
-        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(getItemListWhoseAllCountNotUnderK(combiEntity.getItemList(), 1),2)),3).forEach(item ->
+        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(getItemListWhoseAllCountNotUnderK(combiEntity.getItemList(), 2),2)),3).forEach(item ->
                 summarizedItemList.add((Item)item)
         );
         return summarizedItemList;

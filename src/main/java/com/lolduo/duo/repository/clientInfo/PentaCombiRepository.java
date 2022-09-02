@@ -41,6 +41,6 @@ public interface PentaCombiRepository extends JpaRepository<PentaCombiEntity,Lon
     @Query(value = "select * from penta_combi where all_count >= ?2 and json_contains(position,?1) and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
     Optional<PentaCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
 
-    @Query(value = "select * from double_combi where all_count >= ?2 and json_contains(position,?1) and perk_myth_item not like '%|0%' order by all_count DESC limit 1",nativeQuery = true)
+    @Query(value = "select * from penta_combi where all_count >= ?2 and json_contains(position,?1) and perk_myth_item not like '%|0%' order by all_count DESC limit 1",nativeQuery = true)
     Optional<PentaCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc2(String position, Long minAllCount);
 }
