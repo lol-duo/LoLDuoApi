@@ -243,7 +243,7 @@ public class ClientService {
             else if (championCount == 3)
                 minAllCountForSearch = 20;
             else
-                minAllCountForSearch = 1;
+                minAllCountForSearch = 3;
 
             if (combiSearchDTO.getWinRateAsc() != null) {
                 if (combiSearchDTO.getWinRateAsc())
