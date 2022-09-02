@@ -39,6 +39,9 @@ public interface SoloCombiRepository extends JpaRepository<SoloCombiEntity,Long>
 
     @Query(value = "select id, position, champion_id, item_list, perk_list, spell_list, perk_myth_item, sum(win_count) as win_count, sum(all_count) as all_count from solo_combi where json_contains(position,?1) group by position limit 1",nativeQuery = true)
     Optional<SoloCombiEntity> findAllCountAndWinCountByChampionPosition(String position);
-    @Query(value = "select * from solo_combi where json_contains(position,?1) and all_count >= ?2 and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
+    @Query(value = "select * from solo_combi where all_count >= ?2 and json_contains(position,?1) and perk_myth_item not like '%|0%' order by win_count / all_count DESC limit 1",nativeQuery = true)
     Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc(String position, Long minAllCount);
+
+    @Query(value = "select * from solo_combi where all_count >= ?2 and json_contains(position,?1) and perk_myth_item not like '%|0%' order by all_count DESC limit 1",nativeQuery = true)
+    Optional<SoloCombiEntity> findByPerkAndMythItemAndPositionAndWinRateDesc2(String position, Long minAllCount);
 }

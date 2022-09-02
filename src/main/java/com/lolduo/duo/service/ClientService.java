@@ -139,6 +139,8 @@ public class ClientService {
         //Input Check End
         ChampionDetail2 result = null;
         Map<Long,String> championPositionMap = championDetailComponent2.initChampionPositionMap(championInfoDTOList);
+
+        /*
         try {
             combiEntity = combiRepository.findAllCountAndWinCountByChampionPosition(objectMapper.writeValueAsString(championPositionMap)).orElse(null);
         } catch (JsonProcessingException e) {
@@ -152,16 +154,30 @@ public class ClientService {
         }
         winRate = String.format("%.2f%%", 100 * ((double) combiEntity.getWinCount() / combiEntity.getAllCount())) ;
         AllCount = String.valueOf(combiEntity.getAllCount()).replaceAll("\\B(?=(\\d{3})+(?!\\d))", ",") + " 게임";
+        */
+        winRate = "0.0%% (TEMP)";
+        AllCount = "0 게임 (TEMP)";
 
         try {
-            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 5L).orElse(null);
+            if(championCount==1){
+                //combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 30L).orElse(null);
+                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc2(objectMapper.writeValueAsString(championPositionMap), 30L).orElse(null);
+            }
+            else if(championCount==2){
+                //combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 20L).orElse(null);
+                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc2(objectMapper.writeValueAsString(championPositionMap), 20L).orElse(null);
+            }
+            else {
+                //combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 5L).orElse(null);
+                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc2(objectMapper.writeValueAsString(championPositionMap), 5L).orElse(null);
+            }
         } catch (JsonProcessingException e) {
             log.error("getChampionDetail2 - objectMapper writeValue error");
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
         }
         if(combiEntity==null){
             try {
-                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 3L).orElse(null);
+                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc2(objectMapper.writeValueAsString(championPositionMap), 3L).orElse(null);
             } catch (JsonProcessingException e) {
                 log.error("getChampionDetail2 - objectMapper writeValue error");
                 return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
