@@ -159,7 +159,15 @@ public class ClientService {
         AllCount = "0 게임 (TEMP)";
 
         try {
-            combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 5L).orElse(null);
+            if(championCount==1){
+                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 30L).orElse(null);
+            }
+            else if(championCount==2){
+                combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 20L).orElse(null);
+            }
+            else {
+                    combiEntity = combiRepository.findByPerkAndMythItemAndPositionAndWinRateDesc(objectMapper.writeValueAsString(championPositionMap), 5L).orElse(null);
+            }
         } catch (JsonProcessingException e) {
             log.error("getChampionDetail2 - objectMapper writeValue error");
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.OK);
