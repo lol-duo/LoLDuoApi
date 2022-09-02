@@ -93,6 +93,14 @@ public class ChampionDetailComponent2 {
         });
         return perkList;
     }
+    private List<Perk> getPerkListWhoseAllCountNotUnderK(List<Perk> originalPerkList, int k) {
+        List<Perk> resultPerkList = new ArrayList<>(originalPerkList);
+        resultPerkList.removeIf(perk -> {
+            return perk.getAllCount() < k;
+        });
+
+        return resultPerkList;
+    }
     public List<ResponsePerk2> makePerkList(List<Perk> perkList, Long ChampionId, Long mainPerkId, Long subPerkId){
         List<ResponsePerk2> responsePerkList = new ArrayList<>();
         for(Perk perk : perkList){
@@ -189,7 +197,7 @@ public class ChampionDetailComponent2 {
     }
     public List<Item> pickItemList(@NotNull ICombiEntity combiEntity){
         List<Item> summarizedItemList = new ArrayList<>();
-        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(combiEntity.getItemList(), 2)),3).forEach(item ->
+        findTopK(getSummarizedItemList(getItemListWhoseItemsNotUnderK(getItemListWhoseAllCountNotUnderK(combiEntity.getItemList(), 3), 2)),3).forEach(item ->
                 summarizedItemList.add((Item)item));
         return summarizedItemList;
     }
@@ -222,6 +230,16 @@ public class ChampionDetailComponent2 {
 
         return summarizedItemList;
     }
+
+    private List<Item> getItemListWhoseAllCountNotUnderK(List<Item> originalItemList, int k) {
+        List<Item> resultItemList = new ArrayList<>(originalItemList);
+        resultItemList.removeIf(item -> {
+            return item.getAllCount() < k;
+        });
+
+        return resultItemList;
+    }
+
     private List<Item> getItemListWhoseItemsNotUnderK(List<Item> originalItemList, int k) {
         List<Item> resultItemList = new ArrayList<>(originalItemList);
         resultItemList.removeIf(item -> {
