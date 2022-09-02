@@ -244,7 +244,7 @@ public class ClientService {
             List<? extends ICombiSummaryEntity> combiSummaryEntityList;
             int minAllCountForSearch;
             if (championCount == 1 || championCount == 2)
-                minAllCountForSearch = 10;
+                minAllCountForSearch = 100;
             else if (championCount == 3)
                 minAllCountForSearch = 20;
             else
