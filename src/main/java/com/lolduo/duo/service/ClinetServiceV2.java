@@ -43,7 +43,7 @@ public class ClinetServiceV2 {
                 result.add(dummy);
             }
         }
-        return new ResponseEntity<>( result,HttpStatus.OK);
+        return new ResponseEntity<>( result.toArray(),HttpStatus.OK);
     }
     /*
     public ResponseEntity<?> getSoloChampionInfoList(CombiSearchV2DTO combiSearchV2DTO){
