@@ -8,6 +8,6 @@ public class CombiSearchV2DTO {
     @ApiModelProperty(example = "ALL")
     private String position;
 
-    @ApiModelProperty(example = "")
-    private String championName;
+    @ApiModelProperty(example = "0")
+    private Long championId;
 }

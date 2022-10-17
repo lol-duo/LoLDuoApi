@@ -47,13 +47,20 @@ public class ClientApi {
         log.info("getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
         return clientService.getChampionInfoList(combiSearchDTO);
     }
+    /*
     @PostMapping("/v2/getInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = ChampionInfoList[].class)
     public ResponseEntity<?> getInfo(@RequestBody CombiSearchV2DTO combiSearchV2DTO){
         log.info("/v2/getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
         return clinetServiceV2.getChampionInfoList(combiSearchDTO);
     }
-
+     */
+    @PostMapping("/v2/getInfo")
+    @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = ChampionInfoList[].class)
+    public ResponseEntity<?> getInfo(@RequestBody CombiSearchV2DTO combiSearchV2DTO){
+        log.info("/v2/getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
+        return clinetServiceV2.getDummy(combiSearchV2DTO);
+    }
     @PostMapping("/championDetail")
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠 상위 2개의 정보를 간략화해서 보여준다.  ",response = ChampionDetail.class)
     public ResponseEntity<?> getChampionDetail(@RequestBody ArrayList<ChampionInfoDTO> championInfoDTOList){
