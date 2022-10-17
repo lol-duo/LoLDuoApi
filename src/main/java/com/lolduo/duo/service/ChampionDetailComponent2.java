@@ -252,7 +252,7 @@ public class ChampionDetailComponent2 {
                     else
                         count++;
                 }
-
+                //demo
                 if (count < k)
                     return true;
             }
