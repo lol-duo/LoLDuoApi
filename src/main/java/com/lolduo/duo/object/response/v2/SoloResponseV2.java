@@ -1,8 +1,9 @@
 package com.lolduo.duo.object.response.v2;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+@Getter
 @NoArgsConstructor
 public class SoloResponseV2 {
     @ApiModelProperty(example = "15")
