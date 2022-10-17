@@ -12,9 +12,11 @@ import java.util.*;
 @Service
 @Slf4j
 public class ClinetServiceV2 {
-
     public ResponseEntity<?> getDummy(CombiSearchV2DTO combiSearchV2DTO) {
-        if(combiSearchV2DTO ==null || combiSearchV2DTO.getChampionId() == null || combiSearchV2DTO.getPosition() == null){
+        if(combiSearchV2DTO ==null){
+            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
+        }
+        if(combiSearchV2DTO.getPosition() == null || combiSearchV2DTO.getChampionId() == null){
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
         List<SoloResponseV2> result = new ArrayList<>();
@@ -27,23 +29,27 @@ public class ClinetServiceV2 {
         String championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.png";
         String positionImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.png";
         String winRate = "67.2%";
+
         SoloResponseV2 dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankNumberColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate);
-        if(combiSearchV2DTO.getPosition().equals("ALL") ==false && combiSearchV2DTO.getChampionId()!=0){
-            result.add(dummy);
-        }
-        else if(combiSearchV2DTO.getPosition().equals("ALL") && combiSearchV2DTO.getChampionId()!=0){
-            result.add(dummy);
-            result.add(dummy);
-            result.add(dummy);
-            result.add(dummy);
-            result.add(dummy);
+
+        if(combiSearchV2DTO.getChampionId()!=0){
+            if(combiSearchV2DTO.getPosition().equals("ALL")){
+                result.add(dummy);
+                result.add(dummy);
+                result.add(dummy);
+                result.add(dummy);
+                result.add(dummy);
+            }
+            else{
+                result.add(dummy);
+            }
         }
         else{
             for(int i =0 ; i < 30 ;i++){
                 result.add(dummy);
             }
         }
-        return new ResponseEntity<>( result.toArray(),HttpStatus.OK);
+        return new ResponseEntity<>(result,HttpStatus.OK);
     }
     /*
     public ResponseEntity<?> getSoloChampionInfoList(CombiSearchV2DTO combiSearchV2DTO){
