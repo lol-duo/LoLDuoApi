@@ -24,11 +24,8 @@ public class ClinetServiceV2 {
     private final ChampionRepository championRepository;
     private final PerkRepository perkRepository;
 
-    public ResponseEntity<?> getDummy(CombiSearchV2DTO combiSearchV2DTO) {
-        if(combiSearchV2DTO ==null){
-            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
-        }
-        if(combiSearchV2DTO.getPosition() == null || combiSearchV2DTO.getChampionId() == null){
+    public ResponseEntity<?> getDummy(Long championId,String position) {
+        if(championId == null || position == null){
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
         List<SoloResponseV2> result = new ArrayList<>();
@@ -43,8 +40,8 @@ public class ClinetServiceV2 {
         String winRate = "67.2%";
         String rankNumberColor = "C8AA6E";
 
-        if(combiSearchV2DTO.getChampionId()!=0){
-            if(combiSearchV2DTO.getPosition().equals("ALL")){
+        if(championId!=0L){
+            if(position.equals("ALL")){
                 for(Long i = 0L ; i < 5L; i++){
                     SoloResponseV2 dummy;
                     if(i>2){
