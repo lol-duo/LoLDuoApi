@@ -31,7 +31,6 @@ public class DoubleMatchEntity{
     private Long mainRune2;
     @Column(name = "all_count")
     private Long allCount;
-
     @Column(name = "win_count")
     private Long winCount;
 }
