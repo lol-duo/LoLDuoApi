@@ -34,7 +34,7 @@ public class ClientServiceV2 {
         String rankChangeNumber = "+1";
         String rankChangeColor ="C8AA6E";
         String championName = "티모";
-        String championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.png";
+        String championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.svg";
         String mainRuneImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.png";
         String positionImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.png";
         String winRate = "67.2%";
@@ -111,7 +111,7 @@ public class ClientServiceV2 {
             } else {
                 championName = championEntity.getName();
                 log.info("championName  : {}", championName);
-                championImgUrl = championEntity.getImgUrl();
+                championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/champion/" + championEntity.getImgUrl();
                 log.info("championImgUrl  : {}", championImgUrl);
             }
             PerkEntity perkEntity = perkRepository.findById(soloMatchEntity.getMainRune()).orElse(null);
