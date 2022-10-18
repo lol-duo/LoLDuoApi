@@ -35,29 +35,41 @@ public class ClinetServiceV2 {
         Long combiId = 15L;
         String rankChangeImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankUp.png";
         String rankChangeNumber = "+1";
-        String rankNumberColor ="C8AA6E";
+        String rankChangeColor ="C8AA6E";
         String championName = "티모";
         String championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.png";
         String mainRuneImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.png";
         String positionImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.png";
         String winRate = "67.2%";
-
-        SoloResponseV2 dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankNumberColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate);
+        String rankNumberColor = "C8AA6E";
 
         if(combiSearchV2DTO.getChampionId()!=0){
             if(combiSearchV2DTO.getPosition().equals("ALL")){
-                result.add(dummy);
-                result.add(dummy);
-                result.add(dummy);
-                result.add(dummy);
-                result.add(dummy);
+                for(Long i = 0L ; i < 5L; i++){
+                    SoloResponseV2 dummy;
+                    if(i>2){
+                        dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1,"");
+                    }
+                    else{
+                        dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1, rankNumberColor);
+                    }
+                     result.add(dummy);
+                }
             }
             else{
+                SoloResponseV2 dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,1L,"");
                 result.add(dummy);
             }
         }
         else{
-            for(int i =0 ; i < 30 ;i++){
+            for(Long i =0L ; i < 30 ;i++){
+                SoloResponseV2 dummy;
+                if(i>2){
+                    dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1L,"");
+                }
+                else{
+                    dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1L, rankNumberColor);
+                }
                 result.add(dummy);
             }
         }
@@ -80,6 +92,8 @@ public class ClinetServiceV2 {
         String rankChangeNumber = "";
         String rankNumberColor ="";
         if(!position.equals("ALL") && !championId.equals("0")){
+            List<SoloMatchEntity> soloMatchEntityList;
+
             SoloMatchEntity soloMatchEntity;
             soloMatchEntity = soloMatchRepository.findByPositionAndChampionId(position,combiSearchV2DTO.getChampionId()).orElse(null);
             if(soloMatchEntity == null){
@@ -117,7 +131,7 @@ public class ClinetServiceV2 {
             log.info("winRate : {}",winRate);
             SoloResponseV2 responseV2 = new SoloResponseV2(soloMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
                     rankNumberColor,championName, championImgUrl,mainRune,
-                    positionBaseUrl +soloMatchEntity.getPosition() +".png" ,winRate);
+                    positionBaseUrl +soloMatchEntity.getPosition() +".png" ,winRate,1L,"");
             soloResponseV2List.add(responseV2);
         }
         return new ResponseEntity<>(soloResponseV2List,HttpStatus.OK);
