@@ -1,4 +1,4 @@
-package com.lolduo.duo.object.entity.v2;
+package com.lolduo.duo.v2.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
