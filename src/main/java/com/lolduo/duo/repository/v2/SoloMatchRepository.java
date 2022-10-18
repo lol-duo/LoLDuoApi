@@ -11,6 +11,8 @@ public interface SoloMatchRepository extends JpaRepository<SoloMatchEntity, Long
 
     @Query(value = "select floor(sum(all_count)/10) from solo_match",nativeQuery = true)
     Optional<Long> getAllCountSum();
-    @Query(value = "select * from solo_match where position like ?1 and champion_id like ?2",nativeQuery = true)
-    List<SoloMatchEntity> findAllByPositionAndChampionId(String position, String championId);
+    @Query(value = "select * from solo_match where all_count > ?3 and  position like ?1 and champion_id like ?2 order by win_count / all_count DESC limit 100",nativeQuery = true)
+    List<SoloMatchEntity> findAllByPositionAndChampionId(String position, String championId,Long allCount);
+    Optional<SoloMatchEntity> findByPositionAndChampionId(String position,Long championId);
+
 }
