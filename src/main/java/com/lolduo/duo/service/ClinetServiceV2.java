@@ -23,7 +23,7 @@ public class ClinetServiceV2 {
     private final SoloMatchRepository soloMatchRepository;
     private final ChampionRepository championRepository;
     private final PerkRepository perkRepository;
-    private final Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) /3000L;
+    private Long MINIMUM_ALL_COUNT ;
 
     public ResponseEntity<?> getDummy(CombiSearchV2DTO combiSearchV2DTO) {
         if(combiSearchV2DTO ==null){
@@ -78,6 +78,7 @@ public class ClinetServiceV2 {
     }
 
     public ResponseEntity<?> getSoloChampionInfoList(CombiSearchV2DTO combiSearchV2DTO) {
+        MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) /3000L;
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
         if (combiSearchV2DTO == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
