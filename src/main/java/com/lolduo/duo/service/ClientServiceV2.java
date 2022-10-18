@@ -19,7 +19,7 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ClinetServiceV2 {
+public class ClientServiceV2 {
     private final SoloMatchRepository soloMatchRepository;
     private final ChampionRepository championRepository;
     private final PerkRepository perkRepository;
@@ -59,7 +59,7 @@ public class ClinetServiceV2 {
             }
         }
         else{
-            for(Long i =0L ; i < 30 ;i++){
+            for(Long i =0L ; i < 100 ;i++){
                 SoloResponseV2 dummy;
                 if(i>2){
                     dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1L,"");
@@ -73,18 +73,15 @@ public class ClinetServiceV2 {
         return new ResponseEntity<>(result,HttpStatus.OK);
     }
 
-    public ResponseEntity<?> getSoloChampionInfoList(CombiSearchV2DTO combiSearchV2DTO) {
+    public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
         Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
-        if (combiSearchV2DTO == null) {
+        if (requestPosition == null || requestChampionId == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
-        if (combiSearchV2DTO.getPosition() == null || combiSearchV2DTO.getChampionId() == null) {
-            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
-        }
-        log.info("v2/getChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", combiSearchV2DTO.getChampionId(), combiSearchV2DTO.getPosition());
-        String position = combiSearchV2DTO.getPosition();
-        String championId = String.valueOf(combiSearchV2DTO.getChampionId());
+        log.info("v2/getChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", requestChampionId, requestPosition);
+        String position = requestPosition;
+        String championId = String.valueOf(requestChampionId);
         String rankChangeImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankSame.png";
         String rankChangeNumber = "";
         String rankNumberColor = "";

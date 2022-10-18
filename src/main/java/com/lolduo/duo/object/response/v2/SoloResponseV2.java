@@ -28,8 +28,6 @@ public class SoloResponseV2 {
     private Long rankNumber ;
     @ApiModelProperty(example = "C8AA6E")
     private String rankNumberColor;
-
-
     public SoloResponseV2(Long combiId, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate,Long rankNumber, String rankNumberColor) {
         this.combiId = combiId;
         this.rankChangeImgUrl = rankChangeImgUrl;
