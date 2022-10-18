@@ -24,7 +24,6 @@ public class SoloResponseV2 {
     private String positionImgUrl;
     @ApiModelProperty(example = "67.2%")
     private String winRate;
-
     @ApiModelProperty(example = "1")
     private Long rankNumber ;
     @ApiModelProperty(example = "C8AA6E")

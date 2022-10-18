@@ -23,7 +23,6 @@ public class ClinetServiceV2 {
     private final SoloMatchRepository soloMatchRepository;
     private final ChampionRepository championRepository;
     private final PerkRepository perkRepository;
-    private Long MINIMUM_ALL_COUNT ;
 
     public ResponseEntity<?> getDummy(CombiSearchV2DTO combiSearchV2DTO) {
         if(combiSearchV2DTO ==null){
@@ -78,7 +77,7 @@ public class ClinetServiceV2 {
     }
 
     public ResponseEntity<?> getSoloChampionInfoList(CombiSearchV2DTO combiSearchV2DTO) {
-        MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) /3000L;
+        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
         if (combiSearchV2DTO == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
@@ -140,7 +139,6 @@ public class ClinetServiceV2 {
                 responseV2 = new SoloResponseV2(soloMatchEntity.getId(), rankChangeImgUrl, rankChangeNumber,
                         rankNumberColor, championName, championImgUrl, mainRune,
                         positionBaseUrl + soloMatchEntity.getPosition() + ".png", winRate, i++, "");
-                soloResponseV2List.add(responseV2);
             } else {
                 responseV2 = new SoloResponseV2(soloMatchEntity.getId(), rankChangeImgUrl, rankChangeNumber,
                         rankNumberColor, championName, championImgUrl, mainRune,

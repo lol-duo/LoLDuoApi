@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class CombiSearchV2DTO {
+    @ApiModelProperty(example = "0")
+    private Long championId;
     @ApiModelProperty(example = "ALL")
     private String position;
 
-    @ApiModelProperty(example = "0")
-    private Long championId;
-
-    public CombiSearchV2DTO(String position, Long championId) {
-        this.position = position;
+    public CombiSearchV2DTO(Long championId,String position) {
         this.championId = championId;
+        this.position = position;
     }
 }
