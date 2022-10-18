@@ -74,7 +74,7 @@ public class ClientServiceV2 {
     }
 
     public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
-        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
+        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 1000L;
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
         if (requestPosition == null || requestChampionId == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
