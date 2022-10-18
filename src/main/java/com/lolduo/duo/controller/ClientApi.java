@@ -35,20 +35,18 @@ public class ClientApi {
     public ResponseEntity<?> getChampionList() {
         return clientService.getChampionList();
     }
-
     @GetMapping("/health")
     @ApiOperation(value ="서버 정상 작동 여부 반환", notes = "서버의 HealthCheck 결과를 반환한다.",response = Champion[].class)
     public ResponseEntity<?> getHealth() {
         return healthCheckService.getHealthCheckResult();
     }
-
     @PostMapping("/getInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = ChampionInfoList[].class)
     public ResponseEntity<?> getInfo(@RequestBody CombiSearchDTO combiSearchDTO){
         log.info("getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
         return clientService.getChampionInfoList(combiSearchDTO);
     }
-    @PostMapping("/v2/getSoloInfo")
+    @GetMapping("/v2/getSoloInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = SoloResponseV2[].class)
     public ResponseEntity<?> getInfoV2(@RequestParam String position,@RequestParam Long championId){
         log.info("/v2/getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
