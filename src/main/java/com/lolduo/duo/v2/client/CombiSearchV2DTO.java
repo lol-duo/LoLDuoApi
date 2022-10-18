@@ -1,4 +1,4 @@
-package com.lolduo.duo.object.dto.client;
+package com.lolduo.duo.v2.client;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;

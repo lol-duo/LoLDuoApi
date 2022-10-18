@@ -1,6 +1,6 @@
-package com.lolduo.duo.repository.v2;
+package com.lolduo.duo.v2.repository;
 
-import com.lolduo.duo.object.entity.v2.SoloMatchEntity;
+import com.lolduo.duo.v2.entity.SoloMatchEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

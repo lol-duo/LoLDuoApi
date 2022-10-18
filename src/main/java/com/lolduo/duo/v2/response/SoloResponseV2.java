@@ -1,4 +1,4 @@
-package com.lolduo.duo.object.response.v2;
+package com.lolduo.duo.v2.response;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
