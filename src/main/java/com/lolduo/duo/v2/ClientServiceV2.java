@@ -3,9 +3,11 @@ package com.lolduo.duo.v2;
 import com.lolduo.duo.v2.entity.MainPageChampionEntity;
 import com.lolduo.duo.v2.entity.MainPagePerkEntity;
 import com.lolduo.duo.v2.entity.SoloMatchEntity;
+import com.lolduo.duo.v2.repository.DoubleMatchRepository;
 import com.lolduo.duo.v2.repository.MainPageChampionRepository;
 import com.lolduo.duo.v2.repository.MainPagePerkRepository;
 import com.lolduo.duo.v2.repository.SoloMatchRepository;
+import com.lolduo.duo.v2.response.DoubleResponseV2;
 import com.lolduo.duo.v2.response.SoloResponseV2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +23,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientServiceV2 {
     private final SoloMatchRepository soloMatchRepository;
+    private final DoubleMatchRepository doubleMatchRepository;
     private final MainPageChampionRepository mainPageChampionRepository;
     private final MainPagePerkRepository mainPagePerkRepository;
     private final String FILE_EXTENSION =".svg";
     private final String cloudFrontBaseUrl ="https://d2d4ci5rabfoyr.cloudfront.net";
+    public ResponseEntity<?> getDoubleChampionInfoList(Long championId, String position, Long championId2, String position2){
+        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 1000L;
+        List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
+        if(championId == null || position == null || championId2 == null || position2==null){
+            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
+        }
+        log.info("v2/getChampionInfoList - 챔피언 조합 검색. champion1Id : {}, position1 : {},  champion2Id : {}, position2 : {}", championId, position,championId2,position2);
 
+        return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
+
+    }
     public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
         Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 1000L;
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
@@ -94,55 +107,45 @@ public class ClientServiceV2 {
         return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
     }
 
-
-    public ResponseEntity<?> getDummy(Long championId,String position) {
-        if(championId == null || position == null){
+    public ResponseEntity<?> getDoubleDummy(Long championId, String position, Long championId2, String position2) {
+        if(championId == null || position == null || championId2 ==null || position2 == null){
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
-        List<SoloResponseV2> result = new ArrayList<>();
-        Long combiId = 15L;
+        List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
+        Long combiId = 0L;
         String rankChangeImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankUp.svg";
         String rankChangeNumber = "+1";
-        String rankChangeColor ="C8AA6E";
-        String championName = "티모";
-        String championImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.svg";
-        String mainRuneImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.svg";
-        String positionImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.svg";
-        String winRate = "67.2%";
-        String rankNumberColor = "C8AA6E";
+        String rankChangeColor = "C8AA6E";
+        Long rankNumber = 1L;
+        String rankNumberIcon = "";
+        String rankNumberColor = "";
 
-        if(championId!=0L){
-            if(position.equals("ALL")){
-                for(Long i = 0L ; i < 5L; i++){
-                    SoloResponseV2 dummy;
-                    if(i>2){
-                        dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1,"");
-                    }
-                    else{
-                        dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1, rankNumberColor);
-                    }
-                    result.add(dummy);
-                }
+        String champion1Name = "티모";
+        String champion1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.svg";
+        String mainRune1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.svg";
+        String position1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.svg";
+        String listImage1 = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/icon/listImage.svg";
+
+        String champion2Name = "직스";
+        String champion2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Ziggs.svg";
+        String mainRune2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.svg";
+        String position2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/BOTTOM.svg";
+        String listImage2 = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/icon/listImage.svg";
+
+        String winRate ="67.2%";
+        for(Long i = 0L ; i < 100L;i++ ){
+            if(i<3){
+                rankNumberIcon = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/logo/Group.svg";
+                rankNumberColor = "C8AA6E";
             }
             else{
-                SoloResponseV2 dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,1L,"");
-                result.add(dummy);
+                rankNumberIcon = "";
+                rankNumberColor = "";
             }
+            DoubleResponseV2 doubleResponseV2 = new DoubleResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,rankNumber+i,rankNumberIcon,rankNumberColor,
+                    champion1Name,champion1ImgUrl,mainRune1ImgUrl,position1ImgUrl,listImage1,champion2Name,champion2ImgUrl,mainRune2ImgUrl,position2ImgUrl,listImage2,winRate);
+            doubleResponseV2List.add(doubleResponseV2);
         }
-        else{
-            for(Long i =0L ; i < 100 ;i++){
-                SoloResponseV2 dummy;
-                if(i>2){
-                    dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1L,"");
-                }
-                else{
-                    dummy = new SoloResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,championName,championImgUrl,mainRuneImgUrl,positionImgUrl,winRate,i+1L, rankNumberColor);
-                }
-                result.add(dummy);
-            }
-        }
-        return new ResponseEntity<>(result,HttpStatus.OK);
+        return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
     }
-
-
 }

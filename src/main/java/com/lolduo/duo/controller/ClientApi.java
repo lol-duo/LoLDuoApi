@@ -1,11 +1,7 @@
 package com.lolduo.duo.controller;
 
-import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
-import com.lolduo.duo.object.dto.client.CombiSearchDTO;
-import com.lolduo.duo.object.response.ChampionInfoList;
-import com.lolduo.duo.object.response.championDetail.ChampionDetail;
-import com.lolduo.duo.object.response.championDetail2.ChampionDetail2;
 import com.lolduo.duo.object.response.getChampionList.Champion;
+import com.lolduo.duo.v2.response.DoubleResponseV2;
 import com.lolduo.duo.v2.response.SoloResponseV2;
 import com.lolduo.duo.service.ClientService;
 import com.lolduo.duo.v2.ClientServiceV2;
@@ -19,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
+
 @CrossOrigin(originPatterns = "*")
 @RestController
 @RequiredArgsConstructor
@@ -49,15 +45,20 @@ public class ClientApi {
      */
     @GetMapping("/v2/getSoloInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = SoloResponseV2[].class)
-    public ResponseEntity<?> getInfoV2(@RequestParam String position,@RequestParam Long championId){
+    public ResponseEntity<?> getSoloInfo(@RequestParam String position,@RequestParam Long championId){
         log.info("/v2/getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
         return clientServiceV2.getSoloChampionInfoList(championId,position);
     }
-    @GetMapping("/v2/getSoloInfoDummy")
-    @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = SoloResponseV2[].class)
-    public ResponseEntity<?> getInfoV2Dummy(@RequestParam String position,@RequestParam Long championId){
-        log.info("/v2/getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
-        return clientServiceV2.getDummy(championId,position);
+    @GetMapping("/v2/getDoubleInfo")
+    @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
+    public ResponseEntity<?> getDoubleInfo(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
+        log.info("/v2/getDoubleInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
+        return clientServiceV2.getDoubleDummy(championId,position,championId2,position2);
+    }
+    @GetMapping("/v2/getDoubleInfoDummy")
+    @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
+    public ResponseEntity<?> getDoubleInfoDummy(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
+        return clientServiceV2.getDoubleDummy(championId,position,championId2,position2);
     }
     /*
     @PostMapping("/championDetail")
