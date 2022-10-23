@@ -1,14 +1,9 @@
 package com.lolduo.duo.controller;
 
-import com.lolduo.duo.object.dto.client.ChampionInfoDTO;
-import com.lolduo.duo.object.dto.client.CombiSearchDTO;
-import com.lolduo.duo.object.response.ChampionInfoList;
-import com.lolduo.duo.object.response.championDetail.ChampionDetail;
-import com.lolduo.duo.object.response.championDetail2.ChampionDetail2;
 import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.v2.response.SoloResponseV2;
 import com.lolduo.duo.service.ClientService;
-import com.lolduo.duo.v2.ClientServiceV2;
+import com.lolduo.duo.v2.service.ClientServiceV2;
 import com.lolduo.duo.service.HealthCheckService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
+
 @CrossOrigin(originPatterns = "*")
 @RestController
 @RequiredArgsConstructor

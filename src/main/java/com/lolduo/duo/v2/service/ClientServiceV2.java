@@ -1,4 +1,4 @@
-package com.lolduo.duo.v2;
+package com.lolduo.duo.v2.service;
 
 import com.lolduo.duo.v2.entity.MainPageChampionEntity;
 import com.lolduo.duo.v2.entity.MainPagePerkEntity;
