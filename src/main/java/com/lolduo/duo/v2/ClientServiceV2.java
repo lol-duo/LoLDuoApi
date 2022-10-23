@@ -33,12 +33,20 @@ public class ClientServiceV2 {
     private static String swapStr(String localA, String localB) {
         return localA;
     }
-
+    private boolean checkPositionIsValid(String position){
+        if(position.equals("ALL") || position.equals("MIDDLE") || position.equals("TOP")||position.equals("UTILITY") ||position.equals("JUNGLE") || position.equals("BOTTOM")){
+            return true;
+        }
+        return false;
+    }
     public ResponseEntity<?> getDoubleChampionInfoList(Long requestChampionId, String requestPosition, Long requestChampionId2, String requestPosition2){
         Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
         List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
         if(requestChampionId == null || requestPosition == null || requestChampionId2 == null || requestPosition2==null){
-            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("404 BAD_REQUEST : 요청한 값들 중 null이 존재합니다. ", HttpStatus.BAD_REQUEST);
+        }
+        if(!checkPositionIsValid(requestPosition) || !checkPositionIsValid(requestPosition2)){
+            return new ResponseEntity<>("404 BAD_REQUEST : 요청한 포지션의 값이 잘못되었습니다.", HttpStatus.BAD_REQUEST);
         }
         log.info("v2/getDoubleChampionInfoList - 챔피언 조합 검색. champion1Id : {}, position1 : {},  champion2Id : {}, position2 : {}", requestChampionId, requestPosition,requestChampionId2,requestPosition2);
         String position1 = requestPosition;
@@ -142,6 +150,9 @@ public class ClientServiceV2 {
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
         if (requestPosition == null || requestChampionId == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
+        }
+        if(!checkPositionIsValid(requestPosition)){
+            return new ResponseEntity<>("404 BAD_REQUEST : 요청한 포지션의 값이 잘못되었습니다.", HttpStatus.BAD_REQUEST);
         }
         log.info("v2/getSoloChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", requestChampionId, requestPosition);
         String position = requestPosition;
