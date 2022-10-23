@@ -124,7 +124,7 @@ public class ClientServiceV2 {
             String winRate = String.format("%.2f%%", 100 * ((double) doubleMatchEntity.getWinCount() / doubleMatchEntity.getAllCount()));
             log.info("winRate : {}", winRate);
             DoubleResponseV2 responseV2 ;
-            if( i > 2){
+            if( i > 3L){
                 rankNumberIcon = "";
                 rankNumberColor ="";
                 listImage1 =cloudFrontBaseUrl+ "/mainPage/icon/listImage" + FILE_EXTENSION; // 4 rank after
@@ -220,7 +220,7 @@ public class ClientServiceV2 {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
         List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
-        Long combiId = 0L;
+        Long id = 0L;
         String rankChangeImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankUp.svg";
         String rankChangeNumber = "+1";
         String rankChangeColor = "C8AA6E";
@@ -241,7 +241,7 @@ public class ClientServiceV2 {
         String listImage2 = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/icon/listImage.svg";
 
         String winRate ="67.2%";
-        for(Long i = 0L ; i < 100L;i++ ){
+        for(Long i = 0L ; i < 30L;i++ ){
             if(i<3){
                 rankNumberIcon = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/logo/Group.svg";
                 rankNumberColor = "C8AA6E";
@@ -250,7 +250,7 @@ public class ClientServiceV2 {
                 rankNumberIcon = "";
                 rankNumberColor = "";
             }
-            DoubleResponseV2 doubleResponseV2 = new DoubleResponseV2(combiId,rankChangeImgUrl,rankChangeNumber,rankChangeColor,rankNumber+i,rankNumberIcon,rankNumberColor,
+            DoubleResponseV2 doubleResponseV2 = new DoubleResponseV2(id,rankChangeImgUrl,rankChangeNumber,rankChangeColor,rankNumber+i,rankNumberIcon,rankNumberColor,
                     champion1Name,champion1ImgUrl,mainRune1ImgUrl,position1ImgUrl,listImage1,champion2Name,champion2ImgUrl,mainRune2ImgUrl,position2ImgUrl,listImage2,winRate);
             doubleResponseV2List.add(doubleResponseV2);
         }
