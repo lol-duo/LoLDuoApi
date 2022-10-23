@@ -40,7 +40,7 @@ public class ClientServiceV2 {
         return false;
     }
     public ResponseEntity<?> getDoubleChampionInfoList(Long requestChampionId, String requestPosition, Long requestChampionId2, String requestPosition2){
-        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
+        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(14000L) / 200L;
         List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
         if(requestChampionId == null || requestPosition == null || requestChampionId2 == null || requestPosition2==null){
             return new ResponseEntity<>("404 BAD_REQUEST : 요청한 값들 중 null이 존재합니다. ", HttpStatus.BAD_REQUEST);
@@ -146,7 +146,7 @@ public class ClientServiceV2 {
         return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
     }
     public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
-        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 1000L;
+        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(40000L) / 200L;
         List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
         if (requestPosition == null || requestChampionId == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);

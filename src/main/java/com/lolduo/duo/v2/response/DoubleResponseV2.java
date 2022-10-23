@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DoubleResponseV2 {
     @ApiModelProperty(example = "15")
-    private Long combiId;
+    private Long id;
     @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankUp.svg")
     private String rankChangeImgUrl;
     @ApiModelProperty(example = "+1")
@@ -49,8 +49,8 @@ public class DoubleResponseV2 {
     @ApiModelProperty(example = "67.2%")
     private String winRate;
 
-    public DoubleResponseV2(Long combiId, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, Long rankNumber, String rankNumberIcon, String rankNumberColor, String champion1Name, String champion1ImgUrl, String mainRune1ImgUrl, String position1ImgUrl,String listImage1, String champion2Name, String champion2ImgUrl, String mainRune2ImgUrl, String position2ImgUrl,String listImage2, String winRate) {
-        this.combiId = combiId;
+    public DoubleResponseV2(Long id, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, Long rankNumber, String rankNumberIcon, String rankNumberColor, String champion1Name, String champion1ImgUrl, String mainRune1ImgUrl, String position1ImgUrl, String listImage1, String champion2Name, String champion2ImgUrl, String mainRune2ImgUrl, String position2ImgUrl, String listImage2, String winRate) {
+        this.id = id;
         this.rankChangeImgUrl = rankChangeImgUrl;
         this.rankChangeNumber = rankChangeNumber;
         this.rankChangeColor = rankChangeColor;
