@@ -53,7 +53,7 @@ public class ClientApi {
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
     public ResponseEntity<?> getDoubleInfo(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
         log.info("/v2/getDoubleInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
-        return clientServiceV2.getDoubleDummy(championId,position,championId2,position2);
+        return clientServiceV2.getDoubleChampionInfoList(championId,position,championId2,position2);
     }
     @GetMapping("/v2/getDoubleInfoDummy")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
