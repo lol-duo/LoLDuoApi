@@ -40,7 +40,7 @@ public class ClientServiceV2 {
         return false;
     }
     public ResponseEntity<?> getDoubleChampionInfoList(Long requestChampionId, String requestPosition, Long requestChampionId2, String requestPosition2){
-        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
+        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 4000L;
         List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
         if(requestChampionId == null || requestPosition == null || requestChampionId2 == null || requestPosition2==null){
             return new ResponseEntity<>("404 BAD_REQUEST : 요청한 값들 중 null이 존재합니다. ", HttpStatus.BAD_REQUEST);
