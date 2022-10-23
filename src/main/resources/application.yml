@@ -24,7 +24,7 @@ spring:
       on-profile: localdb
   datasource:
     username: root
-    url: jdbc:mariadb://localhost:3306/lolduo_dev
+    url: jdbc:mariadb://localhost:3306/lolduo
     password: 1234
   jpa:
     hibernate:
@@ -46,7 +46,7 @@ spring:
       on-profile: serverdb
   datasource:
     username: root
-    url: jdbc:mariadb://${rds.mariadb.endpoint}:3306/lolduo_dev
+    url: jdbc:mariadb://${rds.mariadb.endpoint}:3306/lolduo
     password: ${rds.mariadb.password}
   jpa:
     hibernate:
@@ -67,7 +67,7 @@ spring:
       on-profile: devserver
   datasource:
     username: root
-    url: jdbc:mariadb://${rds.mariadb.endpoint}:3306/lolduo_dev
+    url: jdbc:mariadb://${rds.mariadb.endpoint}:3306/lolduo
     password: ${rds.mariadb.password}
   jpa:
     hibernate:

@@ -1,5 +1,6 @@
 package com.lolduo.duo.v2;
 
+import com.lolduo.duo.v2.entity.DoubleMatchEntity;
 import com.lolduo.duo.v2.entity.MainPageChampionEntity;
 import com.lolduo.duo.v2.entity.MainPagePerkEntity;
 import com.lolduo.duo.v2.entity.SoloMatchEntity;
@@ -28,16 +29,113 @@ public class ClientServiceV2 {
     private final MainPagePerkRepository mainPagePerkRepository;
     private final String FILE_EXTENSION =".svg";
     private final String cloudFrontBaseUrl ="https://d2d4ci5rabfoyr.cloudfront.net";
-    public ResponseEntity<?> getDoubleChampionInfoList(Long championId, String position, Long championId2, String position2){
-        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 1000L;
+
+    private static String swapStr(String localA, String localB) {
+        return localA;
+    }
+
+    public ResponseEntity<?> getDoubleChampionInfoList(Long requestChampionId, String requestPosition, Long requestChampionId2, String requestPosition2){
+        Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(240000L) / 3000L;
         List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
-        if(championId == null || position == null || championId2 == null || position2==null){
+        if(requestChampionId == null || requestPosition == null || requestChampionId2 == null || requestPosition2==null){
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
-        log.info("v2/getChampionInfoList - 챔피언 조합 검색. champion1Id : {}, position1 : {},  champion2Id : {}, position2 : {}", championId, position,championId2,position2);
+        log.info("v2/getDoubleChampionInfoList - 챔피언 조합 검색. champion1Id : {}, position1 : {},  champion2Id : {}, position2 : {}", requestChampionId, requestPosition,requestChampionId2,requestPosition2);
+        String position1 = requestPosition;
+        String position2 = requestPosition2;
+        String championId1 = String.valueOf(requestChampionId);
+        String championId2 = String.valueOf(requestChampionId2);
+        if(requestChampionId > requestChampionId2){
+            position2 = swapStr(position1,position1=position2);
+            championId2 = swapStr(championId1,championId1=championId2);
+        }
 
+        String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
+        String rankChangeNumber = "";
+        String rankChangeColor = "";
+        String rankNumberIcon = ""; //only 1,2,3 rank
+        String rankNumberColor =""; //only 1,2,3 rank
+        String listImage1 =""; //only 4 rank after
+        String listImage2 =""; //only 4 rank after
+        Long i = 1L;
+        if(position1.equals("ALL"))
+            position1 = "%";
+        if(position2.equals("ALL"))
+            position2 ="%";
+        if(championId1.equals("0"))
+            championId1 = "%";
+        if(championId2.equals("0"))
+            championId2 = "%";
+        List<DoubleMatchEntity> doubleMatchEntityList;
+        doubleMatchEntityList = doubleMatchRepository.findAllByPositionAndChampionId(position1,championId1,position2,championId2,MINIMUM_ALL_COUNT);
+        if (doubleMatchEntityList == null || doubleMatchEntityList.size() == 0) {
+            log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
+            return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
+        }
+        for(DoubleMatchEntity doubleMatchEntity : doubleMatchEntityList){
+            if(doubleMatchEntity ==null){
+                log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
+                return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
+            }
+            MainPageChampionEntity champion1Entity = mainPageChampionRepository.findById(doubleMatchEntity.getChampionId1()).orElse(null);
+            MainPageChampionEntity champion2Entity = mainPageChampionRepository.findById(doubleMatchEntity.getChampionId2()).orElse(null);
+            String champion1Name ="";
+            String champion1ImgUrl = "";
+            String champion2Name="";
+            String champion2ImgUrl ="";
+
+            if (champion1Entity == null ||champion2Entity == null ) {
+                log.info("챔피언 테이블에서 챔피언을 찾을 수 없습니다. Champion 테이블을 확인해주세요.  champion1Id: {} , champion2Id: {}", doubleMatchEntity.getChampionId1(), doubleMatchEntity.getChampionId2());
+                champion1Name = "이름 없음";
+                champion1ImgUrl = cloudFrontBaseUrl + "/champion/Teemo" + FILE_EXTENSION;
+                champion2Name = "이름 없음";
+                champion2ImgUrl = cloudFrontBaseUrl + "/champion/Teemo" + FILE_EXTENSION;
+            } else{
+                champion1Name = champion1Entity.getName();
+                champion2Name = champion2Entity.getName();
+                log.info("champion1Name  : {} , champion2Name : {}", champion1Name,champion2Name );
+                champion1ImgUrl = cloudFrontBaseUrl + champion1Entity.getImgUrl() + FILE_EXTENSION;
+                champion2ImgUrl = cloudFrontBaseUrl + champion2Entity.getImgUrl() + FILE_EXTENSION;
+                log.info("champion1ImgUrl  : {} ,champion2ImgUrl : {} ", champion1ImgUrl,champion2ImgUrl);
+            }
+            MainPagePerkEntity perkEntity1 = mainPagePerkRepository.findById(doubleMatchEntity.getMainRune1()).orElse(null);
+            MainPagePerkEntity perkEntity2 = mainPagePerkRepository.findById(doubleMatchEntity.getMainRune2()).orElse(null);
+            String mainRune1 ="";
+            String mainRune2 ="";
+            if(perkEntity1 ==null || perkEntity2 ==null){
+                log.info("룬 테이블에서 해당 룬을 찾을 수 없습니다. Perk 테이블을 확인해주세요 mainRune1: {} , mainRune2 : {}", doubleMatchEntity.getMainRune1(),doubleMatchEntity.getMainRune2());
+                mainRune1 =  cloudFrontBaseUrl + "/mainPage/mainRune/ArcaneComet" + FILE_EXTENSION;
+                mainRune2 =  cloudFrontBaseUrl + "/mainPage/mainRune/ArcaneComet" + FILE_EXTENSION;
+            } else{
+                mainRune1 = cloudFrontBaseUrl +perkEntity1.getImgUrl() + FILE_EXTENSION;
+                mainRune2 = cloudFrontBaseUrl +perkEntity2.getImgUrl() + FILE_EXTENSION;
+                log.info("mainRune1 Url: {} , mainRune2 Url : {}", mainRune1,mainRune2);
+            }
+            String position1Url = cloudFrontBaseUrl + "/mainPage/position/" + doubleMatchEntity.getPosition1() + FILE_EXTENSION;
+            String position2Url = cloudFrontBaseUrl + "/mainPage/position/" + doubleMatchEntity.getPosition2() + FILE_EXTENSION;
+            String winRate = String.format("%.2f%%", 100 * ((double) doubleMatchEntity.getWinCount() / doubleMatchEntity.getAllCount()));
+            log.info("winRate : {}", winRate);
+            DoubleResponseV2 responseV2 ;
+            if( i > 2){
+                rankNumberIcon = "";
+                rankNumberColor ="";
+                listImage1 =cloudFrontBaseUrl+ "/mainPage/icon/listImage" + FILE_EXTENSION; // 4 rank after
+                listImage2 =cloudFrontBaseUrl+ "/mainPage/icon/listImage" + FILE_EXTENSION; // 4 rank after
+                responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
+                        rankChangeColor, i++,rankNumberIcon,rankNumberColor,champion1Name,champion1ImgUrl,mainRune1,
+                        position1Url,listImage1,champion2Name,champion2ImgUrl,mainRune2,position2Url,listImage2,winRate);
+            } else{
+                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/icon/rankChangeIcon" + FILE_EXTENSION; //only 1,2,3 rank
+                rankNumberColor ="C8AA6E"; //only 1,2,3 rank
+                listImage1 ="";
+                listImage2 ="";
+                responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
+                        rankChangeColor, i++,rankNumberIcon,rankNumberColor,champion1Name,champion1ImgUrl,mainRune1,
+                        position1Url,listImage1,champion2Name,champion2ImgUrl,mainRune2,position2Url,listImage2,winRate);
+            }
+            doubleResponseV2List.add(responseV2);
+        }
         return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
-
     }
     public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
         Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(240000L) / 1000L;
@@ -45,7 +143,7 @@ public class ClientServiceV2 {
         if (requestPosition == null || requestChampionId == null) {
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
         }
-        log.info("v2/getChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", requestChampionId, requestPosition);
+        log.info("v2/getSoloChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", requestChampionId, requestPosition);
         String position = requestPosition;
         String championId = String.valueOf(requestChampionId);
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
@@ -106,7 +204,6 @@ public class ClientServiceV2 {
         }
         return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
     }
-
     public ResponseEntity<?> getDoubleDummy(Long championId, String position, Long championId2, String position2) {
         if(championId == null || position == null || championId2 ==null || position2 == null){
             return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
