@@ -23,16 +23,13 @@ public class DoubleResponseV2 {
     @ApiModelProperty
     private ChampionResponse champion1;
 
-    @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/icon/listImage.svg")
-    private String listImage;
-
     @ApiModelProperty
     private ChampionResponse champion2;
 
     @ApiModelProperty(example = "67.2%")
     private String winRate;
 
-    public DoubleResponseV2(Long id, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, Long rankNumber, String rankNumberIcon, ChampionResponse champion1, String listImage, ChampionResponse champion2,String winRate) {
+    public DoubleResponseV2(Long id, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, Long rankNumber, String rankNumberIcon, ChampionResponse champion1, ChampionResponse champion2, String winRate) {
         this.id = id;
         this.rankChangeImgUrl = rankChangeImgUrl;
         this.rankChangeNumber = rankChangeNumber;
@@ -41,7 +38,6 @@ public class DoubleResponseV2 {
         this.rankNumberIcon = rankNumberIcon;
 
         this.champion1 =champion1;
-        this.listImage = listImage;
         this.champion2 = champion2;
 
         this.winRate = winRate;
