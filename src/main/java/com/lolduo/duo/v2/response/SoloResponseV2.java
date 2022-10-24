@@ -26,9 +26,8 @@ public class SoloResponseV2 {
     private String winRate;
     @ApiModelProperty(example = "1")
     private Long rankNumber ;
-    @ApiModelProperty(example = "C8AA6E")
-    private String rankNumberColor;
-    public SoloResponseV2(Long id, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate, Long rankNumber, String rankNumberColor) {
+
+    public SoloResponseV2(Long id, String rankChangeImgUrl, String rankChangeNumber, String rankChangeColor, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate, Long rankNumber) {
         this.id = id;
         this.rankChangeImgUrl = rankChangeImgUrl;
         this.rankChangeNumber = rankChangeNumber;
@@ -39,6 +38,5 @@ public class SoloResponseV2 {
         this.positionImgUrl = positionImgUrl;
         this.winRate = winRate;
         this.rankNumber = rankNumber;
-        this.rankNumberColor = rankNumberColor;
     }
 }
