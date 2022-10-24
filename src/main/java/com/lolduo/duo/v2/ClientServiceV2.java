@@ -60,7 +60,6 @@ public class ClientServiceV2 {
         String rankChangeNumber = "";
         String rankChangeColor = "";
         String rankNumberIcon = ""; //only 1,2,3 rank
-        String listImage =""; //only 4 rank after
         Long i = 1L;
         if(position1.equals("ALL"))
             position1 = "%";
@@ -124,14 +123,12 @@ public class ClientServiceV2 {
             DoubleResponseV2 responseV2 ;
             if( i > 3L){
                 rankNumberIcon = "";
-                listImage =cloudFrontBaseUrl+ "/mainPage/icon/listImage" + FILE_EXTENSION; // 4 rank after
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
-                        rankChangeColor, i++,rankNumberIcon,champion1,listImage,champion2,winRate);
+                        rankChangeColor, i++,rankNumberIcon,champion1,champion2,winRate);
             } else{
                 rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/icon/rankChangeIcon" + FILE_EXTENSION; //only 1,2,3 rank
-                listImage ="";
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
-                        rankChangeColor, i++,rankNumberIcon,champion1,listImage,champion2,winRate);
+                        rankChangeColor, i++,rankNumberIcon,champion1,champion2,winRate);
             }
             doubleResponseV2List.add(responseV2);
         }
@@ -223,7 +220,6 @@ public class ClientServiceV2 {
         String champion1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.svg";
         String mainRune1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.svg";
         String position1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.svg";
-        String listImage = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/icon/listImage.svg";
 
         String champion2Name = "직스";
         String champion2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Ziggs.svg";
@@ -240,7 +236,7 @@ public class ClientServiceV2 {
             }
             ChampionResponse champion1= new ChampionResponse(champion1Name,champion1ImgUrl,mainRune1ImgUrl,position1ImgUrl);
             ChampionResponse champion2= new ChampionResponse(champion2Name,champion2ImgUrl,mainRune2ImgUrl,position2ImgUrl);
-            DoubleResponseV2 doubleResponseV2 = new DoubleResponseV2(id,rankChangeImgUrl,rankChangeNumber,rankChangeColor,rankNumber+i,rankNumberIcon,champion1,listImage,champion2, winRate);
+            DoubleResponseV2 doubleResponseV2 = new DoubleResponseV2(id,rankChangeImgUrl,rankChangeNumber,rankChangeColor,rankNumber+i,rankNumberIcon,champion1, champion2, winRate);
             doubleResponseV2List.add(doubleResponseV2);
         }
         return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
