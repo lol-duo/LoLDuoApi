@@ -9,6 +9,7 @@ import com.lolduo.duo.service.HealthCheckService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,6 +70,13 @@ public class ClientApi {
         ResponseEntity<?> responseEntity = clientServiceV2.getDoubleDummy(championId,position,championId2,position2);
         log.info("/v2/getDoubleInfoDummy()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
+    }
+    @GetMapping("/checkServer")
+    @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
+    public ResponseEntity<?> doubleInfoDummy(@RequestParam String name) {
+        long start = System.currentTimeMillis();
+        log.info("/checkServer  API Call 된 시간 : {},호출한 사람 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return new ResponseEntity<>("호출한 사람 : " + name,HttpStatus.OK);
     }
     /*
     @PostMapping("/championDetail")
