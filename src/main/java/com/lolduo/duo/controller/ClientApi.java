@@ -25,10 +25,13 @@ public class ClientApi {
     private final HealthCheckService healthCheckService;
     private final ClientServiceV2 clientServiceV2;
 
-    @GetMapping("/getChampionList")
+    @GetMapping("/championList")
     @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
-    public ResponseEntity<?> getChampionList() {
-        return clientService.getChampionList();
+    public ResponseEntity<?> ChampionList() {
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = clientService.getChampionList();
+        log.info("/v2/ChampionList() API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return responseEntity;
     }
     @GetMapping("/health")
     @ApiOperation(value ="서버 정상 작동 여부 반환", notes = "서버의 HealthCheck 결과를 반환한다.",response = Champion[].class)
@@ -43,22 +46,29 @@ public class ClientApi {
         return clientService.getChampionInfoList(combiSearchDTO);
     }
      */
-    @GetMapping("/v2/getSoloInfo")
+    @GetMapping("/v2/soloInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = SoloResponseV2[].class)
-    public ResponseEntity<?> getSoloInfo(@RequestParam String position,@RequestParam Long championId){
-        log.info("/v2/getInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
-        return clientServiceV2.getSoloChampionInfoList(championId,position);
+    public ResponseEntity<?> soloInfo(@RequestParam String position,@RequestParam Long championId){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = clientServiceV2.getSoloChampionInfoList(championId,position);
+        log.info("/v2/SoloInfo() API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return responseEntity;
     }
-    @GetMapping("/v2/getDoubleInfo")
+    @GetMapping("/v2/doubleInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
-    public ResponseEntity<?> getDoubleInfo(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
-        log.info("/v2/getDoubleInfo() - 시간 측정 : API CALL {}", LocalDateTime.ofInstant(Instant.ofEpochMilli(System.currentTimeMillis()), ZoneId.of("Asia/Seoul")));
-        return clientServiceV2.getDoubleChampionInfoList(championId,position,championId2,position2);
+    public ResponseEntity<?> doubleInfo(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = clientServiceV2.getDoubleChampionInfoList(championId,position,championId2,position2);
+        log.info("/v2/DoubleInfo()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return responseEntity;
     }
-    @GetMapping("/v2/getDoubleInfoDummy")
+    @GetMapping("/v2/doubleInfoDummy")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
-    public ResponseEntity<?> getDoubleInfoDummy(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
-        return clientServiceV2.getDoubleDummy(championId,position,championId2,position2);
+    public ResponseEntity<?> doubleInfoDummy(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = clientServiceV2.getDoubleDummy(championId,position,championId2,position2);
+        log.info("/v2/getDoubleInfoDummy()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return responseEntity;
     }
     /*
     @PostMapping("/championDetail")
