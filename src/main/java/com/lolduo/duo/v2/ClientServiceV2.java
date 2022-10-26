@@ -126,7 +126,7 @@ public class ClientServiceV2 {
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
                         rankChangeColor, i++,rankNumberIcon,champion1,champion2,winRate);
             } else{
-                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/icon/rankChangeIcon" + FILE_EXTENSION; //only 1,2,3 rank
+                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
                         rankChangeColor, i++,rankNumberIcon,champion1,champion2,winRate);
             }
