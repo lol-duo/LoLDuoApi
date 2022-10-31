@@ -51,10 +51,12 @@ public class ClientServiceV2 {
         String position2 = requestPosition2;
         String championId1 = String.valueOf(requestChampionId);
         String championId2 = String.valueOf(requestChampionId2);
+        /*
         if(requestChampionId > requestChampionId2){
             position2 = swapStr(position1,position1=position2);
             championId2 = swapStr(championId1,championId1=championId2);
         }
+         */
 
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
         String rankChangeNumber = "";
@@ -121,6 +123,12 @@ public class ClientServiceV2 {
             ChampionResponse champion1 = new ChampionResponse(champion1Name,champion1ImgUrl,mainRune1,position1Url);
             ChampionResponse champion2 = new ChampionResponse(champion2Name,champion2ImgUrl,mainRune2,position2Url);
             DoubleResponseV2 responseV2 ;
+
+            if(!compareRequestResponse(position1, doubleMatchEntity.getPosition1(),position2,doubleMatchEntity.getPosition2())){
+                ChampionResponse temp = champion1.getChampionResponse();
+                champion1 = champion2.getChampionResponse();
+                champion2 = temp.getChampionResponse();
+            }
             if( i > 3L){
                 rankNumberIcon = "";
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
@@ -133,6 +141,10 @@ public class ClientServiceV2 {
             doubleResponseV2List.add(responseV2);
         }
         return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
+    }
+
+    private boolean compareRequestResponse(String requestPosition1, String responsePosition1,String requestPosition2, String responsePosition2 ){
+        return requestPosition1.equals(responsePosition1) && requestPosition2.equals(responsePosition2);
     }
     public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
         Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(40000L) / 200L;
