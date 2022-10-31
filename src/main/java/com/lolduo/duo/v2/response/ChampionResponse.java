@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ChampionResponse implements Cloneable {
+public class ChampionResponse {
     private String championName;
     @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Ziggs.svg")
     private String championImgUrl;
@@ -20,23 +20,5 @@ public class ChampionResponse implements Cloneable {
         this.championImgUrl = championImgUrl;
         this.mainRuneImgUrl = mainRuneImgUrl;
         this.positionImgUrl = positionImgUrl;
-    }
-    @Override
-
-
-
-    protected Object clone() throws CloneNotSupportedException{
-
-        ChampionResponse cloned = (ChampionResponse) super.clone();
-        return cloned;
-    }
-    public ChampionResponse getChampionResponse(){
-        ChampionResponse cloned ;
-        try {
-            cloned = (ChampionResponse) clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
-        return  cloned;
     }
 }
