@@ -1,8 +1,9 @@
 package com.lolduo.duo.controller;
 
 import com.lolduo.duo.object.response.getChampionList.Champion;
-import com.lolduo.duo.v2.response.DoubleResponseV2;
-import com.lolduo.duo.v2.response.SoloResponseV2;
+import com.lolduo.duo.v2.response.championDetail.SoloChampionDetailResponse;
+import com.lolduo.duo.v2.response.mainPage.DoubleResponseV2;
+import com.lolduo.duo.v2.response.mainPage.SoloResponseV2;
 import com.lolduo.duo.service.ClientService;
 import com.lolduo.duo.v2.ClientServiceV2;
 import com.lolduo.duo.service.HealthCheckService;
@@ -78,6 +79,16 @@ public class ClientApi {
         log.info("/checkServer  API Call 된 시간 : {},호출한 사람 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,name);
         return new ResponseEntity<>("호출한 사람 : " + name,HttpStatus.OK);
     }
+
+    @GetMapping("/v2/soloChampionDetailDummy")
+    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = SoloChampionDetailResponse.class)
+    public ResponseEntity<?> getSoloChampionDetailDummy(@RequestParam Long dbId){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = clientServiceV2.getSoloChampionDetailDummy(dbId);
+        log.info("/v2/getSoloChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
+        return responseEntity;
+    }
+
     /*
     @PostMapping("/championDetail")
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠 상위 2개의 정보를 간략화해서 보여준다.  ",response = ChampionDetail.class)
