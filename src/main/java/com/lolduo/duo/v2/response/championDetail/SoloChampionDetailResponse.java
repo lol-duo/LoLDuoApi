@@ -10,19 +10,22 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class SoloChampionDetailResponse {
-    @ApiModelProperty(example = "15")
-    String mainRuneImg;
-    @ApiModelProperty(example = "15")
+    @ApiModelProperty(example = "미스포츈")
+    String championName;
+    @ApiModelProperty(example = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/champion/MissFortune.svg")
     String championImg;
-    @ApiModelProperty(example = "15")
+    @ApiModelProperty(example = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/mainRune/LethalTempoTemp.svg")
+    String mainRuneImg;
+    @ApiModelProperty(example = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/position/BOTTOM.svg")
     String positionImg;
-    @ApiModelProperty(example = "15")
 
     List<SoloDetailItem> soloDetailItemList =new ArrayList<>();
 
-    public SoloChampionDetailResponse(String mainRuneImg, String championImg, String positionImg, String rankBadge, String winRate, List<SoloDetailItem> soloDetailItemList) {
-        this.mainRuneImg = mainRuneImg;
+
+    public SoloChampionDetailResponse(String championName, String championImg, String mainRuneImg, String positionImg, List<SoloDetailItem> soloDetailItemList) {
+        this.championName = championName;
         this.championImg = championImg;
+        this.mainRuneImg = mainRuneImg;
         this.positionImg = positionImg;
         this.soloDetailItemList = soloDetailItemList;
     }

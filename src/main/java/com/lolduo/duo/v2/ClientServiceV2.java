@@ -303,14 +303,14 @@ public class ClientServiceV2 {
         DetailRune detailRune = new DetailRune("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Precision/Precision.svg",
                 "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Domination/Domination.svg",
                  mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
-        SoloDetailItem soloDetailItem1 = new SoloDetailItem(detailSpell,detailRune,detailItem,"","70.1%");
-        SoloDetailItem soloDetailItem2 = new SoloDetailItem(detailSpell,detailRune,detailItem,"","65.1%");
-        SoloDetailItem soloDetailItem3 = new SoloDetailItem(detailSpell,detailRune,detailItem,"","60.1%");
+        SoloDetailItem soloDetailItem1 = new SoloDetailItem(detailSpell,detailRune,detailItem,"https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
+        SoloDetailItem soloDetailItem2 = new SoloDetailItem(detailSpell,detailRune,detailItem,"https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","65.1%");
+        SoloDetailItem soloDetailItem3 = new SoloDetailItem(detailSpell,detailRune,detailItem,"https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","60.1%");
         List<SoloDetailItem> soloDetailItemList = new ArrayList<>();
         soloDetailItemList.add(soloDetailItem1);
         soloDetailItemList.add(soloDetailItem2);
         soloDetailItemList.add(soloDetailItem3);
-        SoloChampionDetailResponse soloChampionDetailResponse = new SoloChampionDetailResponse();
-        return new ResponseEntity<>(soloChampionDetailResponse, HttpStatus.OK);
+        SoloChampionDetailResponse soloChampionDetailResponse = new SoloChampionDetailResponse(championName,championImgUrl,mainRuneImgUrl,positionImgUrl,soloDetailItemList);
+            return new ResponseEntity<>(soloChampionDetailResponse, HttpStatus.OK);
     }
 }
