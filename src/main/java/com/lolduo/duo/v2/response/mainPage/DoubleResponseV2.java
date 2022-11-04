@@ -1,5 +1,6 @@
-package com.lolduo.duo.v2.response;
+package com.lolduo.duo.v2.response.mainPage;
 
+import com.lolduo.duo.v2.response.ChampionResponse;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
