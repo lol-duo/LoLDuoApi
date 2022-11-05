@@ -2,7 +2,7 @@ package com.lolduo.duo.controller;
 
 import com.lolduo.duo.object.response.getChampionList.Champion;
 import com.lolduo.duo.v2.response.championDetail.DetailDoubleResponse;
-import com.lolduo.duo.v2.response.championDetail.SoloChampionDetailResponse;
+import com.lolduo.duo.v2.response.championDetail.DetailSoloResponse;
 import com.lolduo.duo.v2.response.mainPage.DoubleResponseV2;
 import com.lolduo.duo.v2.response.mainPage.SoloResponseV2;
 import com.lolduo.duo.service.ClientService;
@@ -82,7 +82,7 @@ public class ClientApi {
     }
 
     @GetMapping("/v2/soloChampionDetailDummy")
-    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = SoloChampionDetailResponse.class)
+    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = DetailSoloResponse.class)
     public ResponseEntity<?> getSoloChampionDetailDummy(@RequestParam Long dbId){
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = clientServiceV2.getSoloChampionDetailDummy(dbId);

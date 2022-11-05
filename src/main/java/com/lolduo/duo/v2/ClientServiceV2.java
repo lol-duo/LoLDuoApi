@@ -312,8 +312,8 @@ public class ClientServiceV2 {
                 mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
         DetailInfo detailInfo =new DetailInfo(detailSpell,detailRune,detailItem);
         DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
-        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","70.1%");
-        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","70.1%");
+        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","68.1%");
+        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","76.1%");
         DetailDouble detailDouble1 =new DetailDouble(detailRankWinRate1,detailInfo,detailInfo);
         DetailDouble detailDouble2 =new DetailDouble(detailRankWinRate2,detailInfo,detailInfo);
         DetailDouble detailDouble3 =new DetailDouble(detailRankWinRate3,detailInfo,detailInfo);
@@ -330,7 +330,7 @@ public class ClientServiceV2 {
         String championImgUrl  = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/champion/MissFortune.svg";
         String mainRuneImgUrl = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/mainRune/LethalTempoTemp.svg";
         String positionImgUrl = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/position/BOTTOM.svg";
-
+        DetailChampionComp detailChampionComp = new DetailChampionComp(championName,championImgUrl,mainRuneImgUrl,positionImgUrl);
         DetailSpell detailSpell = new DetailSpell("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/SummonerFlash.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/SummonerExhaust.png");
         DetailItem detailItem = new DetailItem("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3068.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3065.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3075.png");
         List<String> mainRuneList1 = new ArrayList<>();
@@ -375,14 +375,20 @@ public class ClientServiceV2 {
         DetailRune detailRune = new DetailRune("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Precision/Precision.svg",
                 "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Domination/Domination.svg",
                  mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
-        SoloDetailItem soloDetailItem1 = new SoloDetailItem(detailSpell,detailRune,detailItem,"https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
-        SoloDetailItem soloDetailItem2 = new SoloDetailItem(detailSpell,detailRune,detailItem,"https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","65.1%");
-        SoloDetailItem soloDetailItem3 = new SoloDetailItem(detailSpell,detailRune,detailItem,"https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","60.1%");
-        List<SoloDetailItem> soloDetailItemList = new ArrayList<>();
-        soloDetailItemList.add(soloDetailItem1);
-        soloDetailItemList.add(soloDetailItem2);
-        soloDetailItemList.add(soloDetailItem3);
-        SoloChampionDetailResponse soloChampionDetailResponse = new SoloChampionDetailResponse(championName,championImgUrl,mainRuneImgUrl,positionImgUrl,soloDetailItemList);
-        return new ResponseEntity<>(soloChampionDetailResponse, HttpStatus.OK);
+
+        DetailInfo detailInfo =new DetailInfo(detailSpell,detailRune,detailItem);
+        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
+        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","65.1%");
+        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","60.1%");
+        DetailSolo detailSolo1 = new DetailSolo(detailRankWinRate1,detailInfo);
+        DetailSolo detailSolo2 = new DetailSolo(detailRankWinRate2,detailInfo);
+        DetailSolo detailSolo3 = new DetailSolo(detailRankWinRate3,detailInfo);
+
+        List<DetailSolo> detailSoloList = new ArrayList<>();
+        detailSoloList.add(detailSolo1);
+        detailSoloList.add(detailSolo2);
+        detailSoloList.add(detailSolo3);
+        DetailSoloResponse detailSoloResponse = new DetailSoloResponse(detailChampionComp,detailSoloList);
+        return new ResponseEntity<>(detailSoloResponse, HttpStatus.OK);
     }
 }

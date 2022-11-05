@@ -1,7 +1,6 @@
 package com.lolduo.duo.v2.response.championDetail;
 
 import com.lolduo.duo.v2.response.championDetail.sub.DetailChampionComp;
-import jdk.jfr.Name;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
