@@ -61,7 +61,7 @@ public class ClientServiceV2 {
         String championId2 = String.valueOf(requestChampionId2);
 
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
-        String rankChangeNumber = "";
+        Long rankChangeNumber = 0L;
         String rankChangeColor = "";
         String rankNumberIcon = ""; //only 1,2,3 rank
         Long i = 1L;
@@ -148,7 +148,6 @@ public class ClientServiceV2 {
         }
         return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
     }
-
     private boolean compareRequestResponse(String requestPosition1, String responsePosition1,String requestPosition2, String responsePosition2 ){
         return requestPosition1.equals(responsePosition1) || requestPosition2.equals(responsePosition2);
     }
@@ -165,7 +164,7 @@ public class ClientServiceV2 {
         String position = requestPosition;
         String championId = String.valueOf(requestChampionId);
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
-        String rankChangeNumber = "";
+        Long rankChangeNumber = 0L;
         String rankNumberColor = "";
         Long i = 1L;
         if (position.equals("ALL"))
@@ -221,43 +220,6 @@ public class ClientServiceV2 {
             soloResponseV2List.add(responseV2);
         }
         return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
-    }
-    public ResponseEntity<?> getDoubleDummy(Long championId, String position, Long championId2, String position2) {
-        if(championId == null || position == null || championId2 ==null || position2 == null){
-            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
-        }
-        List<DoubleResponseV2> doubleResponseV2List = new ArrayList<>();
-        Long id = 0L;
-        String rankChangeImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankUp.svg";
-        String rankChangeNumber = "+1";
-        String rankChangeColor = "C8AA6E";
-        Long rankNumber = 1L;
-        String rankNumberIcon = "";
-
-        String champion1Name = "티모";
-        String champion1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.svg";
-        String mainRune1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.svg";
-        String position1ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/MIDDLE.svg";
-
-        String champion2Name = "직스";
-        String champion2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Ziggs.svg";
-        String mainRune2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/mainRune/ArcaneComet.svg";
-        String position2ImgUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/position/BOTTOM.svg";
-
-        String winRate ="67.2%";
-        for(Long i = 0L ; i < 30L;i++ ){
-            if(i<3){
-                rankNumberIcon = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/logo/Group.svg";
-            }
-            else{
-                rankNumberIcon = "";
-            }
-            ChampionResponse champion1= new ChampionResponse(champion1Name,champion1ImgUrl,mainRune1ImgUrl,position1ImgUrl);
-            ChampionResponse champion2= new ChampionResponse(champion2Name,champion2ImgUrl,mainRune2ImgUrl,position2ImgUrl);
-            DoubleResponseV2 doubleResponseV2 = new DoubleResponseV2(id,rankChangeImgUrl,rankChangeNumber,rankChangeColor,rankNumber+i,rankNumberIcon,champion1, champion2, winRate);
-            doubleResponseV2List.add(doubleResponseV2);
-        }
-        return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
     }
     public ResponseEntity<?> getDoubleChampionDetailDummy(Long dbId1,Long dbId2) {
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/";
