@@ -62,7 +62,6 @@ public class ClientServiceV2 {
 
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
         Long rankChangeNumber = 0L;
-        String rankChangeColor = "";
         String rankNumberIcon = ""; //only 1,2,3 rank
         Long i = 1L;
         if(position1.equals("ALL"))
@@ -137,11 +136,11 @@ public class ClientServiceV2 {
             }
             if(swapTrueOrFalse){
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
-                        rankChangeColor, i++,rankNumberIcon,champion2,champion1,winRate);
+                        i++,rankNumberIcon,champion2,champion1,winRate);
             }
             else{
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
-                        rankChangeColor, i++,rankNumberIcon,champion1,champion2,winRate);
+                        i++,rankNumberIcon,champion1,champion2,winRate);
             }
             doubleResponseV2List.add(responseV2);
             swapTrueOrFalse = false;
@@ -165,7 +164,6 @@ public class ClientServiceV2 {
         String championId = String.valueOf(requestChampionId);
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
         Long rankChangeNumber = 0L;
-        String rankNumberColor = "";
         Long i = 1L;
         if (position.equals("ALL"))
             position = "%";
@@ -208,15 +206,18 @@ public class ClientServiceV2 {
             String winRate = String.format("%.2f%%", 100 * ((double) soloMatchEntity.getWinCount() / soloMatchEntity.getAllCount()));
             log.info("winRate : {}", winRate);
             SoloResponseV2 responseV2;
-            if (i > 3) {
-                responseV2 = new SoloResponseV2(soloMatchEntity.getId(), rankChangeImgUrl, rankChangeNumber,
-                        rankNumberColor, championName, championImgUrl, mainRune,
-                        positionUrl, winRate, i++);
-            } else {
-                responseV2 = new SoloResponseV2(soloMatchEntity.getId(), rankChangeImgUrl, rankChangeNumber,
-                        rankNumberColor, championName, championImgUrl, mainRune,
-                        positionUrl, winRate, i++);
-            }
+            if(i==1)
+                rankChangeNumber = 10L;
+            else if(i == 2)
+                rankChangeNumber = 0L;
+            else if(i == 3)
+                rankChangeNumber = -3L;
+            else
+                rankChangeNumber = 0L;
+
+            responseV2 = new SoloResponseV2(soloMatchEntity.getId(), rankChangeImgUrl, rankChangeNumber,
+                    championName, championImgUrl, mainRune,
+                    positionUrl, winRate, i++);
             soloResponseV2List.add(responseV2);
         }
         return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);

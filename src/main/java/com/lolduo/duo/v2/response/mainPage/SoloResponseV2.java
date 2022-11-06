@@ -12,8 +12,6 @@ public class SoloResponseV2 {
     private String rankChangeImgUrl;
     @ApiModelProperty(example = "0")
     private Long rankChangeNumber;
-    @ApiModelProperty(example = "C8AA6E")
-    private String rankChangeColor;
     @ApiModelProperty(example = "티모")
     private String championName;
     @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/Teemo.png")
@@ -27,11 +25,10 @@ public class SoloResponseV2 {
     @ApiModelProperty(example = "1")
     private Long rankNumber ;
 
-    public SoloResponseV2(Long id, String rankChangeImgUrl, Long rankChangeNumber, String rankChangeColor, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate, Long rankNumber) {
+    public SoloResponseV2(Long id, String rankChangeImgUrl, Long rankChangeNumber, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate, Long rankNumber) {
         this.id = id;
         this.rankChangeImgUrl = rankChangeImgUrl;
         this.rankChangeNumber = rankChangeNumber;
-        this.rankChangeColor = rankChangeColor;
         this.championName = championName;
         this.championImgUrl = championImgUrl;
         this.mainRuneImgUrl = mainRuneImgUrl;
