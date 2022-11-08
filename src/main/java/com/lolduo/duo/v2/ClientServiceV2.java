@@ -4,6 +4,7 @@ import com.lolduo.duo.v2.entity.DoubleMatchEntity;
 import com.lolduo.duo.v2.entity.MainPageChampionEntity;
 import com.lolduo.duo.v2.entity.MainPagePerkEntity;
 import com.lolduo.duo.v2.entity.SoloMatchEntity;
+import com.lolduo.duo.v2.parser.EntityToResponseParser;
 import com.lolduo.duo.v2.repository.DoubleMatchRepository;
 import com.lolduo.duo.v2.repository.MainPageChampionRepository;
 import com.lolduo.duo.v2.repository.MainPagePerkRepository;
@@ -35,6 +36,8 @@ public class ClientServiceV2 {
     private final DoubleMatchRepository doubleMatchRepository;
     private final MainPageChampionRepository mainPageChampionRepository;
     private final MainPagePerkRepository mainPagePerkRepository;
+    private final EntityToResponseParser entityToResponseParser;
+
     private final String FILE_EXTENSION =".svg";
     private final String cloudFrontBaseUrl ="https://d2d4ci5rabfoyr.cloudfront.net";
 
@@ -43,6 +46,42 @@ public class ClientServiceV2 {
     }
     private boolean checkPositionIsValid(String position){
         return position.equals("ALL") || position.equals("MIDDLE") || position.equals("TOP") || position.equals("UTILITY") || position.equals("JUNGLE") || position.equals("BOTTOM");
+    }
+    private boolean compareRequestResponse(String requestPosition1, String responsePosition1,String requestPosition2, String responsePosition2 ){
+        return requestPosition1.equals(responsePosition1) || requestPosition2.equals(responsePosition2);
+    }
+    public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
+        if (requestPosition == null || requestChampionId == null) {
+            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
+        }
+        if(!checkPositionIsValid(requestPosition)){
+            return new ResponseEntity<>("404 BAD_REQUEST : 요청한 포지션의 값이 잘못되었습니다.", HttpStatus.BAD_REQUEST);
+        }
+        log.info("v2/getSoloChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", requestChampionId, requestPosition);
+
+        List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
+        String position = requestPosition;
+        String championId = String.valueOf(requestChampionId);
+        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(40000L) / 200L;
+        log.info("최소 판수 : {}" ,MINIMUM_ALL_COUNT);
+        Long i = 1L;
+        List<SoloMatchEntity> soloMatchEntityList;
+
+        if (position.equals("ALL"))
+            position = "%";
+        if (championId.equals("0"))
+            championId = "%";
+
+        soloMatchEntityList = soloMatchRepository.findAllByPositionAndChampionId(position, championId, MINIMUM_ALL_COUNT);
+        if (soloMatchEntityList == null || soloMatchEntityList.size() == 0) {
+            log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
+            return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
+        }
+        for (SoloMatchEntity soloMatchEntity : soloMatchEntityList) {
+            SoloResponseV2 soloResponseV2 = entityToResponseParser.soloMatchToSoloResponseV2(soloMatchEntity,i++);
+            soloResponseV2List.add(soloResponseV2);
+        }
+        return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
     }
     public ResponseEntity<?> getDoubleChampionInfoList(Long requestChampionId, String requestPosition, Long requestChampionId2, String requestPosition2){
         Long MINIMUM_ALL_COUNT = doubleMatchRepository.getAllCountSum().orElse(14000L) / 200L;
@@ -147,211 +186,6 @@ public class ClientServiceV2 {
         }
         return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
     }
-    private boolean compareRequestResponse(String requestPosition1, String responsePosition1,String requestPosition2, String responsePosition2 ){
-        return requestPosition1.equals(responsePosition1) || requestPosition2.equals(responsePosition2);
-    }
-    public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
-        Long MINIMUM_ALL_COUNT = soloMatchRepository.getAllCountSum().orElse(40000L) / 200L;
-        List<SoloResponseV2> soloResponseV2List = new ArrayList<>();
-        if (requestPosition == null || requestChampionId == null) {
-            return new ResponseEntity<>("404 BAD_REQUEST", HttpStatus.BAD_REQUEST);
-        }
-        if(!checkPositionIsValid(requestPosition)){
-            return new ResponseEntity<>("404 BAD_REQUEST : 요청한 포지션의 값이 잘못되었습니다.", HttpStatus.BAD_REQUEST);
-        }
-        log.info("v2/getSoloChampionInfoList - 챔피언 조합 검색. championId : {}, position : {}", requestChampionId, requestPosition);
-        String position = requestPosition;
-        String championId = String.valueOf(requestChampionId);
-        String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
-        Long rankChangeNumber = 0L;
-        Long i = 1L;
-        if (position.equals("ALL"))
-            position = "%";
-        if (championId.equals("0"))
-            championId = "%";
-        List<SoloMatchEntity> soloMatchEntityList;
-        soloMatchEntityList = soloMatchRepository.findAllByPositionAndChampionId(position, championId, MINIMUM_ALL_COUNT);
-        if (soloMatchEntityList == null || soloMatchEntityList.size() == 0) {
-            log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
-            return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
-        }
-        for (SoloMatchEntity soloMatchEntity : soloMatchEntityList) {
-            if (soloMatchEntity == null) {
-                log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
-                return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
-            }
-            MainPageChampionEntity championEntity = mainPageChampionRepository.findById(soloMatchEntity.getChampionId()).orElse(null);
-            String championName = "";
-            String championImgUrl = "";
-            if (championEntity == null) {
-                log.info("챔피언 테이블에서 챔피언을 찾을 수 없습니다. Champion 테이블을 확인해주세요.  championId: {}", soloMatchEntity.getChampionId());
-                championName = "이름 없음";
-                championImgUrl = cloudFrontBaseUrl + "/champion/Teemo" + FILE_EXTENSION;
-            } else {
-                championName = championEntity.getName();
-                log.info("championName  : {}", championName);
-                championImgUrl = cloudFrontBaseUrl + championEntity.getImgUrl() + FILE_EXTENSION;
-                log.info("championImgUrl  : {}", championImgUrl);
-            }
-            MainPagePerkEntity perkEntity = mainPagePerkRepository.findById(soloMatchEntity.getMainRune()).orElse(null);
-            String mainRune = "";
-            if (perkEntity == null) {
-                log.info("룬 테이블에서 해당 룬을 찾을 수 없습니다. Perk 테이블을 확인해주세요 mainRune: {}", soloMatchEntity.getMainRune());
-                mainRune = cloudFrontBaseUrl + "/mainPage/mainRune/ArcaneComet" + FILE_EXTENSION;
-            } else {
-                mainRune = cloudFrontBaseUrl +perkEntity.getImgUrl() + FILE_EXTENSION;
-                log.info("mainRune Url : {}", mainRune);
-            }
-            String positionUrl = cloudFrontBaseUrl + "/mainPage/position/" + soloMatchEntity.getPosition() + FILE_EXTENSION;
-            String winRate = String.format("%.2f%%", 100 * ((double) soloMatchEntity.getWinCount() / soloMatchEntity.getAllCount()));
-            log.info("winRate : {}", winRate);
-            SoloResponseV2 responseV2;
-            if(i==1)
-                rankChangeNumber = 10L;
-            else if(i == 2)
-                rankChangeNumber = 0L;
-            else if(i == 3)
-                rankChangeNumber = -3L;
-            else
-                rankChangeNumber = 0L;
-
-            responseV2 = new SoloResponseV2(soloMatchEntity.getId(), rankChangeImgUrl, rankChangeNumber,
-                    championName, championImgUrl, mainRune,
-                    positionUrl, winRate, i++);
-            soloResponseV2List.add(responseV2);
-        }
-        return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
-    }
-    public ResponseEntity<?> getDoubleChampionDetailDummy(Long dbId1,Long dbId2) {
-        String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/";
-        String championName = "미스 포츈";
-        String championImgUrl  = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/champion/MissFortune.svg";
-        String mainRuneImgUrl = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/mainRune/LethalTempoTemp.svg";
-        String positionImgUrl = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/position/BOTTOM.svg";
-        DetailChampionComp detailChampionComp = new DetailChampionComp(championName,championImgUrl,mainRuneImgUrl,positionImgUrl);
-        DetailSpell detailSpell = new DetailSpell("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/SummonerFlash.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/SummonerExhaust.png");
-        DetailItem detailItem = new DetailItem("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3068.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3065.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3075.png");
-        List<String> mainRuneList1 = new ArrayList<>();
-        mainRuneList1.add(baseUrl + "Domination/main/DisabledPressTheAttack.svg");
-        mainRuneList1.add(baseUrl + "Domination/main/LethalTempo.svg");
-        mainRuneList1.add(baseUrl + "Domination/main/DisabledFleetFootwork.svg");
-        mainRuneList1.add(baseUrl + "Domination/main/DisabledConqueror.svg");
 
 
-        List<String> mainRuneList2= new ArrayList<>();
-        mainRuneList2.add(baseUrl + "Precision/1/Overheal.svg");
-        mainRuneList2.add(baseUrl + "Precision/1/PresenceofMind.svg");
-        mainRuneList2.add(baseUrl + "Precision/1/Triumph.svg");
-
-
-        List<String> mainRuneList3= new ArrayList<>();
-        mainRuneList3.add(baseUrl + "Precision/2/Alarcrity.svg");
-        mainRuneList3.add(baseUrl + "Precision/2/Tenacity.svg");
-        mainRuneList3.add(baseUrl + "Precision/2/Bloodline.svg");
-
-
-        List<String> mainRuneList4= new ArrayList<>();
-        mainRuneList4.add(baseUrl + "Precision/3/CoupdeGrace.svg");
-        mainRuneList4.add(baseUrl + "Precision/3/CutDown.svg");
-        mainRuneList4.add(baseUrl + "Precision/3/LastStand.svg");
-
-
-        List<String> subRuneList1= new ArrayList<>();
-        subRuneList1.add(baseUrl + "Domination/1/CheapShot.svg");
-        subRuneList1.add(baseUrl + "Domination/1/TasteofBlood.svg");
-        subRuneList1.add(baseUrl + "Domination/1/SuddenImpact.svg");
-        List<String> subRuneList2= new ArrayList<>();
-        subRuneList2.add(baseUrl + "Domination/2/ZombieWard.svg");
-        subRuneList2.add(baseUrl + "Domination/2/GhostPoro.svg");
-        subRuneList2.add(baseUrl + "Domination/2/EyeballCollection.svg");
-        List<String> subRuneList3= new ArrayList<>();
-        subRuneList3.add(baseUrl + "Domination/3/TreausreHunter.svg");
-        subRuneList3.add(baseUrl + "Domination/3/IngeniousHunter.svg");
-        subRuneList3.add(baseUrl + "Domination/3/RelentlessHunter.svg");
-        subRuneList3.add(baseUrl + "Domination/3/UltimateHunter.svg");
-
-        DetailRune detailRune = new DetailRune("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Precision/Precision.svg",
-                "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Domination/Domination.svg",
-                mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
-        DetailInfo detailInfo =new DetailInfo(detailSpell,detailRune,detailItem);
-        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
-        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","68.1%");
-        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","76.1%");
-        DetailDouble detailDouble1 =new DetailDouble(detailRankWinRate1,detailInfo,detailInfo);
-        DetailDouble detailDouble2 =new DetailDouble(detailRankWinRate2,detailInfo,detailInfo);
-        DetailDouble detailDouble3 =new DetailDouble(detailRankWinRate3,detailInfo,detailInfo);
-        List<DetailDouble> detailDoubleList = new ArrayList<>();
-        detailDoubleList.add(detailDouble1);
-        detailDoubleList.add(detailDouble2);
-        detailDoubleList.add(detailDouble3);
-        DetailDoubleResponse detailDoubleResponse = new DetailDoubleResponse(detailChampionComp,detailChampionComp,detailDoubleList);
-        return new ResponseEntity<>(detailDoubleResponse, HttpStatus.OK);
-    }
-    public ResponseEntity<?> getSoloChampionDetailDummy(Long dbId){
-        String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/";
-        String championName = "미스 포츈";
-        String championImgUrl  = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/champion/MissFortune.svg";
-        String mainRuneImgUrl = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/mainRune/LethalTempoTemp.svg";
-        String positionImgUrl = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/position/BOTTOM.svg";
-        DetailChampionComp detailChampionComp = new DetailChampionComp(championName,championImgUrl,mainRuneImgUrl,positionImgUrl);
-        DetailSpell detailSpell = new DetailSpell("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/SummonerFlash.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/spell/SummonerExhaust.png");
-        DetailItem detailItem = new DetailItem("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3068.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3065.png","https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/item/3075.png");
-        List<String> mainRuneList1 = new ArrayList<>();
-        mainRuneList1.add(baseUrl + "Domination/main/DisabledPressTheAttack.svg");
-        mainRuneList1.add(baseUrl + "Domination/main/LethalTempo.svg");
-        mainRuneList1.add(baseUrl + "Domination/main/DisabledFleetFootwork.svg");
-        mainRuneList1.add(baseUrl + "Domination/main/DisabledConqueror.svg");
-
-
-        List<String> mainRuneList2= new ArrayList<>();
-        mainRuneList2.add(baseUrl + "Precision/1/Overheal.svg");
-        mainRuneList2.add(baseUrl + "Precision/1/PresenceofMind.svg");
-        mainRuneList2.add(baseUrl + "Precision/1/Triumph.svg");
-
-
-        List<String> mainRuneList3= new ArrayList<>();
-        mainRuneList3.add(baseUrl + "Precision/2/Alarcrity.svg");
-        mainRuneList3.add(baseUrl + "Precision/2/Tenacity.svg");
-        mainRuneList3.add(baseUrl + "Precision/2/Bloodline.svg");
-
-
-        List<String> mainRuneList4= new ArrayList<>();
-        mainRuneList4.add(baseUrl + "Precision/3/CoupdeGrace.svg");
-        mainRuneList4.add(baseUrl + "Precision/3/CutDown.svg");
-        mainRuneList4.add(baseUrl + "Precision/3/LastStand.svg");
-
-
-        List<String> subRuneList1= new ArrayList<>();
-        subRuneList1.add(baseUrl + "Domination/1/CheapShot.svg");
-        subRuneList1.add(baseUrl + "Domination/1/TasteofBlood.svg");
-        subRuneList1.add(baseUrl + "Domination/1/SuddenImpact.svg");
-        List<String> subRuneList2= new ArrayList<>();
-        subRuneList2.add(baseUrl + "Domination/2/ZombieWard.svg");
-        subRuneList2.add(baseUrl + "Domination/2/GhostPoro.svg");
-        subRuneList2.add(baseUrl + "Domination/2/EyeballCollection.svg");
-        List<String> subRuneList3= new ArrayList<>();
-        subRuneList3.add(baseUrl + "Domination/3/TreausreHunter.svg");
-        subRuneList3.add(baseUrl + "Domination/3/IngeniousHunter.svg");
-        subRuneList3.add(baseUrl + "Domination/3/RelentlessHunter.svg");
-        subRuneList3.add(baseUrl + "Domination/3/UltimateHunter.svg");
-
-        DetailRune detailRune = new DetailRune("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Precision/Precision.svg",
-                "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Domination/Domination.svg",
-                 mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
-
-        DetailInfo detailInfo =new DetailInfo(detailSpell,detailRune,detailItem);
-        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
-        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","65.1%");
-        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","60.1%");
-        DetailSolo detailSolo1 = new DetailSolo(detailRankWinRate1,detailInfo);
-        DetailSolo detailSolo2 = new DetailSolo(detailRankWinRate2,detailInfo);
-        DetailSolo detailSolo3 = new DetailSolo(detailRankWinRate3,detailInfo);
-
-        List<DetailSolo> detailSoloList = new ArrayList<>();
-        detailSoloList.add(detailSolo1);
-        detailSoloList.add(detailSolo2);
-        detailSoloList.add(detailSolo3);
-        DetailSoloResponse detailSoloResponse = new DetailSoloResponse(detailChampionComp,detailSoloList);
-        return new ResponseEntity<>(detailSoloResponse, HttpStatus.OK);
-    }
 }

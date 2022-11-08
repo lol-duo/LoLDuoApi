@@ -1,6 +1,7 @@
 package com.lolduo.duo.controller;
 
 import com.lolduo.duo.object.response.getChampionList.Champion;
+import com.lolduo.duo.v2.DetailService;
 import com.lolduo.duo.v2.response.championDetail.DetailDoubleResponse;
 import com.lolduo.duo.v2.response.championDetail.DetailSoloResponse;
 import com.lolduo.duo.v2.response.mainPage.DoubleResponseV2;
@@ -27,7 +28,7 @@ public class ClientApi {
     private final ClientService clientService;
     private final HealthCheckService healthCheckService;
     private final ClientServiceV2 clientServiceV2;
-
+    private final DetailService detailService;
     @GetMapping("/championList")
     @ApiOperation(value ="챔피언 리스트 반환", notes = "챔피언의 챔피언 id, 이름에 대한 정보를 제공한다.",response = Champion[].class)
     public ResponseEntity<?> ChampionList() {
@@ -77,7 +78,7 @@ public class ClientApi {
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = DetailSoloResponse.class)
     public ResponseEntity<?> getSoloChampionDetailDummy(@RequestParam Long dbId){
         long start = System.currentTimeMillis();
-        ResponseEntity<?> responseEntity = clientServiceV2.getSoloChampionDetailDummy(dbId);
+        ResponseEntity<?> responseEntity = detailService.getSoloChampionDetailDummy(dbId);
         log.info("/v2/soloChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
         return responseEntity;
     }
@@ -85,8 +86,17 @@ public class ClientApi {
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = DetailDoubleResponse.class)
     public ResponseEntity<?> getDoubleChampionDetailDummy(@RequestParam Long dbId1,@RequestParam Long dbId2){
         long start = System.currentTimeMillis();
-        ResponseEntity<?> responseEntity = clientServiceV2.getDoubleChampionDetailDummy(dbId1,dbId2);
+        ResponseEntity<?> responseEntity = detailService.getDoubleChampionDetailDummy(dbId1,dbId2);
         log.info("/v2/doubleChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
+        return responseEntity;
+    }
+
+    @GetMapping("/v2/soloChampionDetail")
+    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = DetailSoloResponse.class)
+    public ResponseEntity<?> getSoloChampionDetail(@RequestParam Long dbId){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = detailService.getSoloChampionDetail(dbId);
+        log.info("/v2/soloChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
         return responseEntity;
     }
     /*
