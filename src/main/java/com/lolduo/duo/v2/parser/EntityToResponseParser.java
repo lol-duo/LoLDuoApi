@@ -6,16 +6,21 @@ import com.lolduo.duo.object.entity.initialInfo.SpellEntity;
 import com.lolduo.duo.repository.initialInfo.ItemRepository;
 import com.lolduo.duo.repository.initialInfo.PerkRepository;
 import com.lolduo.duo.repository.initialInfo.SpellRepository;
+import com.lolduo.duo.v2.entity.DoubleMatchEntity;
 import com.lolduo.duo.v2.entity.MainPageChampionEntity;
 import com.lolduo.duo.v2.entity.MainPagePerkEntity;
 import com.lolduo.duo.v2.entity.SoloMatchEntity;
 import com.lolduo.duo.v2.entity.detail.*;
+import com.lolduo.duo.v2.repository.DoubleMatchRepository;
 import com.lolduo.duo.v2.repository.MainPageChampionRepository;
 import com.lolduo.duo.v2.repository.MainPagePerkRepository;
+import com.lolduo.duo.v2.repository.SoloMatchRepository;
 import com.lolduo.duo.v2.repository.detail.ItemCombRepository;
 import com.lolduo.duo.v2.repository.detail.RuneCombRepository;
 import com.lolduo.duo.v2.repository.detail.SoloChampionCombRepository;
 import com.lolduo.duo.v2.repository.detail.SpellCombRepository;
+import com.lolduo.duo.v2.response.championDetail.DetailDouble;
+import com.lolduo.duo.v2.response.championDetail.DetailDoubleResponse;
 import com.lolduo.duo.v2.response.championDetail.DetailSolo;
 import com.lolduo.duo.v2.response.championDetail.DetailSoloResponse;
 import com.lolduo.duo.v2.response.championDetail.sub.DetailChampionComp;
@@ -24,6 +29,7 @@ import com.lolduo.duo.v2.response.championDetail.sub.DetailRankWinRate;
 import com.lolduo.duo.v2.response.championDetail.sub.sub.DetailItem;
 import com.lolduo.duo.v2.response.championDetail.sub.sub.DetailRune;
 import com.lolduo.duo.v2.response.championDetail.sub.sub.DetailSpell;
+import com.lolduo.duo.v2.response.mainPage.DoubleResponseV2;
 import com.lolduo.duo.v2.response.mainPage.SoloResponseV2;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +56,9 @@ public class EntityToResponseParser {
     private final PerkRepository perkRepository;
     private final SpellRepository spellRepository;
     private final ItemRepository itemRepository;
+
+    private final SoloMatchRepository soloMatchRepository;
+    private final DoubleMatchRepository doubleMatchRepository;
 
     public SoloResponseV2 soloMatchToSoloResponseV2(SoloMatchEntity soloMatchEntity,Long i){
         String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
@@ -116,10 +125,37 @@ public class EntityToResponseParser {
         List<DetailSolo> detailSoloList = new ArrayList<>();
         int i = 1;
         for(SoloMatchDetailEntity soloMatchDetailEntity : soloMatchDetailEntityList){
-            detailSoloList.add(soloMatchDetailToDetailSolo(soloMatchDetailEntityList.get(i-1),i));
+            detailSoloList.add(soloMatchDetailToDetailSolo(soloMatchDetailEntity,i));
             i++;
         }
         return new DetailSoloResponse(detailChampionComp,detailSoloList);
+    }
+    public DetailDoubleResponse doubleMatchDetailListToDetailResponse(Long championCombId1,Long championCombId2,List<DoubleMatchDetailEntity> doubleMatchDetailEntityList){
+        if(doubleMatchDetailEntityList ==null){
+            log.info("DoubleMatchDetailEntity null 입니다.");
+            return null;
+        }
+        SoloChampionCombEntity soloChampionComb1Entity;
+        SoloChampionCombEntity soloChampionComb2Entity;
+        DetailChampionComp detailChampionComp1;
+        DetailChampionComp detailChampionComp2;
+        soloChampionComb1Entity = soloChampionCombRepository.findById(championCombId1).orElse(null);
+        soloChampionComb2Entity = soloChampionCombRepository.findById(championCombId2).orElse(null);
+        if(soloChampionComb1Entity == null || soloChampionComb2Entity ==null){
+            log.info("soloChampionCombEntity가 null 입니다. solo_champion_comb 테이블을 확인해주세요, 요청 id1 : {} 요청 id2 : {}",championCombId1,championCombId2);
+            return null;
+        }
+        else{
+            detailChampionComp1 = soloChampionCombToDetailChampionComp(soloChampionComb1Entity);
+            detailChampionComp2 = soloChampionCombToDetailChampionComp(soloChampionComb2Entity);
+        }
+        List<DetailDouble> detailDoubleList = new ArrayList<>();
+        int i = 1;
+        for(DoubleMatchDetailEntity doubleMatchDetailEntity : doubleMatchDetailEntityList){
+            detailDoubleList.add(doubleMatchDetailToDetailDouble(doubleMatchDetailEntity,i));
+            i++;
+        }
+        return new DetailDoubleResponse(detailChampionComp1,detailChampionComp2,detailDoubleList);
     }
     public DetailChampionComp soloChampionCombToDetailChampionComp(SoloChampionCombEntity soloChampionCombEntity){
         String championName = "";
@@ -148,7 +184,6 @@ public class EntityToResponseParser {
         DetailChampionComp detailChampionComp = new DetailChampionComp(championName,championImgUrl,mainRuneImgUrl,positionUrl);
         return detailChampionComp;
     }
-
     public DetailSolo soloMatchDetailToDetailSolo(SoloMatchDetailEntity soloMatchDetailEntity,int i ){
         DetailRankWinRate detailRankWinRate = CountToDetailRankWinRate(soloMatchDetailEntity.getAllCount(),soloMatchDetailEntity.getWinCount(),i);
         DetailSpell detailSpell = spellCombToDetailSpell(soloMatchDetailEntity.getSpellCombId());
@@ -156,6 +191,21 @@ public class EntityToResponseParser {
         DetailItem detailItem = itemCombToDetailItem(soloMatchDetailEntity.getItemCombId());
         DetailInfo detailInfo = new DetailInfo(detailSpell,detailRune,detailItem);
         return new DetailSolo(detailRankWinRate,detailInfo);
+    }
+    public DetailDouble doubleMatchDetailToDetailDouble(DoubleMatchDetailEntity doubleMatchDetailEntity,int i){
+        DetailRankWinRate detailRankWinRate = CountToDetailRankWinRate(doubleMatchDetailEntity.getAllCount(),doubleMatchDetailEntity.getWinCount(),i);
+        DetailSpell detailSpell1 = spellCombToDetailSpell(doubleMatchDetailEntity.getSpellCombId1());
+        DetailSpell detailSpell2 = spellCombToDetailSpell(doubleMatchDetailEntity.getSpellCombId2());
+
+        DetailRune detailRune1 = runeCombToDetailRune(doubleMatchDetailEntity.getRuneCombId1());
+        DetailRune detailRune2 = runeCombToDetailRune(doubleMatchDetailEntity.getRuneCombId2());
+
+        DetailItem detailItem1 = itemCombToDetailItem(doubleMatchDetailEntity.getItemCombId1());
+        DetailItem detailItem2 = itemCombToDetailItem(doubleMatchDetailEntity.getItemCombId2());
+
+        DetailInfo detailInfo1 = new DetailInfo(detailSpell1,detailRune1,detailItem1);
+        DetailInfo detailInfo2 = new DetailInfo(detailSpell2,detailRune2,detailItem2);
+        return new DetailDouble(detailRankWinRate,detailInfo1,detailInfo2);
     }
     private DetailRankWinRate CountToDetailRankWinRate(Long allCount,Long winCount,int i){
         String winRate = CountToWinRate(allCount,winCount);
@@ -165,71 +215,20 @@ public class EntityToResponseParser {
     private String CountToWinRate(Long allCount,Long winCount){
         return String.format("%.2f%%", 100 * ((double) winCount / allCount));
     }
-    private DetailSpell spellCombToDetailSpell(Long spellCombId){
-        String firstSpell ="";
-        String secondSpell ="";
-        SpellCombEntity spellCombEntity = spellCombRepository.findById(spellCombId).orElse(null);
-        if(spellCombEntity == null){
-            log.info("spell_comb 테이블에서 스펠 조합을 찾을 수 없습니다. spell_comb 테이블을 확인해주세요.  요청 spell_comb_id {}",spellCombId );
-        }
-        else{
-            SpellEntity spell1 = spellRepository.findById(spellCombEntity.getSpell1()).orElse(null);
-            SpellEntity spell2 = spellRepository.findById(spellCombEntity.getSpell2()).orElse(null);
-            if(spell1 ==null || spell2 ==null ){
-                log.info("spell 테이블에서 스펠을 찾을 수 없습니다. spell 테이블을 확인해주세요.  요청 id1 : {}, 요청 id2 : {}"
-                        ,spellCombEntity.getSpell1(),spellCombEntity.getSpell2());
-            }
-            else{
-                firstSpell = cloudFrontBaseUrl + "/spell/"+spell1.getImgUrl();
-                secondSpell = cloudFrontBaseUrl + "/spell/"+spell2.getImgUrl();
-            }
-        }
-        return new DetailSpell(firstSpell,secondSpell);
-    }
-    private DetailRune runeCombToDetailRune(Long runeCombId){
-        String mainRuneImgUrl ="";
-        String subRuneImgUrl ="";
-        List<String> mainRuneList1;
-        List<String> mainRuneList2;
-        List<String> mainRuneList3;
-        List<String> mainRuneList4;
-        List<String> subRuneList1;
-        List<String> subRuneList2;
-        List<String> subRuneList3;
 
-        RuneCombEntity runeCombEntity = runeCombRepository.findById(runeCombId).orElse(null);
-        if(runeCombEntity ==null){
-            log.info("rune_comb 테이블에서 룬 조합을 찾을 수 없습니다. rune_comb 테이블을 확인해주세요.  요청 rune_comb_id {}",runeCombId );
-            return null;
-        }
-        else{
-            mainRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getMainRuneConcept());
-            subRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getSubRuneConcept());
-            List<List<Long>> mainRuneList = getRuneList(runeCombEntity.getMainRuneConcept());
-            mainRuneList1 = new ArrayList<>();
-            mainRuneList1.add(getRuneImgUrlByRuneId(runeCombEntity.getMainRune0()));
-            mainRuneList2 = getRineImgUrlListByLongList(mainRuneList.get(0));
-            mainRuneList3 = getRineImgUrlListByLongList(mainRuneList.get(1));
-            mainRuneList4 = getRineImgUrlListByLongList(mainRuneList.get(2));
-            List<List<Long>> subRuneList =getRuneList(runeCombEntity.getSubRuneConcept());
-            subRuneList1 = getRineImgUrlListByLongList(subRuneList.get(0));
-            subRuneList2 = getRineImgUrlListByLongList(subRuneList.get(1));
-            subRuneList3 = getRineImgUrlListByLongList(subRuneList.get(2));
-            return new DetailRune(mainRuneImgUrl,subRuneImgUrl,mainRuneList1,mainRuneList2,mainRuneList3,mainRuneList4,subRuneList1,subRuneList2,subRuneList3);
-        }
-    }
-    private List<String> getRineImgUrlListByLongList(List<Long> runeList){
+
+    private List<String> getRuneImgUrlListByLongList(List<Long> runeList){
         List<String> result = new ArrayList<>();
         for(Long rundId : runeList){
             result.add(getRuneImgUrlByRuneId(rundId));
         }
         return result;
     }
-    private String getRuneImgUrlByRuneId(Long rundId){
+    private String getRuneImgUrlByRuneId(Long runeId){
         String perkImgUrl ="";
-        PerkEntity perkEntity = perkRepository.findById(rundId).orElse(null);
+        PerkEntity perkEntity = perkRepository.findById(runeId).orElse(null);
         if(perkEntity ==null){
-            log.info("perk_id 테이블에서 스펠을 찾을 수 없습니다. perk_id 테이블을 확인해주세요.  요청 id: {}",rundId);
+            log.info("perk_id 테이블에서 스펠을 찾을 수 없습니다. perk_id 테이블을 확인해주세요.  요청 id: {}",runeId);
         }
         else {
             perkImgUrl = cloudFrontBaseUrl + "/" + perkEntity.getImgUrl();
@@ -269,6 +268,61 @@ public class EntityToResponseParser {
         result.add(rune1);result.add(rune2);result.add(rune3);
         return  result;
     }
+    private DetailRune runeCombToDetailRune(Long runeCombId){
+        String mainRuneImgUrl ="";
+        String subRuneImgUrl ="";
+        List<String> mainRuneList1;
+        List<String> mainRuneList2;
+        List<String> mainRuneList3;
+        List<String> mainRuneList4;
+        List<String> subRuneList1;
+        List<String> subRuneList2;
+        List<String> subRuneList3;
+
+        RuneCombEntity runeCombEntity = runeCombRepository.findById(runeCombId).orElse(null);
+        if(runeCombEntity ==null){
+            log.info("rune_comb 테이블에서 룬 조합을 찾을 수 없습니다. rune_comb 테이블을 확인해주세요.  요청 rune_comb_id {}",runeCombId );
+            return null;
+        }
+        else{
+            mainRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getMainRuneConcept());
+            subRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getSubRuneConcept());
+            List<List<Long>> mainRuneList = getRuneList(runeCombEntity.getMainRuneConcept());
+            mainRuneList1 = new ArrayList<>();
+            mainRuneList1.add(getRuneImgUrlByRuneId(runeCombEntity.getMainRune0()));
+            mainRuneList2 = getRuneImgUrlListByLongList(mainRuneList.get(0));
+            mainRuneList3 = getRuneImgUrlListByLongList(mainRuneList.get(1));
+            mainRuneList4 = getRuneImgUrlListByLongList(mainRuneList.get(2));
+            List<List<Long>> subRuneList =getRuneList(runeCombEntity.getSubRuneConcept());
+            subRuneList1 = getRuneImgUrlListByLongList(subRuneList.get(0));
+            subRuneList2 = getRuneImgUrlListByLongList(subRuneList.get(1));
+            subRuneList3 = getRuneImgUrlListByLongList(subRuneList.get(2));
+            return new DetailRune(mainRuneImgUrl,subRuneImgUrl,mainRuneList1,mainRuneList2,mainRuneList3,mainRuneList4,subRuneList1,subRuneList2,subRuneList3);
+        }
+    }
+
+
+    private DetailSpell spellCombToDetailSpell(Long spellCombId){
+        String firstSpell ="";
+        String secondSpell ="";
+        SpellCombEntity spellCombEntity = spellCombRepository.findById(spellCombId).orElse(null);
+        if(spellCombEntity == null){
+            log.info("spell_comb 테이블에서 스펠 조합을 찾을 수 없습니다. spell_comb 테이블을 확인해주세요.  요청 spell_comb_id {}",spellCombId );
+        }
+        else{
+            SpellEntity spell1 = spellRepository.findById(spellCombEntity.getSpell1()).orElse(null);
+            SpellEntity spell2 = spellRepository.findById(spellCombEntity.getSpell2()).orElse(null);
+            if(spell1 ==null || spell2 ==null ){
+                log.info("spell 테이블에서 스펠을 찾을 수 없습니다. spell 테이블을 확인해주세요.  요청 id1 : {}, 요청 id2 : {}"
+                        ,spellCombEntity.getSpell1(),spellCombEntity.getSpell2());
+            }
+            else{
+                firstSpell = cloudFrontBaseUrl + "/spell/"+spell1.getImgUrl();
+                secondSpell = cloudFrontBaseUrl + "/spell/"+spell2.getImgUrl();
+            }
+        }
+        return new DetailSpell(firstSpell,secondSpell);
+    }
     private DetailItem itemCombToDetailItem(Long itemCombId){
         String firstItem ="";
         String secondItem ="";
@@ -292,6 +346,28 @@ public class EntityToResponseParser {
             }
         }
         return new DetailItem(firstItem,secondItem,thirdItem);
+    }
+
+    public Long findChampionCombBySoloMatchId(Long soloMatchId){
+        SoloMatchEntity soloMatchEntity;
+        soloMatchEntity = soloMatchRepository.findById(soloMatchId).orElse(null);
+        if(soloMatchEntity ==null){
+            log.info("solo_match 테이블에서 챔피언 조합을 찾을 수 없습니다. solo_match 테이블을 확인해주세요.  요청 id {}",soloMatchId );
+            return null;
+        }
+        return soloMatchEntity.getSoloCombId();
+    }
+    public Long[] findChampionCombByDoubleMatchId(Long doubleMatchId){
+        Long[] result = new Long[2];
+        DoubleMatchEntity doubleMatchEntity;
+        doubleMatchEntity = doubleMatchRepository.findById(doubleMatchId).orElse(null);
+        if(doubleMatchEntity ==null){
+            log.info("double_match 테이블에서 챔피언 조합을 찾을 수 없습니다. double_match 테이블을 확인해주세요.  요청 id {}",doubleMatchId );
+            return null;
+        }
+        result[0] = doubleMatchEntity.getCombId1();
+        result[1] = doubleMatchEntity.getCombId2();
+        return result;
     }
 
 }

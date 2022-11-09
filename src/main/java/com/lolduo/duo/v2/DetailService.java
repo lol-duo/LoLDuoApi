@@ -1,7 +1,12 @@
 package com.lolduo.duo.v2;
 
+import com.lolduo.duo.v2.entity.SoloMatchEntity;
+import com.lolduo.duo.v2.entity.detail.DoubleMatchDetailEntity;
 import com.lolduo.duo.v2.entity.detail.SoloMatchDetailEntity;
 import com.lolduo.duo.v2.parser.EntityToResponseParser;
+import com.lolduo.duo.v2.repository.DoubleMatchRepository;
+import com.lolduo.duo.v2.repository.SoloMatchRepository;
+import com.lolduo.duo.v2.repository.detail.DoubleMatchDetailRepository;
 import com.lolduo.duo.v2.repository.detail.SoloMatchDetailRepository;
 import com.lolduo.duo.v2.response.championDetail.DetailDouble;
 import com.lolduo.duo.v2.response.championDetail.DetailDoubleResponse;
@@ -27,8 +32,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DetailService {
     private final SoloMatchDetailRepository soloMatchDetailRepository;
+    private final DoubleMatchDetailRepository doubleMatchDetailRepository;
+
+    private final SoloMatchRepository soloMatchRepository;
+    private final DoubleMatchRepository doubleMatchRepository;
+
     private final EntityToResponseParser entityToResponseParser;
-    public ResponseEntity<?> getDoubleChampionDetailDummy(Long dbId1, Long dbId2) {
+
+    public ResponseEntity<?> getDoubleChampionDetailDummy(Long dbId) {
         String baseUrl = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/";
         String championName = "미스 포츈";
         String championImgUrl  = "https://d2d4ci5rabfoyr.cloudfront.net/mainPage/champion/MissFortune.svg";
@@ -160,14 +171,26 @@ public class DetailService {
         DetailSoloResponse detailSoloResponse = new DetailSoloResponse(detailChampionComp,detailSoloList);
         return new ResponseEntity<>(detailSoloResponse, HttpStatus.OK);
     }
-    public ResponseEntity<?> getSoloChampionDetail(Long SoloChampionCombId){
+    public ResponseEntity<?> getSoloChampionDetail(Long soloMatchId){
         Long MINIMUM_ALL_COUNT = soloMatchDetailRepository.getAllCountSum().orElse(200L) / 200L;
+        Long championCombId =entityToResponseParser.findChampionCombBySoloMatchId(soloMatchId);
         DetailSoloResponse detailSoloResponse;
-        List<SoloMatchDetailEntity> soloMatchDetailEntityList = soloMatchDetailRepository.findAllBySoloCombIdAndAllCount(SoloChampionCombId,MINIMUM_ALL_COUNT);
+        List<SoloMatchDetailEntity> soloMatchDetailEntityList = soloMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombId,MINIMUM_ALL_COUNT);
         if(soloMatchDetailEntityList == null){
             return new ResponseEntity<>("해당 챔피언의 detail 정보를 찾을 수 없습니다.",HttpStatus.OK);
         }
-        detailSoloResponse =entityToResponseParser.soloMatchDetailListToDetailResponse(SoloChampionCombId,soloMatchDetailEntityList);
+        detailSoloResponse =entityToResponseParser.soloMatchDetailListToDetailResponse(championCombId,soloMatchDetailEntityList);
         return new ResponseEntity<>(detailSoloResponse,HttpStatus.OK);
+    }
+    public ResponseEntity<?> getDoubleChampionDetail(Long doubleMatchId){
+        Long MINIMUM_ALL_COUNT = doubleMatchDetailRepository.getAllCountSum().orElse(200L) / 200L;
+        Long[] championCombIdArr =entityToResponseParser.findChampionCombByDoubleMatchId(doubleMatchId);
+        DetailDoubleResponse detailDoubleResponse;
+        List<DoubleMatchDetailEntity> doubleMatchDetailEntityList = doubleMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombIdArr[0],championCombIdArr[1],MINIMUM_ALL_COUNT);
+        if(doubleMatchDetailEntityList == null){
+            return new ResponseEntity<>("해당 챔피언 조합의 detail 정보를 찾을 수 없습니다.",HttpStatus.OK);
+        }
+        detailDoubleResponse = entityToResponseParser.doubleMatchDetailListToDetailResponse(championCombIdArr[0],championCombIdArr[1],doubleMatchDetailEntityList);
+        return new ResponseEntity<>(detailDoubleResponse,HttpStatus.OK);
     }
 }

@@ -63,14 +63,14 @@ public class ClientApi {
     public ResponseEntity<?> doubleInfo(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = clientServiceV2.getDoubleChampionInfoList(championId,position,championId2,position2);
-        log.info("/v2/DoubleInfo()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        log.info("/v2/DoubleInfo()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start),ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
     @GetMapping("/checkServer")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
     public ResponseEntity<?> doubleInfoDummy(@RequestParam String name) {
         long start = System.currentTimeMillis();
-        log.info("/checkServer  API Call 된 시간 : {},호출한 사람 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,name);
+        log.info("/checkServer  API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return new ResponseEntity<>("호출한 사람 : " + name,HttpStatus.OK);
     }
 
@@ -79,15 +79,15 @@ public class ClientApi {
     public ResponseEntity<?> getSoloChampionDetailDummy(@RequestParam Long dbId){
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = detailService.getSoloChampionDetailDummy(dbId);
-        log.info("/v2/soloChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
+        log.info("/v2/soloChampionDetailDummy  API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
     @GetMapping("/v2/doubleChampionDetailDummy")
     @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = DetailDoubleResponse.class)
-    public ResponseEntity<?> getDoubleChampionDetailDummy(@RequestParam Long dbId1,@RequestParam Long dbId2){
+    public ResponseEntity<?> getDoubleChampionDetailDummy(@RequestParam Long dbId){
         long start = System.currentTimeMillis();
-        ResponseEntity<?> responseEntity = detailService.getDoubleChampionDetailDummy(dbId1,dbId2);
-        log.info("/v2/doubleChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
+        ResponseEntity<?> responseEntity = detailService.getDoubleChampionDetailDummy(dbId);
+        log.info("/v2/doubleChampionDetailDummy  API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
 
@@ -96,7 +96,15 @@ public class ClientApi {
     public ResponseEntity<?> getSoloChampionDetail(@RequestParam Long dbId){
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = detailService.getSoloChampionDetail(dbId);
-        log.info("/v2/soloChampionDetailDummy  API Call 된 시간 : {} ", LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) );
+        log.info("/v2/soloChampionDetailDummy API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return responseEntity;
+    }
+    @GetMapping("/v2/doubleChampionDetail")
+    @ApiOperation(value ="요청한 챔피언들에 대하여 종합 정보를 보여준다.",notes = "룬,아이템,스펠,승률을 포함한 상위 3개의 정보를 간략화해서 보여준다.  ",response = DetailDoubleResponse.class)
+    public ResponseEntity<?> getDoubleChampionDetail(@RequestParam Long dbId){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = detailService.getDoubleChampionDetail(dbId);
+        log.info("/v2/doubleChampionDetail API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
     /*
