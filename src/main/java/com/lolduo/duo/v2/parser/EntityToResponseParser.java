@@ -217,21 +217,29 @@ public class EntityToResponseParser {
     }
 
 
-    private List<String> getRuneImgUrlListByLongList(List<Long> runeList){
+    private List<String> getRuneImgUrlListByLongList(List<Long> runeList,List<Long> activeRuneList){
         List<String> result = new ArrayList<>();
         for(Long rundId : runeList){
-            result.add(getRuneImgUrlByRuneId(rundId));
+            if(activeRuneList.contains(rundId))
+                result.add(getRuneImgUrlByRuneId(rundId,true));
+            else
+                result.add(getRuneImgUrlByRuneId(rundId,false));
+
         }
         return result;
     }
-    private String getRuneImgUrlByRuneId(Long runeId){
+    private String getRuneImgUrlByRuneId(Long runeId,boolean isActive){
         String perkImgUrl ="";
         PerkEntity perkEntity = perkRepository.findById(runeId).orElse(null);
         if(perkEntity ==null){
             log.info("perk_id 테이블에서 스펠을 찾을 수 없습니다. perk_id 테이블을 확인해주세요.  요청 id: {}",runeId);
         }
         else {
-            perkImgUrl = cloudFrontBaseUrl + "/" + perkEntity.getImgUrl();
+            if(isActive)
+                perkImgUrl = cloudFrontBaseUrl + "/Rune/" + perkEntity.getImgUrl() + FILE_EXTENSION;
+            else
+                perkImgUrl = cloudFrontBaseUrl + "/Rune/" + perkEntity.getImgUrl() +"Disabled"+ FILE_EXTENSION;
+            // s3에는 아래와 같이 저장할 것   https://d2d4ci5rabfoyr.cloudfront.net/Rune/Sorcery.svg  || https://d2d4ci5rabfoyr.cloudfront.net/Rune/SorceryDisabled.svg 가 되도록
         }
         return perkImgUrl;
     }
@@ -285,18 +293,27 @@ public class EntityToResponseParser {
             return null;
         }
         else{
-            mainRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getMainRuneConcept());
-            subRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getSubRuneConcept());
+            mainRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getMainRuneConcept(),true);
+            subRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getSubRuneConcept(),true);
             List<List<Long>> mainRuneList = getRuneList(runeCombEntity.getMainRuneConcept());
             mainRuneList1 = new ArrayList<>();
-            mainRuneList1.add(getRuneImgUrlByRuneId(runeCombEntity.getMainRune0()));
-            mainRuneList2 = getRuneImgUrlListByLongList(mainRuneList.get(0));
-            mainRuneList3 = getRuneImgUrlListByLongList(mainRuneList.get(1));
-            mainRuneList4 = getRuneImgUrlListByLongList(mainRuneList.get(2));
+            mainRuneList1.add(getRuneImgUrlByRuneId(runeCombEntity.getMainRune0(),true));
+
+            List<Long> mainRuneActiveList = new ArrayList<>();
+            mainRuneActiveList.add(runeCombEntity.getMainRune1());
+            mainRuneActiveList.add(runeCombEntity.getMainRune2());
+            mainRuneActiveList.add(runeCombEntity.getMainRune3());
+
+            mainRuneList2 = getRuneImgUrlListByLongList(mainRuneList.get(0),mainRuneActiveList);
+            mainRuneList3 = getRuneImgUrlListByLongList(mainRuneList.get(1),mainRuneActiveList);
+            mainRuneList4 = getRuneImgUrlListByLongList(mainRuneList.get(2),mainRuneActiveList);
             List<List<Long>> subRuneList =getRuneList(runeCombEntity.getSubRuneConcept());
-            subRuneList1 = getRuneImgUrlListByLongList(subRuneList.get(0));
-            subRuneList2 = getRuneImgUrlListByLongList(subRuneList.get(1));
-            subRuneList3 = getRuneImgUrlListByLongList(subRuneList.get(2));
+            List<Long> subRuneActiveList = new ArrayList<>();
+            subRuneActiveList.add(runeCombEntity.getSubRune1());
+            subRuneActiveList.add(runeCombEntity.getSubRune2());
+            subRuneList1 = getRuneImgUrlListByLongList(subRuneList.get(0),subRuneActiveList);
+            subRuneList2 = getRuneImgUrlListByLongList(subRuneList.get(1),subRuneActiveList);
+            subRuneList3 = getRuneImgUrlListByLongList(subRuneList.get(2),subRuneActiveList);
             return new DetailRune(mainRuneImgUrl,subRuneImgUrl,mainRuneList1,mainRuneList2,mainRuneList3,mainRuneList4,subRuneList1,subRuneList2,subRuneList3);
         }
     }
