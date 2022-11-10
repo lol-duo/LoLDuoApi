@@ -130,7 +130,7 @@ public class ClientServiceV2 {
             }
             if( i > 3L){
                 rankNumberIcon = "";
-            } else{
+            } else if(doubleMatchEntityList.size()>3){
                 winRate = String.format("%.4f",((double) doubleMatchEntity.getWinCount() / doubleMatchEntity.getAllCount()));
                 rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
 
