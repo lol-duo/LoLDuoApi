@@ -1,7 +1,10 @@
 package com.lolduo.duo.service.slack;
 
 import com.slack.api.Slack;
+import com.slack.api.methods.MethodsClient;
 import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import com.slack.api.methods.response.conversations.ConversationsListResponse;
 import com.slack.api.model.Conversation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,10 +73,10 @@ public class SlackNotifyService {
             return;
         }
 
-        var client = Slack.getInstance().methods();
+        MethodsClient client = Slack.getInstance().methods();
         try {
-            var result = client.chatPostMessage( requestConfig ->
-                     requestConfig
+            ChatPostMessageResponse result = client.chatPostMessage(requestConfig ->
+                    requestConfig
                             .token(token)
                             .channel(notifyChannelId)
                             .text(text)
@@ -86,10 +89,10 @@ public class SlackNotifyService {
 
     private String initChannelId(String notifyChannelName) {
         log.info("[SlackAPI] channelName: {}", notifyChannelName);
-        var client = Slack.getInstance().methods();
+        MethodsClient client = Slack.getInstance().methods();
         String notifyChannelId = null;
         try {
-            var result = client.conversationsList( requestConfig ->
+            ConversationsListResponse result = client.conversationsList(requestConfig ->
                     requestConfig.token(token)
             );
             for (Conversation channel : result.getChannels()) {
