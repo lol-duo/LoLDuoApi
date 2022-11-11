@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-
+    <appender name = "STDOUT_PIN" class= "ch.qos.logback.core.ConsoleAppender" >
+        <layout class = "ch.qos.logback.classic.PatternLayout">
+            <Pattern >%d{HH:mm} %-5level %logger{36} - [TxId : %X{PtxId} , SpanId : %X{PspanId}] %msg%n</Pattern >
+        </layout >
+    </appender >
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- By default, encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
         <encoder>
@@ -21,13 +25,13 @@
 
     <springProfile name="server">
         <root level="INFO">
-            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="STDOUT_PIN"/>
         </root>
     </springProfile>
 
     <springProfile name="devserver">
         <root level="INFO">
-            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="STDOUT_PIN"/>
         </root>
     </springProfile>
 </configuration>
