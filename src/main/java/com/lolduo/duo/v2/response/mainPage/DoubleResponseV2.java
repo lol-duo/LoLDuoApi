@@ -34,7 +34,7 @@ public class DoubleResponseV2 {
         this.rankChangeNumber = rankChangeNumber;
         this.rankNumber = rankNumber;
         this.rankNumberIcon = rankNumberIcon;
-        this.champion1 =champion1;
+        this.champion1 = champion1;
         this.champion2 = champion2;
         this.winRate = winRate;
     }
