@@ -61,14 +61,10 @@ public class ClientApi {
     @GetMapping("/v2/doubleInfo")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
     public ResponseEntity<?> doubleInfo(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
-        return null;
-        /*
-        잠시 연결 끊음.
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = clientServiceV2.getDoubleChampionInfoList(championId,position,championId2,position2);
         log.info("/v2/DoubleInfo()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start),ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
-         */
     }
     @GetMapping("/checkServer")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
