@@ -335,7 +335,7 @@ public class ClientServiceV2 {
         for(ChampionEntity championEntity : championEntityList){
             String engName = championEntity.getImgUrl().substring(0,championEntity.getImgUrl().length()-4);
             Champion temp = new Champion(championEntity.getId(),championEntity.getName(),engName,
-                    cloudFrontBaseUrl+championEntity.getImgUrl() + FILE_EXTENSION);
+                    cloudFrontBaseUrl+ "/champion/" +championEntity.getImgUrl() + FILE_EXTENSION);
             championList.add(temp);
         }
         Collections.sort(championList);
