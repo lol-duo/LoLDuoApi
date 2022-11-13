@@ -10,6 +10,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Table(name = "double_match_front",indexes = {
+        @Index(name ="win_rate_index", columnList = "win_rate desc"),
         @Index(name="double_match_index",columnList = "win_rate desc, position1, champion_id1, position2, champion_id2")})
 public class DoubleMatchFrontEntity{
     @Id
