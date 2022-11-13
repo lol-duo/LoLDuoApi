@@ -174,6 +174,7 @@ public class DetailService {
         DetailSoloResponse detailSoloResponse;
         List<SoloMatchDetailEntity> soloMatchDetailEntityList = soloMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombId,MINIMUM_ALL_COUNT);
         if(soloMatchDetailEntityList == null){
+            log.info("해당 챔피언의 detail 정보를 찾을 수 없습니다. 요청 championCombId : {}, 최소 판수 : {}",championCombId,MINIMUM_ALL_COUNT);
             return new ResponseEntity<>("해당 챔피언의 detail 정보를 찾을 수 없습니다.",HttpStatus.OK);
         }
         detailSoloResponse =entityToResponseParser.soloMatchDetailListToDetailResponse(championCombId,soloMatchDetailEntityList);
@@ -185,6 +186,7 @@ public class DetailService {
         DetailDoubleResponse detailDoubleResponse;
         List<DoubleMatchDetailEntity> doubleMatchDetailEntityList = doubleMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombIdArr[0],championCombIdArr[1],MINIMUM_ALL_COUNT);
         if(doubleMatchDetailEntityList == null){
+            log.info("해당 챔피언의 detail 정보를 찾을 수 없습니다. 요청 championCombId[0] : {},championCombId[1] : {}, 최소 판수 : {}",championCombIdArr[0],championCombIdArr[1],MINIMUM_ALL_COUNT);
             return new ResponseEntity<>("해당 챔피언 조합의 detail 정보를 찾을 수 없습니다.",HttpStatus.OK);
         }
         detailDoubleResponse = entityToResponseParser.doubleMatchDetailListToDetailResponse(championCombIdArr[0],championCombIdArr[1],doubleMatchDetailEntityList);
