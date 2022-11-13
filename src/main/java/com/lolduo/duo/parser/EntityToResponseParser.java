@@ -61,53 +61,29 @@ public class EntityToResponseParser {
     private final DoubleMatchRepository doubleMatchRepository;
 
     public SoloResponseV2 soloMatchFrontToSoloResponseV2(SoloMatchFrontEntity soloMatchFrontEntity,Long i){
-        String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
         Long rankChangeNumber = 0L;
         if (soloMatchFrontEntity == null) {
             log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
             return null;
         }
-        String championName = "";
-        String championImgUrl = "";
-        MainPageChampionEntity championEntity = mainPageChampionRepository.findById(soloMatchFrontEntity.getChampionId()).orElse(null);
-        if (championEntity == null) {
-            log.info("챔피언 테이블에서 챔피언을 찾을 수 없습니다. Champion 테이블을 확인해주세요.  championId: {}", soloMatchFrontEntity.getChampionId());
-            championName = "이름 없음";
-            championImgUrl = cloudFrontBaseUrl + "/champion/Teemo" + FILE_EXTENSION;
-        } else {
-            championName = championEntity.getName();
-            log.info("championName  : {}", championName);
-            championImgUrl = cloudFrontBaseUrl + championEntity.getImgUrl() + FILE_EXTENSION;
-            log.info("championImgUrl  : {}", championImgUrl);
-        }
-        MainPagePerkEntity perkEntity = mainPagePerkRepository.findById(soloMatchFrontEntity.getMainRune()).orElse(null);
-        String mainRune = "";
-        if (perkEntity == null) {
-            log.info("룬 테이블에서 해당 룬을 찾을 수 없습니다. Perk 테이블을 확인해주세요 mainRune: {}", soloMatchFrontEntity.getMainRune());
-            mainRune = cloudFrontBaseUrl + "/mainPage/mainRune/ArcaneComet" + FILE_EXTENSION;
-        } else {
-            mainRune = cloudFrontBaseUrl +perkEntity.getImgUrl() + FILE_EXTENSION;
-            log.info("mainRune Url : {}", mainRune);
-        }
-        String positionUrl = cloudFrontBaseUrl + "/mainPage/position/" + soloMatchFrontEntity.getPosition() + FILE_EXTENSION;
-        String winRate = String.format("%.2f%%", (100 * soloMatchFrontEntity.getWinRate()) );
-        log.info("winRate : {}", winRate);
+        String championName = soloMatchFrontEntity.getChampionName();
+        String championImgUrl = soloMatchFrontEntity.getChampionImgUrl();
+        String mainRuneImgUrl = soloMatchFrontEntity.getMainRuneImgUrl();
+        String positionUrl = soloMatchFrontEntity.getPositionImgUrl();
+        String winRate = (((double)soloMatchFrontEntity.getWinRate()/100)+"%");
         SoloResponseV2 responseV2;
         if(i==1)
             rankChangeNumber = 10L;
-        else if(i == 2)
-            rankChangeNumber = 0L;
         else if(i == 3)
             rankChangeNumber = -3L;
-        else
-            rankChangeNumber = 0L;
-        responseV2 = new SoloResponseV2(soloMatchFrontEntity.getSoloMatchId(), rankChangeImgUrl, rankChangeNumber,
-                championName, championImgUrl, mainRune,
-                positionUrl, winRate, i+1);
+        responseV2 = new SoloResponseV2(soloMatchFrontEntity.getSoloMatchId(), rankChangeNumber,
+                championName, championImgUrl, mainRuneImgUrl,
+                positionUrl, winRate, i);
         return responseV2;
     }
+
+
     public SoloResponseV2 soloMatchToSoloResponseV2(SoloMatchEntity soloMatchEntity,Long i){
-        String rankChangeImgUrl = cloudFrontBaseUrl + "/mainPage/rankChange/RankSame" + FILE_EXTENSION;
         Long rankChangeNumber = 0L;
 
         if (soloMatchEntity == null) {
@@ -148,7 +124,7 @@ public class EntityToResponseParser {
             rankChangeNumber = -3L;
         else
             rankChangeNumber = 0L;
-        responseV2 = new SoloResponseV2(soloMatchEntity.getSoloCombId(), rankChangeImgUrl, rankChangeNumber,
+        responseV2 = new SoloResponseV2(soloMatchEntity.getSoloCombId(), rankChangeNumber,
                 championName, championImgUrl, mainRune,
                 positionUrl, winRate, i+1);
         return responseV2;
@@ -203,6 +179,7 @@ public class EntityToResponseParser {
         }
         return new DetailDoubleResponse(detailChampionComp1,detailChampionComp2,detailDoubleList);
     }
+
     public DetailChampionComp soloChampionCombToDetailChampionComp(SoloChampionCombEntity soloChampionCombEntity){
         String championName = "";
         String championImgUrl = "";
@@ -253,6 +230,7 @@ public class EntityToResponseParser {
         DetailInfo detailInfo2 = new DetailInfo(detailSpell2,detailRune2,detailItem2);
         return new DetailDouble(detailRankWinRate,detailInfo1,detailInfo2);
     }
+
     private DetailRankWinRate CountToDetailRankWinRate(Long allCount,Long winCount,int i){
         String winRate = CountToWinRate(allCount,winCount);
         Long rankNumber = (long)i;

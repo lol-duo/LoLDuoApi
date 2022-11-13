@@ -33,9 +33,6 @@ public class DetailService {
     private final SoloMatchDetailRepository soloMatchDetailRepository;
     private final DoubleMatchDetailRepository doubleMatchDetailRepository;
 
-    private final SoloMatchRepository soloMatchRepository;
-    private final DoubleMatchRepository doubleMatchRepository;
-
     private final EntityToResponseParser entityToResponseParser;
 
     public ResponseEntity<?> getDoubleChampionDetailDummy(Long dbId) {
@@ -170,6 +167,7 @@ public class DetailService {
         DetailSoloResponse detailSoloResponse = new DetailSoloResponse(detailChampionComp,detailSoloList);
         return new ResponseEntity<>(detailSoloResponse, HttpStatus.OK);
     }
+
     public ResponseEntity<?> getSoloChampionDetail(Long soloMatchId){
         Long MINIMUM_ALL_COUNT = soloMatchDetailRepository.getAllCountSum().orElse(200L) / 200L;
         Long championCombId =entityToResponseParser.findChampionCombBySoloMatchId(soloMatchId);
