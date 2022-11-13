@@ -8,7 +8,9 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Getter
-@Table(name = "solo_match_front",indexes = {@Index(name = "front_multi_index",columnList ="win_rate desc, position, champion_id" )})
+@Table(name = "solo_match_front",indexes = {
+        @Index(name ="win_rate_index", columnList = "win_rate desc"),
+        @Index(name = "front_multi_index",columnList ="win_rate desc, position, champion_id" )})
 public class SoloMatchFrontEntity {
     @Id
     @Column(name = "solo_match_id")

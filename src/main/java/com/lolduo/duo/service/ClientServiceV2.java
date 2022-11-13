@@ -200,7 +200,6 @@ public class ClientServiceV2 {
     }
 
 
-
     public ResponseEntity<?> getSoloChampionInfoListToFront(Long requestChampionId,String requestPosition){
         if (requestPosition == null || requestChampionId == null) {
             return new ResponseEntity<>("404 BAD_REQUEST 요청한 값이 null 입니다. requestChampionId : "+requestChampionId + " ,requestPosition : "+requestPosition, HttpStatus.BAD_REQUEST);
@@ -215,11 +214,16 @@ public class ClientServiceV2 {
         Long i = 0L;
         List<SoloMatchFrontEntity> soloMatchFrontEntityList;
 
-        if (position.equals("ALL"))
-            position = "%";
-        if (championId.equals("0"))
-            championId = "%";
-        soloMatchFrontEntityList = soloMatchFrontRepository.findAllByPositionAndChampionId(position,championId);
+        if(position.equals("ALL") && championId.equals("0")){
+            soloMatchFrontEntityList = soloMatchFrontRepository.findAllBy0AndAll();
+        }
+        else {
+            if (position.equals("ALL"))
+                position = "%";
+            if (championId.equals("0"))
+                championId = "%";
+            soloMatchFrontEntityList = soloMatchFrontRepository.findAllByPositionAndChampionId(position, championId);
+        }
         if (soloMatchFrontEntityList == null || soloMatchFrontEntityList.size() == 0) {
             log.info("요청하신 챔피언 조합을 찾을 수 없습니다.");
             return new ResponseEntity<>(soloResponseV2List, HttpStatus.OK);
@@ -247,16 +251,23 @@ public class ClientServiceV2 {
         Long rankChangeNumber = 0L;
         String rankNumberIcon = ""; //only 1,2,3 rank
         Long i = 1L;
-        if(position1.equals("ALL"))
-            position1 = "%";
-        if(position2.equals("ALL"))
-            position2 ="%";
-        if(championId1.equals("0"))
-            championId1 = "%";
-        if(championId2.equals("0"))
-            championId2 = "%";
+
         List<DoubleMatchFrontEntity> doubleMatchFrontEntityList;
-        doubleMatchFrontEntityList = doubleMatchFrontRepository.findAllByPositionAndChampionId(position1,championId1,position2,championId2);
+        if(position1.equals("ALL") && position2.equals("ALL") && championId1.equals("0") && championId2.equals("0")){
+            doubleMatchFrontEntityList = doubleMatchFrontRepository.findAllBy0AndAll();
+        }
+        else {
+            if (position1.equals("ALL"))
+                position1 = "%";
+            if (position2.equals("ALL"))
+                position2 = "%";
+            if (championId1.equals("0"))
+                championId1 = "%";
+            if (championId2.equals("0"))
+                championId2 = "%";
+            doubleMatchFrontEntityList = doubleMatchFrontRepository.findAllByPositionAndChampionId(position1,championId1,position2,championId2);
+        }
+
         if (doubleMatchFrontEntityList == null || doubleMatchFrontEntityList.size() == 0) {
             log.info("요청하신 챔피언 조합 자체가 존재하지 않습니다.");
             return new ResponseEntity<>(doubleResponseV2List, HttpStatus.OK);
