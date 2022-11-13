@@ -10,12 +10,28 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Table(name = "double_match_front",indexes = {
-        @Index(name="double_match_index",columnList = "win_rate desc, position1, champion_id1,position2,champion_id2")})
+        @Index(name="double_match_index",columnList = "win_rate desc, position1, champion_id1, position2, champion_id2")})
 public class DoubleMatchFrontEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "double_match_id")
+    private Long doubleMatchId;
+
+    @Column(name = "champion_name1")
+    private String championName1;
+    @Column(name = "champion_name2")
+    private String championName2;
+    @Column(name = "champion_img_url1")
+    private String championImgUrl1;
+    @Column(name = "champion_img_url2")
+    private String championImgUrl2;
+    @Column(name = "main_rune_img_url1")
+    private String mainRuneImgUrl1;
+    @Column(name = "main_rune_img_url2")
+    private String mainRuneImgUrl2;
+    @Column(name = "position_img_url1")
+    private String positionImgUrl1;
+    @Column(name = "position_img_url2")
+    private String positionImgUrl2;
 
     @Column(name = "position1")
     private String position1;
@@ -31,10 +47,5 @@ public class DoubleMatchFrontEntity{
     private Long mainRune2;
 
     @Column(name = "win_rate")
-    private Double winRate;
-
-    @Column(name = "comb_id1")
-    private Long combId1;
-    @Column(name = "comb_id2")
-    private Long combId2;
+    private Long winRate;
 }

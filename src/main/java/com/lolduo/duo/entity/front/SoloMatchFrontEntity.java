@@ -11,9 +11,17 @@ import javax.persistence.*;
 @Table(name = "solo_match_front",indexes = {@Index(name = "front_multi_index",columnList ="win_rate desc, position, champion_id" )})
 public class SoloMatchFrontEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @Column(name = "solo_match_id")
+    private Long soloMatchId;
+
+    @Column(name = "champion_name")
+    private String championName;
+    @Column(name = "champion_img_url")
+    private String championImgUrl;
+    @Column(name = "main_rune_img_url")
+    private String mainRuneImgUrl;
+    @Column(name = "position_img_url")
+    private String positionImgUrl;
 
     @Column(name = "position")
     private String position;
@@ -23,8 +31,5 @@ public class SoloMatchFrontEntity {
     private Long mainRune;
 
     @Column(name = "win_rate")
-    private Double winRate;
-
-    @Column(name = "solo_match_id")
-    private Long soloMatchId;
+    private Long winRate;
 }

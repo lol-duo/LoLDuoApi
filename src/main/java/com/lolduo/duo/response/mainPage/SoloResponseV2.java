@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 public class SoloResponseV2 {
     @ApiModelProperty(example = "15")
     private Long id;
-    @ApiModelProperty(example = "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/mainPage/rankChange/RankUp.png")
-    private String rankChangeImgUrl;
     @ApiModelProperty(example = "0")
     private Long rankChangeNumber;
     @ApiModelProperty(example = "티모")
@@ -25,9 +23,8 @@ public class SoloResponseV2 {
     @ApiModelProperty(example = "1")
     private Long rankNumber ;
 
-    public SoloResponseV2(Long id, String rankChangeImgUrl, Long rankChangeNumber, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate, Long rankNumber) {
+    public SoloResponseV2(Long id, Long rankChangeNumber, String championName, String championImgUrl, String mainRuneImgUrl, String positionImgUrl, String winRate, Long rankNumber) {
         this.id = id;
-        this.rankChangeImgUrl = rankChangeImgUrl;
         this.rankChangeNumber = rankChangeNumber;
         this.championName = championName;
         this.championImgUrl = championImgUrl;
