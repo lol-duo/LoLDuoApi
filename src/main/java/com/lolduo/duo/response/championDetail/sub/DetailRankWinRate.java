@@ -6,11 +6,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class DetailRankWinRate {
-    String rankBadge;
+    Long rankNumber;
     String winRate;
 
-    public DetailRankWinRate(String rankBadge, String winRate) {
-        this.rankBadge = rankBadge;
+    public DetailRankWinRate(Long rankNumber, String winRate) {
+        this.rankNumber = rankNumber;
         this.winRate = winRate;
     }
 }
