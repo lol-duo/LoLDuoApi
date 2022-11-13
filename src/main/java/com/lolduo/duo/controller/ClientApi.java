@@ -55,7 +55,7 @@ public class ClientApi {
     public ResponseEntity<?> soloInfoFront(@RequestParam String position,@RequestParam Long championId){
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = clientServiceV2.getSoloChampionInfoListToFront(championId,position);
-        log.info("/v2/SoloInfo() API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        log.info("/v2/soloInfoFront() API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
     @GetMapping("/v2/doubleInfo")
@@ -66,10 +66,18 @@ public class ClientApi {
         log.info("/v2/DoubleInfo()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start),ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
+    @GetMapping("/v2/doubleInfoFront")
+    @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
+    public ResponseEntity<?> doubleInfoFront(@RequestParam String position,@RequestParam String position2,@RequestParam Long championId,@RequestParam Long championId2){
+        long start = System.currentTimeMillis();
+        ResponseEntity<?> responseEntity = clientServiceV2.getDoubleChampionInfoListToFront(championId,position,championId2,position2);
+        log.info("/v2/doubleInfoFront()  API Call 된 시간 : {}, 소요 시간  : {} ms", LocalDateTime.ofInstant(Instant.ofEpochMilli(start),ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        return responseEntity;
+    }
 
     @GetMapping("/checkServer")
     @ApiOperation(value ="요청한 챔피언 목록에 대한 승률 및 판수 반환", notes = "요청한 조합에 대한 챔피언들의 승률 및 전체 판수 리스트 정보를 제공한다.",response = DoubleResponseV2[].class)
-    public ResponseEntity<?> doubleInfoDummy(@RequestParam String name) {
+    public ResponseEntity<?> checkServer(@RequestParam String name) {
         long start = System.currentTimeMillis();
         log.info("/checkServer  API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return new ResponseEntity<>("호출한 사람 : " + name,HttpStatus.OK);

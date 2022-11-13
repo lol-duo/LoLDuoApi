@@ -174,10 +174,12 @@ public class ClientServiceV2 {
             }
             if( i > 3L){
                 rankNumberIcon = "";
-            } else{
-                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
-
             }
+            else if(doubleMatchFrontEntityList.size()>3){
+                winRate = String.format("%.4f",doubleMatchFrontEntity.getWinRate());
+                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
+            }
+
             if(swapTrueOrFalse){
                 responseV2 = new DoubleResponseV2(doubleMatchFrontEntity.getId(),rankChangeImgUrl,rankChangeNumber,
                         i++,rankNumberIcon,champion2,champion1,winRate);
@@ -277,10 +279,12 @@ public class ClientServiceV2 {
             }
             if( i > 3L){
                 rankNumberIcon = "";
-            } else{
-                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
-
             }
+            else if(doubleMatchEntityList.size()>3){
+                winRate = String.format("%.4f",doubleMatchEntity.getWinRate());
+                rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
+            }
+
             if(swapTrueOrFalse){
                 responseV2 = new DoubleResponseV2(doubleMatchEntity.getId(),rankChangeImgUrl,rankChangeNumber,
                         i++,rankNumberIcon,champion2,champion1,winRate);
