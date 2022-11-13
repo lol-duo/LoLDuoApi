@@ -255,8 +255,8 @@ public class EntityToResponseParser {
     }
     private DetailRankWinRate CountToDetailRankWinRate(Long allCount,Long winCount,int i){
         String winRate = CountToWinRate(allCount,winCount);
-        String rankBadge = cloudFrontBaseUrl + "/detail/RankBadge/" + i + FILE_EXTENSION;
-        return new DetailRankWinRate(rankBadge,winRate);
+        Long rankNumber = (long)i;
+        return new DetailRankWinRate(rankNumber,winRate);
     }
     private String CountToWinRate(Long allCount,Long winCount){
         return String.format("%.2f%%", 100 * ((double) winCount / allCount));

@@ -90,9 +90,9 @@ public class DetailService {
                 "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/Rune/Domination/Domination.svg",
                 mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
         DetailInfo detailInfo =new DetailInfo(detailSpell,detailRune,detailItem);
-        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
-        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","68.1%");
-        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","76.1%");
+        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate(1L,"70.1%");
+        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate(2L,"68.1%");
+        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate(3L,"76.1%");
         DetailDouble detailDouble1 =new DetailDouble(detailRankWinRate1,detailInfo,detailInfo);
         DetailDouble detailDouble2 =new DetailDouble(detailRankWinRate2,detailInfo,detailInfo);
         DetailDouble detailDouble3 =new DetailDouble(detailRankWinRate3,detailInfo,detailInfo);
@@ -156,9 +156,9 @@ public class DetailService {
                 mainRuneList1,  mainRuneList2,  mainRuneList3,  mainRuneList4,  subRuneList1, subRuneList2, subRuneList3);
 
         DetailInfo detailInfo =new DetailInfo(detailSpell,detailRune,detailItem);
-        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/1.svg","70.1%");
-        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/2.svg","65.1%");
-        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate("https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/detail/RankBadge/3.svg","60.1%");
+        DetailRankWinRate detailRankWinRate1 = new DetailRankWinRate(1L,"70.1%");
+        DetailRankWinRate detailRankWinRate2 = new DetailRankWinRate(2L,"65.1%");
+        DetailRankWinRate detailRankWinRate3 = new DetailRankWinRate(3L,"60.1%");
         DetailSolo detailSolo1 = new DetailSolo(detailRankWinRate1,detailInfo);
         DetailSolo detailSolo2 = new DetailSolo(detailRankWinRate2,detailInfo);
         DetailSolo detailSolo3 = new DetailSolo(detailRankWinRate3,detailInfo);
