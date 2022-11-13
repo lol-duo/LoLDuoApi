@@ -118,7 +118,7 @@ public class EntityToResponseParser {
         String championImgUrl = "";
         MainPageChampionEntity championEntity = mainPageChampionRepository.findById(soloMatchEntity.getChampionId()).orElse(null);
         if (championEntity == null) {
-            log.info("챔피언 테이블에서 챔피언을 찾을 수 없습니다. Champion 테이블을 확인해주세요.  championId: {}", soloMatchEntity.getChampionId());
+            log.info("챔피언 테이블에서 챔피언을 찾을 수 없습니다. main_page_champion 테이블을 확인해주세요.  championId: {}", soloMatchEntity.getChampionId());
             championName = "이름 없음";
             championImgUrl = cloudFrontBaseUrl + "/champion/Teemo" + FILE_EXTENSION;
         } else {
@@ -285,7 +285,6 @@ public class EntityToResponseParser {
                 perkImgUrl = cloudFrontBaseUrl + "/Rune/" + perkEntity.getImgUrl() + FILE_EXTENSION;
             else
                 perkImgUrl = cloudFrontBaseUrl + "/Rune/" + perkEntity.getImgUrl() +"Disabled"+ FILE_EXTENSION;
-            // s3에는 아래와 같이 저장할 것   https://d2d4ci5rabfoyr.cloudfront.net/Rune/Sorcery.svg  || https://d2d4ci5rabfoyr.cloudfront.net/Rune/SorceryDisabled.svg 가 되도록
         }
         return perkImgUrl;
     }

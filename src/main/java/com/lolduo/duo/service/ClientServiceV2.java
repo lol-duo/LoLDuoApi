@@ -335,7 +335,7 @@ public class ClientServiceV2 {
         for(ChampionEntity championEntity : championEntityList){
             String engName = championEntity.getImgUrl().substring(0,championEntity.getImgUrl().length()-4);
             Champion temp = new Champion(championEntity.getId(),championEntity.getName(),engName,
-                    "https://lol-duo-bucket.s3.ap-northeast-2.amazonaws.com/champion/"+championEntity.getImgUrl());
+                    cloudFrontBaseUrl+championEntity.getImgUrl() + FILE_EXTENSION);
             championList.add(temp);
         }
         Collections.sort(championList);
