@@ -304,6 +304,11 @@ public class ClientServiceV2 {
                 rankNumberIcon = cloudFrontBaseUrl+ "/mainPage/rankChange/" +i + FILE_EXTENSION; //only 1,2,3 rank
             }
 
+            if(i==1)
+                rankChangeNumber = 10L;
+            else if(i == 3)
+                rankChangeNumber = -3L;
+
             if(swapTrueOrFalse){
                 responseV2 = new DoubleResponseV2(doubleMatchFrontEntity.getDoubleMatchId(),rankChangeNumber,
                         i++,rankNumberIcon,champion2,champion1,winRate);

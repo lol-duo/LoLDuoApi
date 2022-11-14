@@ -169,25 +169,33 @@ public class DetailService {
     }
 
     public ResponseEntity<?> getSoloChampionDetail(Long soloMatchId){
-        Long MINIMUM_ALL_COUNT = soloMatchDetailRepository.getAllCountSum().orElse(200L) / 200L;
+        Long MINIMUM_ALL_COUNT = 10L; // 임시로 10판으로 해놓음.
         Long championCombId =entityToResponseParser.findChampionCombBySoloMatchId(soloMatchId);
         DetailSoloResponse detailSoloResponse;
         List<SoloMatchDetailEntity> soloMatchDetailEntityList = soloMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombId,MINIMUM_ALL_COUNT);
         if(soloMatchDetailEntityList == null){
-            log.info("해당 챔피언의 detail 정보를 찾을 수 없습니다. 요청 championCombId : {}, 최소 판수 : {}",championCombId,MINIMUM_ALL_COUNT);
-            return new ResponseEntity<>("해당 챔피언의 detail 정보를 찾을 수 없습니다.",HttpStatus.OK);
+            log.info("championCombId = {} 인 챔피언의 detail 최고판수가 10판을 넘는것이 존재하지않습니다. 판수 조건을 {}판으로 완화합니다. solo_match_detail에서 id로 검색해보세요",championCombId,0L);
+            soloMatchDetailEntityList = soloMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombId,0L);
+            if(soloMatchDetailEntityList==null) {
+                log.info("해당 챔피언의 detail 정보를 찾을 수 없습니다. 요청 championCombId : {}, 최소 판수 : {}", championCombId, MINIMUM_ALL_COUNT);
+                return new ResponseEntity<>("해당 챔피언의 detail 정보를 찾을 수 없습니다.", HttpStatus.OK);
+            }
         }
         detailSoloResponse =entityToResponseParser.soloMatchDetailListToDetailResponse(championCombId,soloMatchDetailEntityList);
         return new ResponseEntity<>(detailSoloResponse,HttpStatus.OK);
     }
     public ResponseEntity<?> getDoubleChampionDetail(Long doubleMatchId){
-        Long MINIMUM_ALL_COUNT = doubleMatchDetailRepository.getAllCountSum().orElse(200L) / 200L;
+        Long MINIMUM_ALL_COUNT = 10L; // 임시로 10판으로 해놓음.
         Long[] championCombIdArr =entityToResponseParser.findChampionCombByDoubleMatchId(doubleMatchId);
         DetailDoubleResponse detailDoubleResponse;
         List<DoubleMatchDetailEntity> doubleMatchDetailEntityList = doubleMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombIdArr[0],championCombIdArr[1],MINIMUM_ALL_COUNT);
         if(doubleMatchDetailEntityList == null){
-            log.info("해당 챔피언의 detail 정보를 찾을 수 없습니다. 요청 championCombId[0] : {},championCombId[1] : {}, 최소 판수 : {}",championCombIdArr[0],championCombIdArr[1],MINIMUM_ALL_COUNT);
-            return new ResponseEntity<>("해당 챔피언 조합의 detail 정보를 찾을 수 없습니다.",HttpStatus.OK);
+            log.info("champion_comb_id1 = {} 이고 champion_comb_id2 = {} 인 챔피언 조합의 detail 최고판수가 10판을 넘는것이 존재하지않습니다. 판수 조건을 {}판으로 완화합니다. double_match_detail 에서 id로 검색해보세요.",championCombIdArr[0],championCombIdArr[1],0L);
+            doubleMatchDetailEntityList = doubleMatchDetailRepository.findAllBySoloCombIdAndAllCount(championCombIdArr[0],championCombIdArr[1],0L);
+            if(doubleMatchDetailEntityList == null) {
+                log.info("해당 챔피언의 detail 정보를 찾을 수 없습니다. 요청 championCombId[0] : {},championCombId[1] : {}, 최소 판수 : {}", championCombIdArr[0], championCombIdArr[1], MINIMUM_ALL_COUNT);
+                return new ResponseEntity<>("해당 챔피언 조합의 detail 정보를 찾을 수 없습니다.", HttpStatus.OK);
+            }
         }
         detailDoubleResponse = entityToResponseParser.doubleMatchDetailListToDetailResponse(championCombIdArr[0],championCombIdArr[1],doubleMatchDetailEntityList);
         return new ResponseEntity<>(detailDoubleResponse,HttpStatus.OK);
