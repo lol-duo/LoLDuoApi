@@ -268,10 +268,12 @@ public class EntityToResponseParser {
     }
     private List<List<Long>> getRuneList(Long runeConceptId){
         List<List<Long>> result = new ArrayList<>();
+        List<Long> rune0 = new ArrayList<>();
         List<Long> rune1 = new ArrayList<>();
         List<Long> rune2 = new ArrayList<>();
         List<Long> rune3 = new ArrayList<>();
         if(runeConceptId == 8000L){
+
             rune1.add(9101L);rune1.add(9111L);rune1.add(8009L);
             rune2.add(9104L);rune2.add(9105L);rune2.add(9103L);
             rune3.add(8014L);rune3.add(8017L);rune3.add(8299L);
