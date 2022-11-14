@@ -243,11 +243,11 @@ public class EntityToResponseParser {
 
     private List<String> getRuneImgUrlListByLongList(List<Long> runeList,List<Long> activeRuneList){
         List<String> result = new ArrayList<>();
-        for(Long rundId : runeList){
-            if(activeRuneList.contains(rundId))
-                result.add(getRuneImgUrlByRuneId(rundId,true));
+        for(Long runeId : runeList){
+            if(activeRuneList.contains(runeId))
+                result.add(getRuneImgUrlByRuneId(runeId,true));
             else
-                result.add(getRuneImgUrlByRuneId(rundId,false));
+                result.add(getRuneImgUrlByRuneId(runeId,false));
 
         }
         return result;
@@ -273,32 +273,37 @@ public class EntityToResponseParser {
         List<Long> rune2 = new ArrayList<>();
         List<Long> rune3 = new ArrayList<>();
         if(runeConceptId == 8000L){
-
+            rune0.add(8005L);rune0.add(8008L);rune0.add(8021L);rune0.add(8010L);
             rune1.add(9101L);rune1.add(9111L);rune1.add(8009L);
             rune2.add(9104L);rune2.add(9105L);rune2.add(9103L);
             rune3.add(8014L);rune3.add(8017L);rune3.add(8299L);
         }
         else if(runeConceptId == 8100L){
+            rune0.add(8112L);rune0.add(8124L);rune0.add(8128L);rune0.add(9923L);
             rune1.add(8126L);rune1.add(8139L);rune1.add(8143L);
             rune2.add(8136L);rune2.add(8120L);rune2.add(8138L);
             rune3.add(8135L);rune3.add(8134L);rune3.add(8105L);rune3.add(8106L);
         }
         else if(runeConceptId == 8200L){
+            rune0.add(8214L);rune0.add(8229L);rune0.add(8230L);
             rune1.add(8224L);rune1.add(8226L);rune1.add(8275L);
             rune2.add(8210L);rune2.add(8234L);rune2.add(8233L);
             rune3.add(8237L);rune3.add(8232L);rune3.add(8236L);
         }
         else if(runeConceptId == 8300L){
+            rune0.add(8351L);rune0.add(8360L);rune0.add(8369L);
+
             rune1.add(8306L);rune1.add(8304L);rune1.add(8313L);
             rune2.add(8321L);rune2.add(8316L);rune2.add(8345L);
             rune3.add(8347L);rune3.add(8410L);rune3.add(8352L);
         }
         else if(runeConceptId ==8400L){
+            rune0.add(8437L);rune0.add(8439L);rune0.add(8465L);
             rune1.add(8446L);rune1.add(8463L);rune1.add(8401L);
             rune2.add(8429L);rune2.add(8444L);rune2.add(8473L);
             rune3.add(8451L);rune3.add(8453L);rune3.add(8242L);
         }
-        result.add(rune1);result.add(rune2);result.add(rune3);
+        result.add(rune0);result.add(rune1);result.add(rune2);result.add(rune3);
         return  result;
     }
     private DetailRune runeCombToDetailRune(Long runeCombId){
@@ -321,24 +326,24 @@ public class EntityToResponseParser {
             mainRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getMainRuneConcept(),true);
             subRuneImgUrl = getRuneImgUrlByRuneId(runeCombEntity.getSubRuneConcept(),true);
             List<List<Long>> mainRuneList = getRuneList(runeCombEntity.getMainRuneConcept());
-            mainRuneList1 = new ArrayList<>();
-            mainRuneList1.add(getRuneImgUrlByRuneId(runeCombEntity.getMainRune0(),true));
 
             List<Long> mainRuneActiveList = new ArrayList<>();
+            mainRuneActiveList.add(runeCombEntity.getMainRune0());
             mainRuneActiveList.add(runeCombEntity.getMainRune1());
             mainRuneActiveList.add(runeCombEntity.getMainRune2());
             mainRuneActiveList.add(runeCombEntity.getMainRune3());
 
-            mainRuneList2 = getRuneImgUrlListByLongList(mainRuneList.get(0),mainRuneActiveList);
-            mainRuneList3 = getRuneImgUrlListByLongList(mainRuneList.get(1),mainRuneActiveList);
-            mainRuneList4 = getRuneImgUrlListByLongList(mainRuneList.get(2),mainRuneActiveList);
+            mainRuneList1 = getRuneImgUrlListByLongList(mainRuneList.get(0),mainRuneActiveList);
+            mainRuneList2 = getRuneImgUrlListByLongList(mainRuneList.get(1),mainRuneActiveList);
+            mainRuneList3 = getRuneImgUrlListByLongList(mainRuneList.get(2),mainRuneActiveList);
+            mainRuneList4 = getRuneImgUrlListByLongList(mainRuneList.get(3),mainRuneActiveList);
             List<List<Long>> subRuneList =getRuneList(runeCombEntity.getSubRuneConcept());
             List<Long> subRuneActiveList = new ArrayList<>();
             subRuneActiveList.add(runeCombEntity.getSubRune1());
             subRuneActiveList.add(runeCombEntity.getSubRune2());
-            subRuneList1 = getRuneImgUrlListByLongList(subRuneList.get(0),subRuneActiveList);
-            subRuneList2 = getRuneImgUrlListByLongList(subRuneList.get(1),subRuneActiveList);
-            subRuneList3 = getRuneImgUrlListByLongList(subRuneList.get(2),subRuneActiveList);
+            subRuneList1 = getRuneImgUrlListByLongList(subRuneList.get(1),subRuneActiveList);
+            subRuneList2 = getRuneImgUrlListByLongList(subRuneList.get(2),subRuneActiveList);
+            subRuneList3 = getRuneImgUrlListByLongList(subRuneList.get(3),subRuneActiveList);
             return new DetailRune(mainRuneImgUrl,subRuneImgUrl,mainRuneList1,mainRuneList2,mainRuneList3,mainRuneList4,subRuneList1,subRuneList2,subRuneList3);
         }
     }

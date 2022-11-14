@@ -308,6 +308,8 @@ public class ClientServiceV2 {
                 rankChangeNumber = 10L;
             else if(i == 3)
                 rankChangeNumber = -3L;
+            else
+                rankChangeNumber = 0L;
 
             if(swapTrueOrFalse){
                 responseV2 = new DoubleResponseV2(doubleMatchFrontEntity.getDoubleMatchId(),rankChangeNumber,
