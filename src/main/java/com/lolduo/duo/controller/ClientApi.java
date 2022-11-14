@@ -109,7 +109,7 @@ public class ClientApi {
     public ResponseEntity<?> getSoloChampionDetail(@RequestParam Long dbId){
         long start = System.currentTimeMillis();
         ResponseEntity<?> responseEntity = detailService.getSoloChampionDetail(dbId);
-        log.info("/v2/soloChampionDetailDummy API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
+        log.info("/v2/soloChampionDetail API Call 된 시간 : {}, 소요 시간  : {} ms",LocalDateTime.ofInstant(Instant.ofEpochMilli(start), ZoneId.of("Asia/Seoul")) ,System.currentTimeMillis()-start);
         return responseEntity;
     }
     @GetMapping("/v2/doubleChampionDetail")
