@@ -54,10 +54,18 @@ public class ClientServiceV2 {
         return position.equals("ALL") || position.equals("MIDDLE") || position.equals("TOP") || position.equals("UTILITY") || position.equals("JUNGLE") || position.equals("BOTTOM");
     }
     private boolean compareRequestResponsePosition(String requestPosition1, String responsePosition1,String requestPosition2, String responsePosition2 ){
-        return requestPosition1.equals(responsePosition1) || requestPosition2.equals(responsePosition2);
+        if(!requestPosition1.equals("ALL") && !requestPosition1.equals(requestPosition1))
+            return true;
+        else if(!requestPosition2.equals("ALL") && !requestPosition2.equals(requestPosition2))
+            return true;
+        return false;
     }
     private boolean compareRequestResponseChampion(Long requestChampionId1, Long responseChampionId1,Long requestChampionId2, Long responseChampionId2 ){
-        return requestChampionId1 != responseChampionId1 || requestChampionId2 != responseChampionId2;
+        if(requestChampionId1!=0L && requestChampionId1!=responseChampionId1)
+            return true;
+        else if(requestChampionId2!=0L && requestChampionId2!=responseChampionId2)
+            return true;
+        return false;
     }
     public ResponseEntity<?> getSoloChampionInfoList(Long requestChampionId,String requestPosition) {
         if (requestPosition == null || requestChampionId == null) {
@@ -292,9 +300,9 @@ public class ClientServiceV2 {
             ChampionResponse champion2 = new ChampionResponse(champion2Name,champion2ImgUrl,mainRune2ImgUrl,position2Url);
             DoubleResponseV2 responseV2 ;
 
-            if(!compareRequestResponsePosition(requestPosition, doubleMatchFrontEntity.getPosition1(),requestPosition2,doubleMatchFrontEntity.getPosition2()))
+            if(compareRequestResponsePosition(requestPosition, doubleMatchFrontEntity.getPosition1(),requestPosition2,doubleMatchFrontEntity.getPosition2()))
                 swapTrueOrFalse = true;
-            if(!compareRequestResponseChampion(requestChampionId, doubleMatchFrontEntity.getChampionId1(),requestChampionId2,doubleMatchFrontEntity.getChampionId2()))
+            if(compareRequestResponseChampion(requestChampionId, doubleMatchFrontEntity.getChampionId1(),requestChampionId2,doubleMatchFrontEntity.getChampionId2()))
                 swapTrueOrFalse = true;
             if( i > 3L){
                 rankNumberIcon = "";
