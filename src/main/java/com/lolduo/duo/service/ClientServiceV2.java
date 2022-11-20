@@ -54,16 +54,16 @@ public class ClientServiceV2 {
         return position.equals("ALL") || position.equals("MIDDLE") || position.equals("TOP") || position.equals("UTILITY") || position.equals("JUNGLE") || position.equals("BOTTOM");
     }
     private boolean compareRequestResponsePosition(String requestPosition1, String responsePosition1,String requestPosition2, String responsePosition2 ){
-        if(!requestPosition1.equals("ALL") && !requestPosition1.equals(requestPosition1))
+        if(!requestPosition1.equals("ALL") && !requestPosition1.equals(responsePosition1))
             return true;
-        else if(!requestPosition2.equals("ALL") && !requestPosition2.equals(requestPosition2))
+        else if(!requestPosition2.equals("ALL") && !requestPosition2.equals(responsePosition2))
             return true;
         return false;
     }
     private boolean compareRequestResponseChampion(Long requestChampionId1, Long responseChampionId1,Long requestChampionId2, Long responseChampionId2 ){
-        if(requestChampionId1!=0L && requestChampionId1!=responseChampionId1)
+        if(requestChampionId1!=0L && requestChampionId1.longValue()!=responseChampionId1.longValue())
             return true;
-        else if(requestChampionId2!=0L && requestChampionId2!=responseChampionId2)
+        else if(requestChampionId2!=0L && requestChampionId2.longValue()!=responseChampionId2.longValue())
             return true;
         return false;
     }
@@ -302,8 +302,10 @@ public class ClientServiceV2 {
 
             if(compareRequestResponsePosition(requestPosition, doubleMatchFrontEntity.getPosition1(),requestPosition2,doubleMatchFrontEntity.getPosition2()))
                 swapTrueOrFalse = true;
+            log.info(" requestPosition :{}, doubleMatchFrontEntity.getPosition1() : {}, \n requestPosition2 : {}, doubleMatchFrontEntity.getPosition2(): {} , swapTrueOrFalse: {}",requestPosition,doubleMatchFrontEntity.getPosition1(),requestPosition2,doubleMatchFrontEntity.getPosition2(),swapTrueOrFalse );
             if(compareRequestResponseChampion(requestChampionId, doubleMatchFrontEntity.getChampionId1(),requestChampionId2,doubleMatchFrontEntity.getChampionId2()))
                 swapTrueOrFalse = true;
+            //log.info(" requestChampionId :{}, doubleMatchFrontEntity.getChampionId1() : {}, \n requestChampionId2 : {}, doubleMatchFrontEntity.getChampionId2(): {} , swapTrueOrFalse: {}",requestChampionId,doubleMatchFrontEntity.getChampionId1(),requestChampionId2,doubleMatchFrontEntity.getChampionId2(),swapTrueOrFalse );
             if( i > 3L){
                 rankNumberIcon = "";
             }
